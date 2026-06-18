@@ -43,3 +43,20 @@ final class ParserTests: XCTestCase {
         }
     }
 }
+
+extension ParserTests {
+    /// Resilience: the full CommonMark spec suite (652 cases) must parse without
+    /// crashing. We do not assert HTML equivalence — the engine renders natively,
+    /// not to HTML — but every spec input must be handled gracefully.
+    func testCommonMarkSpecSuiteParsesWithoutCrashing() throws {
+        struct Example: Decodable { let markdown: String }
+        let url = try XCTUnwrap(Bundle.module.url(forResource: "commonmark-spec", withExtension: "json", subdirectory: "Fixtures"))
+        let examples = try JSONDecoder().decode([Example].self, from: Data(contentsOf: url))
+        XCTAssertGreaterThan(examples.count, 600)
+        for example in examples {
+            let doc = parser.parse(example.markdown)
+            // Determinism holds across the whole suite.
+            XCTAssertEqual(doc, parser.parse(example.markdown))
+        }
+    }
+}

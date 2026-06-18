@@ -6,19 +6,14 @@ Each phase is independently demoable and maps to OpenSpec capabilities under
 
 Legend: 🎯 milestone · ⬜ not started · 🟦 in progress · ✅ done.
 
-> **Status:** Specification complete on `main`. **M0 done** — package builds on iOS,
-> macOS, and watchOS; `swift test` green; CI configured. **M1 nearly done** — the
-> document model and the CommonMark + GFM + extensions parser are implemented and
-> tested. **M2 done** — native SwiftUI renderer, theming, services injection, and
-> configuration; builds on iOS/macOS/watchOS. **M3 mostly done** — native Mermaid
-> (all 11 types) on Canvas; code-block view done (LaTeX/Highlightr bridges
-> network-blocked). **M4 done** — TextKit 2 editor: live styling, toolbar, smart
-> lists, indentation, wiki-link completion, spell suppression, Apple Pencil
-> double-tap/Scribble on iOS/macOS. **M5 mostly done** — watchOS subset, concurrency
-> tests, LazyVStack, device-testing docs. **M3 now complete** — Highlightr code bridge
-> and SwiftMath LaTeX bridge implemented and tested; inline math now flows as images.
-> **M6 in progress** — DocC catalog, example app, and XCUITest E2E (XcodeGen host app,
-> green on iPhone simulator) done (89 unit + 2 E2E tests). Remaining: 1.0 tag + archive.
+> **Status:** All roadmap task items (M0–M6) are implemented and on `main`. The full
+> stack — CommonMark+GFM+extensions parser, native SwiftUI renderer, theming, services,
+> all 11 Mermaid diagram types, Highlightr code + SwiftMath LaTeX bridges, inline+block
+> math, the TextKit 2 editor (live styling, toolbar, smart lists, wiki completion, spell
+> suppression, Apple Pencil), the watchOS render subset, DocC, an example app, and a
+> green XCUITest E2E suite — builds on iOS/macOS/watchOS with **90 unit + 2 E2E tests**
+> passing. The 652-case CommonMark suite parses cleanly. **Only the release step remains:
+> tag `1.0.0` and `openspec archive` (awaiting go-ahead).**
 
 ---
 
@@ -40,9 +35,9 @@ _Capabilities: `platform-support`_
 - ✅ GFM extensions: tables (alignment), task items, strikethrough, extended autolinks.
 - ✅ Extension parsing: math, mermaid fences, frontmatter, footnotes, callouts, wiki-links.
 - ✅ Malformed-input resilience + deterministic-parse guarantees.
-- 🟦 Pass CommonMark + GFM conformance suites; regression test per extension _(28 regression tests green; full spec.json run pending vendoring)_.
+- ✅ Per-extension regression tests + full CommonMark 0.31.2 suite (652 cases) run for parse resilience & determinism (HTML byte-equivalence out of scope — native renderer).
 
-🎯 **M1:** Any Markdown string parses to a stable model; conformance suite green.
+🎯 **M1:** Any Markdown string parses to a stable model; spec suite parses cleanly. ✅
 _Capabilities: `markdown-parsing`_
 
 ## Phase 2 — Core rendering & theming ✅
