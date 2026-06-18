@@ -9,7 +9,8 @@ Legend: 🎯 milestone · ⬜ not started · 🟦 in progress · ✅ done.
 > **Status:** Specification complete on `main`. **M0 done** — package builds on iOS,
 > macOS, and watchOS; `swift test` green; CI configured. **M1 nearly done** — the
 > document model and the CommonMark + GFM + extensions parser are implemented and
-> tested (38 tests). Remaining: full spec.json conformance run. **Renderer (M2) is next.**
+> tested. **M2 done** — native SwiftUI renderer, theming, services injection, and
+> configuration; builds on iOS/macOS/watchOS (46 tests). **M3 (code/math/Mermaid) is next.**
 
 ---
 
@@ -36,18 +37,18 @@ _Capabilities: `platform-support`_
 🎯 **M1:** Any Markdown string parses to a stable model; conformance suite green.
 _Capabilities: `markdown-parsing`_
 
-## Phase 2 — Core rendering & theming
+## Phase 2 — Core rendering & theming ✅
 **Goal:** render the parsed model natively in SwiftUI on iOS/macOS.
 
-- ⬜ `MarkdownTheme` semantic tokens (light/dark) + per-element styling + environment injection.
-- ⬜ Service protocols (`SyntaxHighlighter`, `LatexRenderer`, `WikiLinkResolver`, `EmbeddedImageProvider`) with safe defaults.
-- ⬜ `MarkdownConfiguration` (feature toggles, interactivity, code options, reading width).
-- ⬜ Recursive block renderer (headings, paragraphs, quotes, rules, lists, task lists).
-- ⬜ Inline flow renderer (emphasis, links, wiki-links, inline code, images, line breaks).
-- ⬜ GFM table rendering with alignment + horizontal overflow.
-- ⬜ Image loading via provider (placeholders, alt-text), accessibility, Dynamic Type.
+- ✅ `MarkdownTheme` semantic tokens (light/dark) + per-element styling + environment injection.
+- ✅ Service protocols (`SyntaxHighlighter`, `LatexRenderer`, `WikiLinkResolver`, `EmbeddedImageProvider`) with safe defaults.
+- ✅ `MarkdownConfiguration` (feature toggles, interactivity, code options, reading width).
+- ✅ Recursive block renderer (headings, paragraphs, quotes, rules, lists, task lists, callouts, tables).
+- ✅ Inline renderer (emphasis, links, wiki-links, inline code, images, line breaks).
+- ✅ GFM table rendering with alignment + horizontal overflow.
+- ✅ Image loading via provider (placeholders, alt-text), accessibility, Dynamic Type.
 
-🎯 **M2:** `MarkdownView` renders a full CommonMark+GFM document with theming.
+🎯 **M2:** `MarkdownView` renders a full CommonMark+GFM document with theming. ✅
 _Capabilities: `document-rendering`, `theming-customization`, `extensibility-services`_
 
 ## Phase 3 — Rich content (code · math · Mermaid)
