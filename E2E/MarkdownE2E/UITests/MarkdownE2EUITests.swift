@@ -16,6 +16,23 @@ final class MarkdownE2EUITests: XCTestCase {
         XCTAssertTrue(app.staticTexts["E2E Heading"].waitForExistence(timeout: 10))
     }
 
+    /// A toolbar formatting command wraps the typed text. Verifies the command fires
+    /// even after the toolbar tap resigns the editor's first responder (iPad).
+    func testEditorToolbarCommandMutatesBuffer() {
+        let app = launch()
+        let mirror = app.staticTexts["editorMirror"]
+        XCTAssertTrue(mirror.waitForExistence(timeout: 10))
+
+        let editor = app.textViews.firstMatch
+        XCTAssertTrue(editor.waitForExistence(timeout: 5))
+        editor.tap()
+        editor.typeText("hi")
+
+        app.buttons["Strikethrough"].firstMatch.tap()
+        expectation(for: NSPredicate(format: "label CONTAINS '~'"), evaluatedWith: mirror)
+        waitForExpectations(timeout: 5)
+    }
+
     /// Pressing Return on a list item continues the list with a new marker.
     func testSmartListContinuation() {
         let app = launch()

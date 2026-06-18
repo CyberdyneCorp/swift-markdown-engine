@@ -53,20 +53,22 @@ struct RootView: View {
     """
 
     var body: some View {
+        // Editor on top so its formatting toolbar stays above the keyboard (keeps the
+        // toolbar buttons hittable for XCUITest, notably on iPad).
         VStack(spacing: 0) {
-            MarkdownView(Self.sample)
-                .frame(maxHeight: .infinity)
-
-            Divider()
-
             MarkdownEditor(text: $editorText, wikiLinkResolver: DemoWikiResolver())
-                .frame(height: 200)
+                .frame(height: 240)
 
             // Mirror of the editor buffer for test assertions (newlines as ⏎).
             Text(editorText.replacingOccurrences(of: "\n", with: "⏎"))
                 .accessibilityIdentifier("editorMirror")
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(6)
+
+            Divider()
+
+            MarkdownView(Self.sample)
+                .frame(maxHeight: .infinity)
         }
     }
 }

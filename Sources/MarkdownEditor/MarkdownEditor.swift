@@ -80,27 +80,36 @@ struct MarkdownEditorToolbar: View {
     let theme: MarkdownTheme
 
     var body: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 14) {
-                button("bold", "Bold", "b") { controller.toggleBold() }
-                button("italic", "Italic", "i") { controller.toggleItalic() }
-                button("strikethrough", "Strikethrough", nil) { controller.toggleStrikethrough() }
-                button("chevron.left.forwardslash.chevron.right", "Inline code", nil) { controller.toggleInlineCode() }
-                Divider().frame(height: 18)
-                button("number", "Heading", nil) { controller.setHeading(2) }
-                button("list.bullet", "Bullet list", nil) { controller.toggleBulletList() }
-                button("checklist", "Task list", nil) { controller.toggleTaskList() }
-                button("checkmark.square", "Toggle checkbox", nil) { controller.toggleCheckbox() }
-                button("text.quote", "Quote", nil) { controller.toggleQuote() }
-                button("link", "Link", "k") { controller.insertLink() }
-                Divider().frame(height: 18)
-                button("decrease.indent", "Outdent", nil) { controller.outdent() }
-                button("increase.indent", "Indent", nil) { controller.indent() }
-            }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 6)
+        // Use the full row when it fits (e.g. iPad / wide windows) and only fall back
+        // to a horizontal ScrollView when space is tight (narrow iPhones). A plain row
+        // keeps the buttons reliably tappable; buttons inside a ScrollView can have
+        // their taps swallowed by the scroll gesture on iPad.
+        ViewThatFits(in: .horizontal) {
+            buttonRow
+            ScrollView(.horizontal, showsIndicators: false) { buttonRow }
         }
         .background(theme.surface)
+    }
+
+    private var buttonRow: some View {
+        HStack(spacing: 14) {
+            button("bold", "Bold", "b") { controller.toggleBold() }
+            button("italic", "Italic", "i") { controller.toggleItalic() }
+            button("strikethrough", "Strikethrough", nil) { controller.toggleStrikethrough() }
+            button("chevron.left.forwardslash.chevron.right", "Inline code", nil) { controller.toggleInlineCode() }
+            Divider().frame(height: 18)
+            button("number", "Heading", nil) { controller.setHeading(2) }
+            button("list.bullet", "Bullet list", nil) { controller.toggleBulletList() }
+            button("checklist", "Task list", nil) { controller.toggleTaskList() }
+            button("checkmark.square", "Toggle checkbox", nil) { controller.toggleCheckbox() }
+            button("text.quote", "Quote", nil) { controller.toggleQuote() }
+            button("link", "Link", "k") { controller.insertLink() }
+            Divider().frame(height: 18)
+            button("decrease.indent", "Outdent", nil) { controller.outdent() }
+            button("increase.indent", "Indent", nil) { controller.indent() }
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 6)
     }
 
     @ViewBuilder

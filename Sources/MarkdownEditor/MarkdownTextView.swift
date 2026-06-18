@@ -27,13 +27,42 @@ public final class MarkdownEditorController: ObservableObject {
         #endif
     }
 
+    /// The most recent valid selection. Tapping a toolbar button can resign the text
+    /// view's first responder (notably on iPad), after which `textView.selectedRange`
+    /// reports `NSNotFound`; commands fall back to this stored value so they keep
+    /// operating on the user's last caret/selection.
+    private var lastSelection = NSRange(location: 0, length: 0)
+
     private var selectedRange: NSRange {
-        textView?.selectedRange ?? NSRange(location: 0, length: 0)
+        guard let textView else { return lastSelection }
+        let length = (currentText as NSString).length
+        let live = textView.selectedRange
+        if live.location != NSNotFound, live.location <= length, NSMaxRange(live) <= length {
+            return live
+        }
+        return NSRange(location: min(lastSelection.location, length), length: 0)
+    }
+
+    /// Records the live selection when it is valid, so commands can use it later.
+    func recordSelection() {
+        guard let textView else { return }
+        let length = (currentText as NSString).length
+        let live = textView.selectedRange
+        if live.location != NSNotFound, NSMaxRange(live) <= length {
+            lastSelection = live
+        }
     }
 
     /// Applies an edit result to the text view, restyles, and notifies the binding.
     func apply(_ result: EditResult) {
         setText(result.text, selection: result.selection)
+        lastSelection = result.selection
+        // Restore focus so the user can keep typing after a toolbar command.
+        #if canImport(UIKit)
+        textView?.becomeFirstResponder()
+        #else
+        if let textView { textView.window?.makeFirstResponder(textView) }
+        #endif
         onChange?(result.text)
     }
 
@@ -83,6 +112,7 @@ public final class MarkdownEditorController: ObservableObject {
     /// Updates spell-check suppression and wiki-link suggestions for the caret.
     func refreshAffordances() {
         guard let textView else { return }
+        recordSelection()
         let text = currentText
         let caret = selectedRange.location
 
