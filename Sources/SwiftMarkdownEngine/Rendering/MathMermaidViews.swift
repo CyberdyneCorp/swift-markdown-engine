@@ -22,13 +22,3 @@ struct MathBlockView: View {
     }
 }
 
-/// Renders a Mermaid diagram. Native Canvas rendering lands in Phase 3; until then
-/// the diagram source is shown as a labeled code block (the spec-defined fallback).
-struct MermaidView: View {
-    let source: String
-
-    var body: some View {
-        // Phase 3 replaces this with native Canvas rendering per diagram type.
-        CodeBlockView(language: "mermaid", code: source)
-    }
-}

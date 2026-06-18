@@ -10,7 +10,9 @@ Legend: 🎯 milestone · ⬜ not started · 🟦 in progress · ✅ done.
 > macOS, and watchOS; `swift test` green; CI configured. **M1 nearly done** — the
 > document model and the CommonMark + GFM + extensions parser are implemented and
 > tested. **M2 done** — native SwiftUI renderer, theming, services injection, and
-> configuration; builds on iOS/macOS/watchOS (46 tests). **M3 (code/math/Mermaid) is next.**
+> configuration; builds on iOS/macOS/watchOS. **M3 in progress** — native Mermaid
+> (flowchart/sequence/pie) renders on Canvas; code-block view done; LaTeX + Highlightr/
+> SwiftMath bridges and the remaining 8 Mermaid types pending (55 tests).
 
 ---
 
@@ -51,15 +53,15 @@ _Capabilities: `markdown-parsing`_
 🎯 **M2:** `MarkdownView` renders a full CommonMark+GFM document with theming. ✅
 _Capabilities: `document-rendering`, `theming-customization`, `extensibility-services`_
 
-## Phase 3 — Rich content (code · math · Mermaid)
+## Phase 3 — Rich content (code · math · Mermaid) 🟦
 **Goal:** the differentiators — highlighted code, LaTeX, and native diagrams.
 
-- ⬜ Code block view: distinct surface, horizontal scroll, optional line numbers + copy; alias resolution; unknown-language fallback.
-- ⬜ `MarkdownEngineCodeBlocks` Highlightr bridge (configurable code theme).
-- ⬜ Inline + block math views (CoreText); invalid-LaTeX fallback; theme-aware color.
-- ⬜ `MarkdownEngineLatex` SwiftMath bridge.
-- ⬜ Mermaid: 11 parsers + layout engines + SwiftUI Canvas renderers (shapes, edges, subgraphs, self-loops).
-- ⬜ Mermaid inline-style + theme-fallback colors; unsupported-type fallback to highlighted source; overflow scrolling.
+- ✅ Code block view: distinct surface, horizontal scroll, optional line numbers + copy; alias resolution; unknown-language fallback.
+- ⬜ `MarkdownEngineCodeBlocks` Highlightr bridge (configurable code theme) _(needs network to vendor Highlightr)_.
+- 🟦 Inline + block math views; invalid-LaTeX fallback; theme-aware color _(fallback-to-source view in place; LatexRenderer wiring pending)_.
+- ⬜ `MarkdownEngineLatex` SwiftMath bridge _(needs network to vendor SwiftMath)_.
+- 🟦 Mermaid: native Canvas renderers — **flowchart, sequence, pie done**; remaining 8 types pending (class, state, ER, gantt, gitGraph, journey, mindmap, timeline).
+- ✅ Mermaid inline-style + theme-fallback colors; unsupported-type fallback to highlighted source; overflow scrolling.
 
 🎯 **M3:** Code, LaTeX, and all 11 Mermaid types render natively with graceful fallback.
 _Capabilities: `code-syntax-highlighting`, `latex-math-rendering`, `mermaid-diagrams`_
