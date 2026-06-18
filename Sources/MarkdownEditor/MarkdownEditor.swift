@@ -100,16 +100,27 @@ struct MarkdownEditorToolbar: View {
             Divider().frame(height: 18)
             button("number", "Heading", nil) { controller.setHeading(2) }
             button("list.bullet", "Bullet list", nil) { controller.toggleBulletList() }
-            button("checklist", "Task list", nil) { controller.toggleTaskList() }
-            button("checkmark.square", "Toggle checkbox", nil) { controller.toggleCheckbox() }
-            button("text.quote", "Quote", nil) { controller.toggleQuote() }
             button("link", "Link", "k") { controller.insertLink() }
             Divider().frame(height: 18)
-            button("decrease.indent", "Outdent", nil) { controller.outdent() }
-            button("increase.indent", "Indent", nil) { controller.indent() }
+            overflowMenu
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 6)
+    }
+
+    /// Less-common commands live in an overflow menu so the toolbar fits inline
+    /// (and every command stays reliably reachable).
+    private var overflowMenu: some View {
+        Menu {
+            Button("Task list", systemImage: "checklist") { controller.toggleTaskList() }
+            Button("Toggle checkbox", systemImage: "checkmark.square") { controller.toggleCheckbox() }
+            Button("Quote", systemImage: "text.quote") { controller.toggleQuote() }
+            Button("Outdent", systemImage: "decrease.indent") { controller.outdent() }
+            Button("Indent", systemImage: "increase.indent") { controller.indent() }
+        } label: {
+            Image(systemName: "ellipsis.circle").foregroundStyle(theme.textPrimary)
+        }
+        .accessibilityLabel("More")
     }
 
     @ViewBuilder

@@ -59,8 +59,12 @@ struct RootView: View {
             MarkdownEditor(text: $editorText, wikiLinkResolver: DemoWikiResolver())
                 .frame(height: 240)
 
-            // Mirror of the editor buffer for test assertions (newlines as ⏎).
-            Text(editorText.replacingOccurrences(of: "\n", with: "⏎"))
+            // Mirror of the editor buffer for test assertions. Newlines render as ⏎
+            // and spaces as · so whitespace is explicit and not collapsed by the
+            // accessibility layer (iPhone collapses runs of spaces; iPad does not).
+            Text(editorText
+                .replacingOccurrences(of: "\n", with: "⏎")
+                .replacingOccurrences(of: " ", with: "·"))
                 .accessibilityIdentifier("editorMirror")
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(6)

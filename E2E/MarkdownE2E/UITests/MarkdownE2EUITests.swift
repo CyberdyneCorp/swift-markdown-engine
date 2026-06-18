@@ -44,8 +44,8 @@ final class MarkdownE2EUITests: XCTestCase {
         editor.tap()
         editor.typeText("- a\n")
 
-        // Continuation inserts a second "- " marker (newlines rendered as ⏎).
-        expectation(for: NSPredicate(format: "label CONTAINS '⏎- '"), evaluatedWith: mirror)
+        // Continuation inserts a second "- " marker (newlines ⏎, spaces ·).
+        expectation(for: NSPredicate(format: "label CONTAINS '⏎-·'"), evaluatedWith: mirror)
         waitForExpectations(timeout: 5)
     }
 
@@ -64,7 +64,44 @@ final class MarkdownE2EUITests: XCTestCase {
         XCTAssertTrue(suggestion.waitForExistence(timeout: 5))
         suggestion.tap()
 
-        expectation(for: NSPredicate(format: "label CONTAINS 'Page One]]'"), evaluatedWith: mirror)
+        expectation(for: NSPredicate(format: "label CONTAINS 'Page·One]]'"), evaluatedWith: mirror)
+        waitForExpectations(timeout: 5)
+    }
+
+    /// The Toggle-checkbox toolbar command flips a task item's state.
+    func testCheckboxToggleCommand() {
+        let app = launch()
+        let mirror = app.staticTexts["editorMirror"]
+        XCTAssertTrue(mirror.waitForExistence(timeout: 10))
+
+        let editor = app.textViews.firstMatch
+        XCTAssertTrue(editor.waitForExistence(timeout: 5))
+        editor.tap()
+        editor.typeText("- [ ] task")
+
+        app.buttons["More"].firstMatch.tap()
+        app.buttons["Toggle checkbox"].firstMatch.tap()
+        expectation(for: NSPredicate(format: "label CONTAINS '[x]'"), evaluatedWith: mirror)
+        waitForExpectations(timeout: 5)
+    }
+
+    /// The Indent toolbar command adds leading indentation to the current line.
+    /// Indents the second line so the assertion targets mid-string whitespace
+    /// (`⏎··b`, spaces rendered as ·); leading whitespace is trimmed from
+    /// accessibility labels on iPhone.
+    func testIndentCommand() {
+        let app = launch()
+        let mirror = app.staticTexts["editorMirror"]
+        XCTAssertTrue(mirror.waitForExistence(timeout: 10))
+
+        let editor = app.textViews.firstMatch
+        XCTAssertTrue(editor.waitForExistence(timeout: 5))
+        editor.tap()
+        editor.typeText("a\nb")
+
+        app.buttons["More"].firstMatch.tap()
+        app.buttons["Indent"].firstMatch.tap()
+        expectation(for: NSPredicate(format: "label CONTAINS '⏎··b'"), evaluatedWith: mirror)
         waitForExpectations(timeout: 5)
     }
 }
