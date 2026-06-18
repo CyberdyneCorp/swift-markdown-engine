@@ -15,7 +15,9 @@ Legend: 🎯 milestone · ⬜ not started · 🟦 in progress · ✅ done.
 > network-blocked). **M4 done** — TextKit 2 editor: live styling, toolbar, smart
 > lists, indentation, wiki-link completion, spell suppression, Apple Pencil
 > double-tap/Scribble on iOS/macOS. **M5 mostly done** — watchOS subset, concurrency
-> tests, LazyVStack, device-testing docs (82 tests). **M6 (docs/example/v1.0) is next.**
+> tests, LazyVStack, device-testing docs. **M6 in progress** — DocC catalog, example
+> app, block math via LatexRenderer (82 tests). Remaining: Highlightr/SwiftMath
+> bridges (network-blocked), then 1.0 tag + archive.
 
 ---
 
@@ -61,7 +63,7 @@ _Capabilities: `document-rendering`, `theming-customization`, `extensibility-ser
 
 - ✅ Code block view: distinct surface, horizontal scroll, optional line numbers + copy; alias resolution; unknown-language fallback.
 - ⬜ `MarkdownEngineCodeBlocks` Highlightr bridge (configurable code theme) _(needs network to vendor Highlightr)_.
-- 🟦 Inline + block math views; invalid-LaTeX fallback; theme-aware color _(fallback-to-source view in place; LatexRenderer wiring pending)_.
+- 🟦 Inline + block math views; invalid-LaTeX fallback; theme-aware color _(block math renders via injected LatexRenderer; inline baseline-flow pending; fallback + theme color done)_.
 - ⬜ `MarkdownEngineLatex` SwiftMath bridge _(needs network to vendor SwiftMath)_.
 - ✅ Mermaid: native Canvas renderers for **all 11 types** (flowchart, sequence, pie, state, class, ER, mindmap, gantt, gitGraph, journey, timeline). Subgraph boxes & self-loop curves are a future refinement.
 - ✅ Mermaid inline-style + theme-fallback colors; unsupported-type fallback to highlighted source; overflow scrolling.
@@ -96,12 +98,12 @@ _Capabilities: `markdown-editor`_
 🎯 **M5:** Documents render legibly on Apple Watch; engine is concurrency-safe and fast; E2E green on simulators and verified on an iPad with Apple Pencil.
 _Capabilities: `platform-support`, `markdown-editor`_
 
-## Phase 6 — Docs, example app & v1.0
+## Phase 6 — Docs, example app & v1.0 🟦
 **Goal:** a polished, documented, stable 1.0 release.
 
-- ⬜ README feature matrix (done) + DocC for the public API.
-- ⬜ Example app: rendering + editing on iOS/macOS, rendering on watchOS.
-- ⬜ Stabilize the public API surface; semantic-version 1.0.
+- ✅ README feature matrix + DocC catalog for the public API.
+- ✅ Example app (`Examples/MarkdownDemo`): rendering + editing on iOS/macOS, rendering on watchOS.
+- 🟦 Stabilize the public API surface; semantic-version 1.0 (pending the network-blocked bridges).
 - ⬜ Tag `1.0.0`; `openspec archive add-markdown-renderer-editor`.
 
 🎯 **M6 (v1.0):** Documented, example-backed, API-stable release.

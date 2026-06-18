@@ -52,10 +52,10 @@
 
 ## 8. LaTeX math rendering
 
-- [ ] 8.1 Implement inline (baseline-flowed) and block (centered) math views via `LatexRenderer`
-- [ ] 8.2 Implement invalid-LaTeX fallback to monospaced source and theme-aware coloring
-- [ ] 8.3 Implement `MarkdownEngineLatex` SwiftMath bridge (UIView/NSView representable)
-- [ ] 8.4 Tests: fraction/superscript rendering, malformed fallback, dark-mode color, core-has-no-dependency check
+- [ ] 8.1 Implement inline (baseline-flowed) and block (centered) math views via `LatexRenderer` _(block math renders via injected renderer; inline baseline-flow via text attachment pending)_
+- [x] 8.2 Implement invalid-LaTeX fallback to monospaced source and theme-aware coloring
+- [ ] 8.3 Implement `MarkdownEngineLatex` SwiftMath bridge (UIView/NSView representable) _(network-blocked: vendoring SwiftMath)_
+- [ ] 8.4 Tests: fraction/superscript rendering, malformed fallback, dark-mode color, core-has-no-dependency check _(blocked on the SwiftMath bridge)_
 
 ## 9. Mermaid diagrams
 
@@ -87,10 +87,10 @@
 
 ## 12. Documentation & example
 
-- [ ] 12.1 Write README with feature matrix, platform support, and quick-start
-- [ ] 12.2 Add DocC for public API (`MarkdownView`, `MarkdownEditor`, `MarkdownDocument`, `MarkdownTheme`, services)
-- [ ] 12.3 Add an example app demonstrating rendering + editing on iOS/macOS and rendering on watchOS
-- [ ] 12.4 Validate the change (`openspec validate add-markdown-renderer-editor --strict`) and run the full test suite before PR
+- [x] 12.1 Write README with feature matrix, platform support, and quick-start
+- [x] 12.2 Add DocC for public API (`MarkdownView`, `MarkdownEditor`, `MarkdownDocument`, `MarkdownTheme`, services)
+- [x] 12.3 Add an example app demonstrating rendering + editing on iOS/macOS and rendering on watchOS
+- [x] 12.4 Validate the change (`openspec validate add-markdown-renderer-editor --strict`) and run the full test suite before PR
 
 ## 13. End-to-end & device testing
 
