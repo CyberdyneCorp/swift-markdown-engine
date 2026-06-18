@@ -6,25 +6,26 @@ Each phase is independently demoable and maps to OpenSpec capabilities under
 
 Legend: 🎯 milestone · ⬜ not started · 🟦 in progress · ✅ done.
 
-> **Status:** Specification complete and on `main` (`openspec validate --strict` passes).
-> Implementation has not started — all phases below are ⬜.
+> **Status:** Specification complete on `main`. **M0 done** — package builds on iOS,
+> macOS, and watchOS; `swift test` green; CI configured. **M1 in progress** — the
+> document model (AST) is implemented; the parser is next.
 
 ---
 
-## Phase 0 — Foundations (package & CI)
+## Phase 0 — Foundations (package & CI) ✅
 **Goal:** the package builds on all three platforms with the test gate wired up.
 
-- ⬜ `Package.swift` with products `SwiftMarkdownEngine`, `MarkdownEditor`, `MarkdownEngineCodeBlocks`, `MarkdownEngineLatex`; iOS 17 / macOS 14 / watchOS 10; Swift 6 + strict concurrency.
-- ⬜ Add the CommonMark spec suite and GFM example fixtures as test resources.
-- ⬜ CI (GitHub Actions, macOS runner): `openspec validate --all --strict`, `swift build`/`swift test` across platforms.
+- ✅ `Package.swift` with products `SwiftMarkdownEngine`, `MarkdownEditor`, `MarkdownEngineCodeBlocks`, `MarkdownEngineLatex`; iOS 17 / macOS 14 / watchOS 10; Swift 6 + strict concurrency.
+- 🟦 Add the CommonMark spec suite and GFM example fixtures as test resources _(seed subset + JSON-driven driver in place; full suites pending vendoring)_.
+- ✅ CI (GitHub Actions, macOS runner): `openspec validate --all --strict`, `swift test`, and iOS/watchOS builds.
 
-🎯 **M0:** Empty package compiles for iOS, macOS, and watchOS; CI green.
+🎯 **M0:** Package compiles for iOS, macOS, and watchOS; tests green. ✅
 _Capabilities: `platform-support`_
 
-## Phase 1 — Parser & document model
+## Phase 1 — Parser & document model 🟦
 **Goal:** turn Markdown into a typed, immutable AST that passes conformance.
 
-- ⬜ `Sendable` value-type AST (`Block`, `Inline`, list/table/code nodes) with UTF-8 source ranges.
+- ✅ `Sendable` value-type AST (`Block`, `Inline`, list/table/code nodes) with UTF-8 source ranges, incl. all extension nodes.
 - ⬜ CommonMark block + inline parsing (headings, lists, quotes, code, links, images, emphasis, escapes).
 - ⬜ GFM extensions: tables (alignment), task items, strikethrough, extended autolinks.
 - ⬜ Extension parsing: math, mermaid fences, frontmatter, footnotes, callouts, wiki-links.

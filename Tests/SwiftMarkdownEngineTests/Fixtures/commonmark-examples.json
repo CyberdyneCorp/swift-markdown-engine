@@ -1,0 +1,8 @@
+[
+  { "section": "Headings", "markdown": "# Title\n", "html": "<h1>Title</h1>\n" },
+  { "section": "Paragraphs", "markdown": "Hello world\n", "html": "<p>Hello world</p>\n" },
+  { "section": "Emphasis", "markdown": "*italic*\n", "html": "<p><em>italic</em></p>\n" },
+  { "section": "Strong", "markdown": "**bold**\n", "html": "<p><strong>bold</strong></p>\n" },
+  { "section": "Code spans", "markdown": "`code`\n", "html": "<p><code>code</code></p>\n" },
+  { "section": "Thematic breaks", "markdown": "***\n", "html": "<hr />\n" }
+]

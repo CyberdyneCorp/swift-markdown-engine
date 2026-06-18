@@ -1,14 +1,14 @@
 ## 1. Package scaffolding
 
-- [ ] 1.1 Create the `Package.swift` with products `SwiftMarkdownEngine` (core), `MarkdownEditor`, `MarkdownEngineCodeBlocks`, `MarkdownEngineLatex`; platforms iOS 17 / macOS 14 / watchOS 10; Swift 6 tools, strict concurrency on
-- [ ] 1.2 Add the CommonMark spec test suite and GFM example fixtures as test resources
-- [ ] 1.3 Configure CI to run `openspec validate --all --strict`, the spec-conformance gate, and `swift test` on all platforms
+- [x] 1.1 Create the `Package.swift` with products `SwiftMarkdownEngine` (core), `MarkdownEditor`, `MarkdownEngineCodeBlocks`, `MarkdownEngineLatex`; platforms iOS 17 / macOS 14 / watchOS 10; Swift 6 tools, strict concurrency on
+- [ ] 1.2 Add the CommonMark spec test suite and GFM example fixtures as test resources _(seed subset + JSON-driven conformance driver in place; full suites pending vendoring — see 3.8)_
+- [x] 1.3 Configure CI to run `openspec validate --all --strict`, the spec-conformance gate, and `swift test` on all platforms
 
 ## 2. Document model
 
-- [ ] 2.1 Define the `Sendable` value-type AST (`Block`, `Inline`, list/table/code nodes) with UTF-8 source ranges
-- [ ] 2.2 Define extension nodes: inline/block math, mermaid, footnote def/ref, callout, wiki-link, task item, frontmatter
-- [ ] 2.3 Implement `Equatable`/diffing support and a `MarkdownDocument` wrapper exposing frontmatter metadata
+- [x] 2.1 Define the `Sendable` value-type AST (`Block`, `Inline`, list/table/code nodes) with UTF-8 source ranges
+- [x] 2.2 Define extension nodes: inline/block math, mermaid, footnote def/ref, callout, wiki-link, task item, frontmatter
+- [x] 2.3 Implement `Equatable`/diffing support and a `MarkdownDocument` wrapper exposing frontmatter metadata
 
 ## 3. Parser
 

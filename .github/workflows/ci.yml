@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  openspec:
+    name: OpenSpec validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install -g @fission-ai/openspec@latest
+      - run: openspec validate --all --strict
+
+  test:
+    name: Build & test (macOS)
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_26.app
+      - name: Swift build & test
+        run: swift test
+
+  cross-platform:
+    name: Build (${{ matrix.platform }})
+    runs-on: macos-15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: iOS
+            destination: 'generic/platform=iOS Simulator'
+          - platform: watchOS
+            destination: 'generic/platform=watchOS Simulator'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_26.app
+      - name: Build core for ${{ matrix.platform }}
+        run: >
+          xcodebuild build
+          -scheme SwiftMarkdownEngine
+          -destination '${{ matrix.destination }}'
+          -quiet
