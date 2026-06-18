@@ -3,30 +3,51 @@ import XCTest
 final class MarkdownE2EUITests: XCTestCase {
     override func setUp() { continueAfterFailure = false }
 
-    /// Renders a complex document (heading, table, code, math, task list, Mermaid)
-    /// and asserts the heading appears with the header trait.
-    func testRendersComplexDocument() {
+    private func launch() -> XCUIApplication {
         let app = XCUIApplication()
         app.launch()
-
-        let heading = app.staticTexts["E2E Heading"]
-        XCTAssertTrue(heading.waitForExistence(timeout: 10))
+        return app
     }
 
-    /// Drives an editor formatting command and asserts the buffer changed via the
-    /// mirror Text.
-    func testEditorBoldCommandMutatesBuffer() {
-        let app = XCUIApplication()
-        app.launch()
+    /// Renders a complex document (heading, table, code, math, task list, Mermaid)
+    /// and asserts the heading appears.
+    func testRendersComplexDocument() {
+        let app = launch()
+        XCTAssertTrue(app.staticTexts["E2E Heading"].waitForExistence(timeout: 10))
+    }
 
+    /// Pressing Return on a list item continues the list with a new marker.
+    func testSmartListContinuation() {
+        let app = launch()
         let mirror = app.staticTexts["editorMirror"]
         XCTAssertTrue(mirror.waitForExistence(timeout: 10))
-        XCTAssertEqual(mirror.label, "hello")
 
-        // Tapping Bold with no selection inserts the ** ** markers.
-        app.buttons["Bold"].firstMatch.tap()
-        let updated = NSPredicate(format: "label CONTAINS '*'")
-        expectation(for: updated, evaluatedWith: mirror)
+        let editor = app.textViews.firstMatch
+        XCTAssertTrue(editor.waitForExistence(timeout: 5))
+        editor.tap()
+        editor.typeText("- a\n")
+
+        // Continuation inserts a second "- " marker (newlines rendered as ⏎).
+        expectation(for: NSPredicate(format: "label CONTAINS '⏎- '"), evaluatedWith: mirror)
+        waitForExpectations(timeout: 5)
+    }
+
+    /// Typing `[[` shows wiki-link suggestions; selecting one inserts the target.
+    func testWikiLinkCompletion() {
+        let app = launch()
+        let mirror = app.staticTexts["editorMirror"]
+        XCTAssertTrue(mirror.waitForExistence(timeout: 10))
+
+        let editor = app.textViews.firstMatch
+        XCTAssertTrue(editor.waitForExistence(timeout: 5))
+        editor.tap()
+        editor.typeText("[[Pa")
+
+        let suggestion = app.buttons["Page One"]
+        XCTAssertTrue(suggestion.waitForExistence(timeout: 5))
+        suggestion.tap()
+
+        expectation(for: NSPredicate(format: "label CONTAINS 'Page One]]'"), evaluatedWith: mirror)
         waitForExpectations(timeout: 5)
     }
 }

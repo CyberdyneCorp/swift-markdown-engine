@@ -3,7 +3,8 @@ import SwiftMarkdownEngine
 import MarkdownEditor
 
 /// Host app for the XCUITest E2E suite. It exposes a render screen and an editor
-/// screen, plus a "mirror" Text so tests can assert the editor's buffer.
+/// screen, plus a "mirror" Text (newlines shown as ⏎) so tests can assert the
+/// editor's buffer without depending on the text view's internals.
 @main
 struct MarkdownE2EApp: App {
     var body: some Scene {
@@ -11,8 +12,23 @@ struct MarkdownE2EApp: App {
     }
 }
 
+/// Wiki-link resolver with a fixed page set so completion flows are deterministic.
+struct DemoWikiResolver: WikiLinkResolver {
+    let pages = ["Page One", "Page Two", "Playbook"]
+
+    func resolve(_ target: String) -> WikiLinkTarget? {
+        pages.contains(target) ? WikiLinkTarget(identifier: target, title: target, exists: true) : nil
+    }
+
+    func suggestions(matching query: String) -> [WikiLinkTarget] {
+        pages
+            .filter { query.isEmpty || $0.lowercased().contains(query.lowercased()) }
+            .map { WikiLinkTarget(identifier: $0, title: $0, exists: true) }
+    }
+}
+
 struct RootView: View {
-    @State private var editorText = "hello"
+    @State private var editorText = ""
 
     static let sample = """
     # E2E Heading
@@ -43,11 +59,11 @@ struct RootView: View {
 
             Divider()
 
-            MarkdownEditor(text: $editorText)
-                .frame(height: 160)
+            MarkdownEditor(text: $editorText, wikiLinkResolver: DemoWikiResolver())
+                .frame(height: 200)
 
-            // Mirror of the editor buffer for test assertions.
-            Text(editorText)
+            // Mirror of the editor buffer for test assertions (newlines as ⏎).
+            Text(editorText.replacingOccurrences(of: "\n", with: "⏎"))
                 .accessibilityIdentifier("editorMirror")
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(6)
