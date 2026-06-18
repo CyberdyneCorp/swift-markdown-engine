@@ -68,6 +68,34 @@ checking while suppressing it within code, math, and wiki-link spans.
 - **WHEN** the caret is inside an inline code span or fenced code block
 - **THEN** spelling and grammar checking SHALL NOT flag tokens within that span
 
+### Requirement: Apple Pencil support on iPad
+On iPad, the editor SHALL support Apple Pencil input. Handwriting SHALL be converted to
+text and inserted at the writing location via Scribble, and standard Scribble editing
+gestures SHALL be supported: scratch-out to delete, draw a vertical bar to insert space,
+and select by circling or underlining. Where the hardware and OS provide them, the editor
+SHALL support Pencil hover previews and a configurable action for Pencil double-tap and
+squeeze.
+
+#### Scenario: Insert text by handwriting
+- **WHEN** the user writes words over the editor with Apple Pencil
+- **THEN** the handwriting SHALL be converted to text and inserted into the Markdown source at the indicated location
+
+#### Scenario: Scratch out to delete
+- **WHEN** the user scratches out a word with Apple Pencil
+- **THEN** that word SHALL be removed from the source
+
+#### Scenario: Pencil hover preview
+- **WHEN** Pencil hover is available and the user hovers over the editor
+- **THEN** the editor SHALL preview the insertion point without committing input
+
+#### Scenario: Configurable Pencil double-tap or squeeze
+- **WHEN** the user performs a Pencil double-tap or squeeze and an action is configured
+- **THEN** the editor SHALL invoke that configured action
+
+#### Scenario: Non-Pencil input unaffected
+- **WHEN** the device has no Apple Pencil or Pencil features are unavailable
+- **THEN** keyboard and touch editing SHALL continue to work unchanged
+
 ### Requirement: Editor scrolling ergonomics
 The editor SHALL provide bottom overscroll so the caret is not pinned to the bottom edge
 while typing, and SHALL constrain body text to a readable column while allowing wide

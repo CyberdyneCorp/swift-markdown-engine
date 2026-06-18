@@ -70,8 +70,9 @@ _Capabilities: `code-syntax-highlighting`, `latex-math-rendering`, `mermaid-diag
 - ⬜ Interactive checkboxes, smart list continuation, tab/shift-tab indentation.
 - ⬜ Wiki-link/image affordances + wiki-link completion via resolver.
 - ⬜ Spelling/grammar suppression for code/math/wiki spans; bottom overscroll + reading column.
+- ⬜ **Apple Pencil on iPad**: Scribble handwriting-to-text, scratch-out/select/insert-space gestures, hover preview, configurable double-tap/squeeze action.
 
-🎯 **M4:** `MarkdownEditor` edits Markdown live on iOS and macOS.
+🎯 **M4:** `MarkdownEditor` edits Markdown live on iOS and macOS, with Apple Pencil on iPad.
 _Capabilities: `markdown-editor`_
 
 ## Phase 5 — watchOS subset & hardening
@@ -81,9 +82,11 @@ _Capabilities: `markdown-editor`_
 - ⬜ Exclude the editor target from watchOS; verify off-main-actor parsing under strict concurrency.
 - ⬜ Performance pass: lazy off-screen rendering, incremental re-style, large-document profiling.
 - ⬜ Accessibility audit across platforms.
+- ⬜ **E2E tests on simulators in CI/CD** (iPhone, iPad, Mac) via `xcodebuild test`: render a rich document and drive editor flows (toolbar, checkbox, list continuation).
+- ⬜ **On-device testing on a physical iPad with Apple Pencil**: Scribble insertion, scratch-out delete, hover preview, double-tap/squeeze — plus a documented device-testing matrix (manual or device-farm).
 
-🎯 **M5:** Documents render legibly on Apple Watch; engine is concurrency-safe and fast.
-_Capabilities: `platform-support`_
+🎯 **M5:** Documents render legibly on Apple Watch; engine is concurrency-safe and fast; E2E green on simulators and verified on an iPad with Apple Pencil.
+_Capabilities: `platform-support`, `markdown-editor`_
 
 ## Phase 6 — Docs, example app & v1.0
 **Goal:** a polished, documented, stable 1.0 release.

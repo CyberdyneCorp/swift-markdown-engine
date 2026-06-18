@@ -75,7 +75,8 @@
 - [ ] 10.5 Implement wiki-link/image affordances and wiki-link completion via resolver
 - [ ] 10.6 Implement spelling/grammar suppression for code/math/wiki spans
 - [ ] 10.7 Implement bottom overscroll and reading-column with wide-content breakout
-- [ ] 10.8 Tests: command toggling, list continuation, checkbox toggle, suppression ranges
+- [ ] 10.8 Implement Apple Pencil support on iPad: Scribble handwriting-to-text, scratch-out/select/insert-space gestures, hover preview, configurable double-tap/squeeze action
+- [ ] 10.9 Tests: command toggling, list continuation, checkbox toggle, suppression ranges, Scribble insertion/deletion
 
 ## 11. Platform support
 
@@ -90,3 +91,11 @@
 - [ ] 12.2 Add DocC for public API (`MarkdownView`, `MarkdownEditor`, `MarkdownDocument`, `MarkdownTheme`, services)
 - [ ] 12.3 Add an example app demonstrating rendering + editing on iOS/macOS and rendering on watchOS
 - [ ] 12.4 Validate the change (`openspec validate add-markdown-renderer-editor --strict`) and run the full test suite before PR
+
+## 13. End-to-end & device testing
+
+- [ ] 13.1 Build a UI test host app embedding `MarkdownView` and `MarkdownEditor` for XCUITest targets (iOS, iPadOS, macOS)
+- [ ] 13.2 Write XCUITest E2E flows: render a complex document (code/math/mermaid/tables) and edit it (toolbar commands, checkbox toggle, list continuation)
+- [ ] 13.3 Run E2E on simulators in CI/CD (iPhone, iPad, Mac) via `xcodebuild test` in GitHub Actions
+- [ ] 13.4 Add an on-device test plan for a physical iPad with Apple Pencil: Scribble insertion, scratch-out delete, hover preview, double-tap/squeeze action
+- [ ] 13.5 Document the device-testing matrix and Pencil verification steps (manual or device-farm) in the repo
