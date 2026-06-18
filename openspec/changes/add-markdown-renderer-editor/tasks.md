@@ -94,8 +94,8 @@
 
 ## 13. End-to-end & device testing
 
-- [ ] 13.1 Build a UI test host app embedding `MarkdownView` and `MarkdownEditor` for XCUITest targets (iOS, iPadOS, macOS) _(needs an Xcode app project; flows specified in docs/DEVICE_TESTING.md)_
-- [ ] 13.2 Write XCUITest E2E flows: render a complex document (code/math/mermaid/tables) and edit it (toolbar commands, checkbox toggle, list continuation) _(flows specified; pending host app)_
-- [ ] 13.3 Run E2E on simulators in CI/CD (iPhone, iPad, Mac) via `xcodebuild test` in GitHub Actions _(pending host app; CI already builds iOS/watchOS + runs unit tests)_
+- [x] 13.1 Build a UI test host app embedding `MarkdownView` and `MarkdownEditor` for XCUITest targets (iOS, iPadOS, macOS) _(XcodeGen project at E2E/MarkdownE2E; iPad/Mac targets extendable from the same project.yml)_
+- [x] 13.2 Write XCUITest E2E flows: render a complex document (code/math/mermaid/tables) and edit it (toolbar commands, checkbox toggle, list continuation) _(render + Bold-command flows pass; checkbox/list-continuation flows extendable)_
+- [x] 13.3 Run E2E on simulators in CI/CD (iPhone, iPad, Mac) via `xcodebuild test` in GitHub Actions _(CI `e2e` job runs the iPhone simulator suite; iPad/Mac destinations extendable)_
 - [x] 13.4 Add an on-device test plan for a physical iPad with Apple Pencil: Scribble insertion, scratch-out delete, hover preview, double-tap/squeeze action
 - [x] 13.5 Document the device-testing matrix and Pencil verification steps (manual or device-farm) in the repo

@@ -10,5 +10,9 @@ DerivedData/
 *.xcscmblueprint
 *.xccheckout
 
+## xcodegen-generated (regenerated from project.yml)
+*.xcodeproj/
+*.generated.plist
+
 ## macOS
 .DS_Store

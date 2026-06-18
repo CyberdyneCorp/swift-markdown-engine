@@ -52,3 +52,25 @@ jobs:
           -scheme SwiftMarkdownEngine
           -destination '${{ matrix.destination }}'
           -quiet
+
+  e2e:
+    name: E2E (XCUITest, iOS Simulator)
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode_26.app
+      - name: Install xcodegen
+        run: brew install xcodegen
+      - name: Generate project
+        working-directory: E2E/MarkdownE2E
+        run: xcodegen generate
+      - name: Run XCUITest
+        working-directory: E2E/MarkdownE2E
+        run: >
+          xcodebuild test
+          -project MarkdownE2E.xcodeproj
+          -scheme MarkdownE2E
+          -destination 'platform=iOS Simulator,name=iPhone 16'
+          CODE_SIGNING_ALLOWED=NO
+          -quiet

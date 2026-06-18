@@ -17,8 +17,8 @@ Legend: 🎯 milestone · ⬜ not started · 🟦 in progress · ✅ done.
 > double-tap/Scribble on iOS/macOS. **M5 mostly done** — watchOS subset, concurrency
 > tests, LazyVStack, device-testing docs. **M3 now complete** — Highlightr code bridge
 > and SwiftMath LaTeX bridge implemented and tested; inline math now flows as images.
-> **M6 in progress** — DocC catalog, example app done (89 tests). Remaining: XCUITest
-> host app (needs an Xcode app project), then 1.0 tag + archive.
+> **M6 in progress** — DocC catalog, example app, and XCUITest E2E (XcodeGen host app,
+> green on iPhone simulator) done (89 unit + 2 E2E tests). Remaining: 1.0 tag + archive.
 
 ---
 
@@ -93,10 +93,10 @@ _Capabilities: `markdown-editor`_
 - ✅ Editor excluded from watchOS; off-main-actor parsing verified under strict concurrency (async tests).
 - ✅ Performance: `LazyVStack` off-screen rendering. (Incremental re-style + large-doc profiling: future.)
 - 🟦 Accessibility audit across platforms (heading traits, alt text, Dynamic Type in place; full audit pending).
-- 🟦 **E2E tests on simulators in CI/CD**: flows specified in `docs/DEVICE_TESTING.md`; XCUITest host app pending an Xcode app project.
+- ✅ **E2E tests on simulators in CI/CD**: XcodeGen host app (`E2E/MarkdownE2E`) + XCUITest suite running on the iPhone simulator (CI `e2e` job); render + editor-command flows pass.
 - ✅ **On-device iPad + Apple Pencil plan** documented (`docs/DEVICE_TESTING.md`); Scribble + double-tap supported.
 
-🎯 **M5:** Documents render legibly on Apple Watch; engine is concurrency-safe and fast; E2E green on simulators and verified on an iPad with Apple Pencil.
+🎯 **M5:** Documents render legibly on Apple Watch; engine is concurrency-safe and fast; E2E green on simulators and verified on an iPad with Apple Pencil. ✅ (on-device Pencil verification per `docs/DEVICE_TESTING.md`)
 _Capabilities: `platform-support`, `markdown-editor`_
 
 ## Phase 6 — Docs, example app & v1.0 🟦

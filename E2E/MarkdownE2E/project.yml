@@ -1,0 +1,56 @@
+name: MarkdownE2E
+options:
+  bundleIdPrefix: ai.cyberdyne.markdowne2e
+  deploymentTarget:
+    iOS: "17.0"
+  createIntermediateGroups: true
+
+packages:
+  SwiftMarkdownEngine:
+    path: ../..
+
+targets:
+  MarkdownE2EApp:
+    type: application
+    platform: iOS
+    sources:
+      - App
+    dependencies:
+      - package: SwiftMarkdownEngine
+        product: SwiftMarkdownEngine
+      - package: SwiftMarkdownEngine
+        product: MarkdownEditor
+    info:
+      path: App/Info.generated.plist
+      properties:
+        UILaunchScreen: {}
+        UIApplicationSceneManifest:
+          UIApplicationSupportsMultipleScenes: false
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: ai.cyberdyne.markdowne2e.app
+        GENERATE_INFOPLIST_FILE: NO
+        CODE_SIGNING_ALLOWED: NO
+
+  MarkdownE2EUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - UITests
+    dependencies:
+      - target: MarkdownE2EApp
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: ai.cyberdyne.markdowne2e.uitests
+        TEST_TARGET_NAME: MarkdownE2EApp
+        CODE_SIGNING_ALLOWED: NO
+
+schemes:
+  MarkdownE2E:
+    build:
+      targets:
+        MarkdownE2EApp: all
+        MarkdownE2EUITests: [test]
+    test:
+      targets:
+        - MarkdownE2EUITests
