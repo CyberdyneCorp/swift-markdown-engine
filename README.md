@@ -218,7 +218,7 @@ openspec/changes/add-markdown-renderer-editor/
 ```
 
 Browse it with `openspec show add-markdown-renderer-editor` or read the spec files
-directly.
+directly. The phased delivery plan lives in [ROADMAP.md](ROADMAP.md).
 
 ## License
 
