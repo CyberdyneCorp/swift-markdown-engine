@@ -7,8 +7,9 @@ Each phase is independently demoable and maps to OpenSpec capabilities under
 Legend: 🎯 milestone · ⬜ not started · 🟦 in progress · ✅ done.
 
 > **Status:** Specification complete on `main`. **M0 done** — package builds on iOS,
-> macOS, and watchOS; `swift test` green; CI configured. **M1 in progress** — the
-> document model (AST) is implemented; the parser is next.
+> macOS, and watchOS; `swift test` green; CI configured. **M1 nearly done** — the
+> document model and the CommonMark + GFM + extensions parser are implemented and
+> tested (38 tests). Remaining: full spec.json conformance run. **Renderer (M2) is next.**
 
 ---
 
@@ -26,11 +27,11 @@ _Capabilities: `platform-support`_
 **Goal:** turn Markdown into a typed, immutable AST that passes conformance.
 
 - ✅ `Sendable` value-type AST (`Block`, `Inline`, list/table/code nodes) with UTF-8 source ranges, incl. all extension nodes.
-- ⬜ CommonMark block + inline parsing (headings, lists, quotes, code, links, images, emphasis, escapes).
-- ⬜ GFM extensions: tables (alignment), task items, strikethrough, extended autolinks.
-- ⬜ Extension parsing: math, mermaid fences, frontmatter, footnotes, callouts, wiki-links.
-- ⬜ Malformed-input resilience + deterministic-parse guarantees.
-- ⬜ Pass CommonMark + GFM conformance suites; regression test per extension.
+- ✅ CommonMark block + inline parsing (headings, lists, quotes, code, links, images, emphasis, escapes).
+- ✅ GFM extensions: tables (alignment), task items, strikethrough, extended autolinks.
+- ✅ Extension parsing: math, mermaid fences, frontmatter, footnotes, callouts, wiki-links.
+- ✅ Malformed-input resilience + deterministic-parse guarantees.
+- 🟦 Pass CommonMark + GFM conformance suites; regression test per extension _(28 regression tests green; full spec.json run pending vendoring)_.
 
 🎯 **M1:** Any Markdown string parses to a stable model; conformance suite green.
 _Capabilities: `markdown-parsing`_

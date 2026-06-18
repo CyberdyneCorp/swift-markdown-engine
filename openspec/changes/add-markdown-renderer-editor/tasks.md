@@ -12,14 +12,14 @@
 
 ## 3. Parser
 
-- [ ] 3.1 Implement CommonMark block parsing (headings, paragraphs, thematic breaks, code blocks, block quotes, lists incl. tight/loose & nesting, HTML blocks)
-- [ ] 3.2 Implement CommonMark inline parsing (emphasis/strong, code spans, links inline+reference, images, autolinks, escapes, breaks, inline HTML)
-- [ ] 3.3 Implement GFM extensions (tables w/ alignment, task items, strikethrough, extended autolinks)
-- [ ] 3.4 Implement math extension parsing with currency false-positive guard
-- [ ] 3.5 Implement mermaid fence recognition
-- [ ] 3.6 Implement frontmatter, footnotes, callouts, wiki-links
-- [ ] 3.7 Implement malformed-input resilience (no crash; literal fallback) and deterministic-parse guarantees
-- [ ] 3.8 Pass the CommonMark + GFM conformance suites; add regression tests for each extension
+- [x] 3.1 Implement CommonMark block parsing (headings, paragraphs, thematic breaks, code blocks, block quotes, lists incl. tight/loose & nesting, HTML blocks)
+- [x] 3.2 Implement CommonMark inline parsing (emphasis/strong, code spans, links inline+reference, images, autolinks, escapes, breaks, inline HTML)
+- [x] 3.3 Implement GFM extensions (tables w/ alignment, task items, strikethrough, extended autolinks)
+- [x] 3.4 Implement math extension parsing with currency false-positive guard
+- [x] 3.5 Implement mermaid fence recognition
+- [x] 3.6 Implement frontmatter, footnotes, callouts, wiki-links
+- [x] 3.7 Implement malformed-input resilience (no crash; literal fallback) and deterministic-parse guarantees
+- [ ] 3.8 Pass the CommonMark + GFM conformance suites; add regression tests for each extension _(28 regression tests added; full spec.json conformance run pending vendoring — see 1.2)_
 
 ## 4. Service protocols & configuration
 
