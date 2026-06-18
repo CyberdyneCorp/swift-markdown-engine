@@ -12,6 +12,14 @@ struct MermaidView: View {
         switch MermaidDiagramType.detect(from: source) {
         case .flowchart:
             scrollable { FlowchartView(chart: FlowchartParser.parse(source), theme: theme) }
+        case .stateDiagram:
+            scrollable { FlowchartView(chart: StateDiagramParser.parse(source), theme: theme) }
+        case .classDiagram:
+            scrollable { ClassDiagramView(model: ClassDiagramParser.parse(source), theme: theme) }
+        case .erDiagram:
+            scrollable { ERDiagramView(model: ERDiagramParser.parse(source), theme: theme) }
+        case .mindmap:
+            scrollable { MindmapView(model: MindmapParser.parse(source), theme: theme) }
         case .sequence:
             scrollable { SequenceDiagramView(model: SequenceParser.parse(source), theme: theme) }
         case .pie:

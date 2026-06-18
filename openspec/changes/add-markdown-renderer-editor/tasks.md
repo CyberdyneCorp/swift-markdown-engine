@@ -59,12 +59,12 @@
 
 ## 9. Mermaid diagrams
 
-- [ ] 9.1 Port pure-value-type parsers for all 11 diagram types _(flowchart, sequence, pie done; remaining: class, state, ER, gantt, gitGraph, journey, mindmap, timeline)_
-- [ ] 9.2 Port/implement layout engines per diagram family _(flowchart layered, sequence columns, pie wedges done; remaining types pending)_
-- [ ] 9.3 Implement SwiftUI Canvas renderers (shapes, edges, subgraphs, self-loops, styling) _(node shapes, edge styles, arrowheads, labels done; subgraphs/self-loops pending)_
+- [ ] 9.1 Port pure-value-type parsers for all 11 diagram types _(flowchart, sequence, pie, state, class, ER, mindmap done; remaining: gantt, gitGraph, journey, timeline)_
+- [ ] 9.2 Port/implement layout engines per diagram family _(flowchart/state layered, sequence columns, pie wedges, class/ER layered, mindmap tree done; remaining: gantt, gitGraph, journey, timeline)_
+- [ ] 9.3 Implement SwiftUI Canvas renderers (shapes, edges, subgraphs, self-loops, styling) _(node shapes, edge styles, arrowheads, labels, class/ER boxes, mindmap tree done; subgraphs/self-loops pending)_
 - [x] 9.4 Implement inline-style + theme-fallback color resolution and light/dark adaptation
 - [x] 9.5 Implement unsupported-type fallback to highlighted source and diagram overflow scrolling
-- [ ] 9.6 Tests: one parse+render test per diagram type plus fallback and styling cases _(flowchart/sequence/pie + detection + fallback + styling covered; remaining types pending)_
+- [ ] 9.6 Tests: one parse+render test per diagram type plus fallback and styling cases _(flowchart/sequence/pie/state/class/ER/mindmap + detection + fallback + styling covered; remaining 4 types pending)_
 
 ## 10. Editor (iOS/macOS)
 

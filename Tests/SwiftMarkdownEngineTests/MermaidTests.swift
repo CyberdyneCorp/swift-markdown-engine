@@ -79,3 +79,38 @@ final class MermaidTests: XCTestCase {
         XCTAssertEqual(MermaidDiagramType.detect(from: src), .pie)
     }
 }
+
+extension MermaidTests {
+    func testStateDiagramParse() {
+        let chart = StateDiagramParser.parse("stateDiagram-v2\n[*] --> Still\nStill --> Moving: go\nMoving --> [*]")
+        // Two [*] markers + Still + Moving = 4 nodes.
+        XCTAssertEqual(chart.nodes.count, 4)
+        XCTAssertEqual(chart.edges.count, 3)
+        XCTAssertEqual(chart.edges.first { $0.label == "go" }?.label, "go")
+    }
+
+    func testClassDiagramParse() {
+        let model = ClassDiagramParser.parse("classDiagram\nclass Animal\nAnimal : +int age\nAnimal <|-- Dog")
+        XCTAssertTrue(model.classes.contains { $0.name == "Animal" })
+        XCTAssertTrue(model.classes.contains { $0.name == "Dog" })
+        XCTAssertEqual(model.classes.first { $0.name == "Animal" }?.members, ["+int age"])
+        XCTAssertEqual(model.relations.first?.inheritance, true)
+    }
+
+    func testERDiagramParse() {
+        let model = ERDiagramParser.parse("erDiagram\nCUSTOMER ||--o{ ORDER : places")
+        XCTAssertEqual(model.entities.sorted(), ["CUSTOMER", "ORDER"])
+        XCTAssertEqual(model.relations.first?.label, "places")
+        XCTAssertEqual(model.relations.first?.left, "CUSTOMER")
+        XCTAssertEqual(model.relations.first?.right, "ORDER")
+    }
+
+    func testMindmapParse() {
+        let model = MindmapParser.parse("mindmap\n  root((Root))\n    A\n    B\n      B1")
+        XCTAssertEqual(model.nodes.first?.label, "Root")
+        // Root has two children A and B.
+        XCTAssertEqual(model.nodes.first?.children.count, 2)
+        // B (index 2) has one child B1.
+        XCTAssertTrue(model.nodes.contains { $0.label == "B1" && $0.depth == 2 })
+    }
+}
