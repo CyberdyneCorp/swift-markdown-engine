@@ -10,9 +10,10 @@ Legend: 🎯 milestone · ⬜ not started · 🟦 in progress · ✅ done.
 > macOS, and watchOS; `swift test` green; CI configured. **M1 nearly done** — the
 > document model and the CommonMark + GFM + extensions parser are implemented and
 > tested. **M2 done** — native SwiftUI renderer, theming, services injection, and
-> configuration; builds on iOS/macOS/watchOS. **M3 in progress** — native Mermaid
-> (7/11 types) renders on Canvas; code-block view done; LaTeX + Highlightr/
-> SwiftMath bridges and the remaining 4 Mermaid types pending (59 tests).
+> configuration; builds on iOS/macOS/watchOS. **M3 mostly done** — native Mermaid
+> (all 11 types) renders on Canvas; code-block view done. Remaining: LaTeX
+> `LatexRenderer` wiring + Highlightr/SwiftMath bridges (network-blocked). 64 tests.
+> **M4 (editor) is next.**
 
 ---
 
@@ -60,7 +61,7 @@ _Capabilities: `document-rendering`, `theming-customization`, `extensibility-ser
 - ⬜ `MarkdownEngineCodeBlocks` Highlightr bridge (configurable code theme) _(needs network to vendor Highlightr)_.
 - 🟦 Inline + block math views; invalid-LaTeX fallback; theme-aware color _(fallback-to-source view in place; LatexRenderer wiring pending)_.
 - ⬜ `MarkdownEngineLatex` SwiftMath bridge _(needs network to vendor SwiftMath)_.
-- 🟦 Mermaid: native Canvas renderers — **flowchart, sequence, pie, state, class, ER, mindmap done** (7/11); remaining 4 pending (gantt, gitGraph, journey, timeline).
+- ✅ Mermaid: native Canvas renderers for **all 11 types** (flowchart, sequence, pie, state, class, ER, mindmap, gantt, gitGraph, journey, timeline). Subgraph boxes & self-loop curves are a future refinement.
 - ✅ Mermaid inline-style + theme-fallback colors; unsupported-type fallback to highlighted source; overflow scrolling.
 
 🎯 **M3:** Code, LaTeX, and all 11 Mermaid types render natively with graceful fallback.

@@ -25,6 +25,14 @@ struct MermaidView: View {
         case .pie:
             PieChartView(model: PieChartParser.parse(source), theme: theme)
                 .padding(.vertical, 4)
+        case .gantt:
+            scrollable { GanttView(model: GanttParser.parse(source), theme: theme) }
+        case .gitGraph:
+            scrollable { GitGraphView(model: GitGraphParser.parse(source), theme: theme) }
+        case .journey:
+            scrollable { JourneyView(model: JourneyParser.parse(source), theme: theme) }
+        case .timeline:
+            scrollable { TimelineView(model: TimelineParser.parse(source), theme: theme) }
         default:
             // Unsupported type: spec-defined fallback to highlighted source.
             CodeBlockView(language: "mermaid", code: source)

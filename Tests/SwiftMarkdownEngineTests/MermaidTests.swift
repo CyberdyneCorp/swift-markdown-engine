@@ -114,3 +114,51 @@ extension MermaidTests {
         XCTAssertTrue(model.nodes.contains { $0.label == "B1" && $0.depth == 2 })
     }
 }
+
+extension MermaidTests {
+    func testGanttParse() {
+        let model = GanttParser.parse("gantt\ntitle Plan\nsection A\nTask one :a1, 2024-01-01, 3d\nTask two :after a1, 2d")
+        XCTAssertEqual(model.title, "Plan")
+        XCTAssertEqual(model.tasks.count, 2)
+        XCTAssertEqual(model.tasks[0].duration, 3)
+        // Second task starts after the first ends (3).
+        XCTAssertEqual(model.tasks[1].start, 3)
+        XCTAssertEqual(model.tasks[1].duration, 2)
+    }
+
+    func testGitGraphParse() {
+        let model = GitGraphParser.parse("gitGraph\ncommit\nbranch dev\ncheckout dev\ncommit\ncheckout main\nmerge dev")
+        // 2 commits + 1 merge.
+        XCTAssertEqual(model.commits.count, 3)
+        XCTAssertTrue(model.commits.last!.isMerge)
+        XCTAssertEqual(model.laneCount, 2)
+        // The dev commit sits on a different lane than main.
+        let devCommit = model.commits.first { $0.branch == "dev" }
+        XCTAssertEqual(devCommit?.lane, 1)
+    }
+
+    func testJourneyParse() {
+        let model = JourneyParser.parse("journey\ntitle Day\nsection Work\nMake tea: 5: Me\nDrive: 3: Me, Cat")
+        XCTAssertEqual(model.tasks.count, 2)
+        XCTAssertEqual(model.tasks[0].score, 5)
+        XCTAssertEqual(model.tasks[1].actors, "Me, Cat")
+    }
+
+    func testTimelineParse() {
+        let model = TimelineParser.parse("timeline\ntitle History\nsection Ancient\n2000 BC : Event A : Event B\n2024 : Modern")
+        XCTAssertEqual(model.entries.count, 2)
+        XCTAssertEqual(model.entries[0].period, "2000 BC")
+        XCTAssertEqual(model.entries[0].events, ["Event A", "Event B"])
+        XCTAssertEqual(model.entries[1].events, ["Modern"])
+    }
+
+    func testAllElevenTypesRenderNatively() {
+        // None of the 11 supported types should be classified as unknown.
+        let headers = ["flowchart TD", "sequenceDiagram", "pie", "stateDiagram-v2",
+                       "classDiagram", "erDiagram", "gantt", "gitGraph", "journey",
+                       "mindmap", "timeline"]
+        for header in headers {
+            XCTAssertNotEqual(MermaidDiagramType.detect(from: header), .unknown, "\(header) should be recognized")
+        }
+    }
+}
