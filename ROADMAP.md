@@ -16,8 +16,9 @@ Legend: 🎯 milestone · ⬜ not started · 🟦 in progress · ✅ done.
 > lists, indentation, wiki-link completion, spell suppression, Apple Pencil
 > double-tap/Scribble on iOS/macOS. **M5 mostly done** — watchOS subset, concurrency
 > tests, LazyVStack, device-testing docs. **M3 now complete** — Highlightr code bridge
-> and SwiftMath LaTeX bridge implemented and tested. **M6 in progress** — DocC catalog,
-> example app done (88 tests). Remaining: XCUITest host app, then 1.0 tag + archive.
+> and SwiftMath LaTeX bridge implemented and tested; inline math now flows as images.
+> **M6 in progress** — DocC catalog, example app done (89 tests). Remaining: XCUITest
+> host app (needs an Xcode app project), then 1.0 tag + archive.
 
 ---
 
@@ -63,7 +64,7 @@ _Capabilities: `document-rendering`, `theming-customization`, `extensibility-ser
 
 - ✅ Code block view: distinct surface, horizontal scroll, optional line numbers + copy; alias resolution; unknown-language fallback.
 - ✅ `MarkdownEngineCodeBlocks` Highlightr bridge (configurable code theme).
-- 🟦 Inline + block math views; invalid-LaTeX fallback; theme-aware color _(block math renders via injected LatexRenderer; inline baseline-flow pending; fallback + theme color done)_.
+- ✅ Inline + block math views; invalid-LaTeX fallback; theme-aware color (inline math flows as images via the LatexRenderer; block centered).
 - ✅ `MarkdownEngineLatex` SwiftMath bridge.
 - ✅ Mermaid: native Canvas renderers for **all 11 types** (flowchart, sequence, pie, state, class, ER, mindmap, gantt, gitGraph, journey, timeline). Subgraph boxes & self-loop curves are a future refinement.
 - ✅ Mermaid inline-style + theme-fallback colors; unsupported-type fallback to highlighted source; overflow scrolling.

@@ -63,3 +63,20 @@ final class RenderingTests: XCTestCase {
         _ = MarkdownTableView(table: MarkdownTable(alignments: [.left], header: [[InlineNode(.text("h"))]], rows: []))
     }
 }
+
+private struct StubLatexRenderer: LatexRenderer {
+    // A minimal 1x1 transparent PNG so the inline-math image branch is exercised.
+    func renderToPNG(_ latex: String, displayMode: Bool, pointSize: Double, hexColor: String) -> Data? {
+        Data(base64Encoded: "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+M8AAAMBAQDJ/pLvAAAAAElFTkSuQmCC")
+    }
+}
+
+extension RenderingTests {
+    func testInlineRendererFlowTextBuilds() {
+        // With a renderer, inline math flows as an image; without, it stays text.
+        let withMath = InlineRenderer(theme: .light, latexRenderer: StubLatexRenderer())
+        _ = withMath.text(for: inlines("value $E=mc^2$ end"))
+        let plain = InlineRenderer(theme: .light)
+        _ = plain.text(for: inlines("just **bold** text"))
+    }
+}

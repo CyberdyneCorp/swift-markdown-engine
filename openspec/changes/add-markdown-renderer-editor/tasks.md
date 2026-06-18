@@ -52,7 +52,7 @@
 
 ## 8. LaTeX math rendering
 
-- [ ] 8.1 Implement inline (baseline-flowed) and block (centered) math views via `LatexRenderer` _(block math renders via injected renderer; inline baseline-flow via text attachment pending)_
+- [x] 8.1 Implement inline (baseline-flowed) and block (centered) math views via `LatexRenderer` _(inline math flows as images in Text; block math centered; both via the injected renderer)_
 - [x] 8.2 Implement invalid-LaTeX fallback to monospaced source and theme-aware coloring
 - [x] 8.3 Implement `MarkdownEngineLatex` SwiftMath bridge (UIView/NSView representable)
 - [x] 8.4 Tests: fraction/superscript rendering, malformed fallback, dark-mode color, core-has-no-dependency check

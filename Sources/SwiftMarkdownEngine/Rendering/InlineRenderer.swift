@@ -7,12 +7,49 @@ import SwiftUI
 /// Phase 3 upgrades inline math to a flow layout with embedded formula views.
 struct InlineRenderer {
     let theme: MarkdownTheme
+    /// When present, inline math is rendered as a baseline-flowed image instead of
+    /// styled source text.
+    var latexRenderer: (any LatexRenderer)?
+
+    init(theme: MarkdownTheme, latexRenderer: (any LatexRenderer)? = nil) {
+        self.theme = theme
+        self.latexRenderer = latexRenderer
+    }
 
     func attributedString(for inlines: [InlineNode]) -> AttributedString {
         var result = AttributedString()
         for node in inlines {
             result.append(render(node, intent: []))
         }
+        return result
+    }
+
+    /// Builds a SwiftUI `Text` that flows styled runs together with inline math
+    /// images (when a `LatexRenderer` is available), interleaving them inline.
+    func text(for inlines: [InlineNode]) -> Text {
+        var result = Text("")
+        var buffer = AttributedString()
+
+        func flush() {
+            if !buffer.characters.isEmpty {
+                result = result + Text(buffer)
+                buffer = AttributedString()
+            }
+        }
+
+        for node in inlines {
+            if case .inlineMath(let mathBody) = node.kind,
+               let renderer = latexRenderer,
+               let data = renderer.renderToPNG(mathBody, displayMode: false, pointSize: 16,
+                                               hexColor: theme.textPrimary.hexString()),
+               let image = makeImage(from: data) {
+                flush()
+                result = result + Text(image)
+            } else {
+                buffer.append(render(node, intent: []))
+            }
+        }
+        flush()
         return result
     }
 

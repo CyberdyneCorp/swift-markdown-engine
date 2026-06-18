@@ -6,6 +6,7 @@ struct MarkdownTableView: View {
     let table: MarkdownTable
 
     @Environment(\.resolvedMarkdownTheme) private var theme
+    @Environment(\.markdownServices) private var services
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
@@ -29,7 +30,7 @@ struct MarkdownTableView: View {
 
     private func cellView(_ cell: [InlineNode], column: Int, isHeader: Bool) -> some View {
         let alignment = column < table.alignments.count ? table.alignments[column] : .none
-        return Text(InlineRenderer(theme: theme).attributedString(for: cell))
+        return InlineRenderer(theme: theme, latexRenderer: services.latexRenderer).text(for: cell)
             .font(isHeader ? theme.bodyFont.bold() : theme.bodyFont)
             .foregroundStyle(theme.textPrimary)
             .multilineTextAlignment(textAlignment(alignment))

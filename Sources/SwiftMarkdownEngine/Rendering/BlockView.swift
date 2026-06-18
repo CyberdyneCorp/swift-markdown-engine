@@ -5,6 +5,7 @@ struct BlockView: View {
     let block: BlockNode
 
     @Environment(\.resolvedMarkdownTheme) private var theme
+    @Environment(\.markdownServices) private var services
 
     var body: some View {
         switch block.kind {
@@ -50,7 +51,7 @@ struct BlockView: View {
             return AnyView(MarkdownImageView(source: source, alt: alt))
         }
         return AnyView(
-            Text(InlineRenderer(theme: theme).attributedString(for: inlines))
+            InlineRenderer(theme: theme, latexRenderer: services.latexRenderer).text(for: inlines)
                 .font(theme.bodyFont)
                 .foregroundStyle(theme.textPrimary)
                 .fixedSize(horizontal: false, vertical: true)
