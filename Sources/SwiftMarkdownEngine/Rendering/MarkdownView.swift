@@ -43,7 +43,7 @@ public struct MarkdownView: View {
         let theme = resolvedTheme
         let doc = document
         return ScrollView {
-            VStack(alignment: .leading, spacing: theme.paragraphSpacing) {
+            LazyVStack(alignment: .leading, spacing: theme.paragraphSpacing) {
                 ForEach(Array(doc.blocks.enumerated()), id: \.offset) { _, block in
                     BlockView(block: block)
                 }

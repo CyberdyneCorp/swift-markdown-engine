@@ -9,6 +9,17 @@ struct MermaidView: View {
     @Environment(\.resolvedMarkdownTheme) private var theme
 
     var body: some View {
+        #if os(watchOS)
+        // watchOS renders a constrained subset: layout-heavy diagrams degrade to
+        // their source so the small screen stays legible and fast.
+        CodeBlockView(language: "mermaid", code: source)
+        #else
+        nativeBody
+        #endif
+    }
+
+    #if !os(watchOS)
+    @ViewBuilder private var nativeBody: some View {
         switch MermaidDiagramType.detect(from: source) {
         case .flowchart:
             scrollable { FlowchartView(chart: FlowchartParser.parse(source), theme: theme) }
@@ -44,4 +55,5 @@ struct MermaidView: View {
             content().padding(8)
         }
     }
+    #endif
 }

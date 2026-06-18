@@ -14,7 +14,8 @@ Legend: 🎯 milestone · ⬜ not started · 🟦 in progress · ✅ done.
 > (all 11 types) on Canvas; code-block view done (LaTeX/Highlightr bridges
 > network-blocked). **M4 done** — TextKit 2 editor: live styling, toolbar, smart
 > lists, indentation, wiki-link completion, spell suppression, Apple Pencil
-> double-tap/Scribble on iOS/macOS (79 tests). **M5 (watchOS/perf/E2E) is next.**
+> double-tap/Scribble on iOS/macOS. **M5 mostly done** — watchOS subset, concurrency
+> tests, LazyVStack, device-testing docs (82 tests). **M6 (docs/example/v1.0) is next.**
 
 ---
 
@@ -82,15 +83,15 @@ _Capabilities: `code-syntax-highlighting`, `latex-math-rendering`, `mermaid-diag
 🎯 **M4:** `MarkdownEditor` edits Markdown live on iOS and macOS, with Apple Pencil on iPad. ✅
 _Capabilities: `markdown-editor`_
 
-## Phase 5 — watchOS subset & hardening
+## Phase 5 — watchOS subset & hardening 🟦
 **Goal:** rendering on the watch and production-quality polish.
 
-- ⬜ watchOS render subset (text, lists, tables, code, inline formatting); diagram degradation.
-- ⬜ Exclude the editor target from watchOS; verify off-main-actor parsing under strict concurrency.
-- ⬜ Performance pass: lazy off-screen rendering, incremental re-style, large-document profiling.
-- ⬜ Accessibility audit across platforms.
-- ⬜ **E2E tests on simulators in CI/CD** (iPhone, iPad, Mac) via `xcodebuild test`: render a rich document and drive editor flows (toolbar, checkbox, list continuation).
-- ⬜ **On-device testing on a physical iPad with Apple Pencil**: Scribble insertion, scratch-out delete, hover preview, double-tap/squeeze — plus a documented device-testing matrix (manual or device-farm).
+- ✅ watchOS render subset (text, lists, tables, code, inline formatting); Mermaid degrades to source.
+- ✅ Editor excluded from watchOS; off-main-actor parsing verified under strict concurrency (async tests).
+- ✅ Performance: `LazyVStack` off-screen rendering. (Incremental re-style + large-doc profiling: future.)
+- 🟦 Accessibility audit across platforms (heading traits, alt text, Dynamic Type in place; full audit pending).
+- 🟦 **E2E tests on simulators in CI/CD**: flows specified in `docs/DEVICE_TESTING.md`; XCUITest host app pending an Xcode app project.
+- ✅ **On-device iPad + Apple Pencil plan** documented (`docs/DEVICE_TESTING.md`); Scribble + double-tap supported.
 
 🎯 **M5:** Documents render legibly on Apple Watch; engine is concurrency-safe and fast; E2E green on simulators and verified on an iPad with Apple Pencil.
 _Capabilities: `platform-support`, `markdown-editor`_

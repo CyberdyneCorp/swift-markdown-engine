@@ -80,10 +80,10 @@
 
 ## 11. Platform support
 
-- [ ] 11.1 Verify core + renderer compile for iOS, macOS, watchOS
-- [ ] 11.2 Implement watchOS render subset and diagram degradation; exclude the editor target from watchOS
-- [ ] 11.3 Verify off-main-actor parsing and `Sendable` model under strict concurrency
-- [ ] 11.4 Add platform-conditional tests / build matrix
+- [x] 11.1 Verify core + renderer compile for iOS, macOS, watchOS
+- [x] 11.2 Implement watchOS render subset and diagram degradation; exclude the editor target from watchOS
+- [x] 11.3 Verify off-main-actor parsing and `Sendable` model under strict concurrency
+- [x] 11.4 Add platform-conditional tests / build matrix _(CI builds iOS+watchOS; async concurrency tests; LazyVStack for off-screen rendering)_
 
 ## 12. Documentation & example
 
@@ -94,8 +94,8 @@
 
 ## 13. End-to-end & device testing
 
-- [ ] 13.1 Build a UI test host app embedding `MarkdownView` and `MarkdownEditor` for XCUITest targets (iOS, iPadOS, macOS)
-- [ ] 13.2 Write XCUITest E2E flows: render a complex document (code/math/mermaid/tables) and edit it (toolbar commands, checkbox toggle, list continuation)
-- [ ] 13.3 Run E2E on simulators in CI/CD (iPhone, iPad, Mac) via `xcodebuild test` in GitHub Actions
-- [ ] 13.4 Add an on-device test plan for a physical iPad with Apple Pencil: Scribble insertion, scratch-out delete, hover preview, double-tap/squeeze action
-- [ ] 13.5 Document the device-testing matrix and Pencil verification steps (manual or device-farm) in the repo
+- [ ] 13.1 Build a UI test host app embedding `MarkdownView` and `MarkdownEditor` for XCUITest targets (iOS, iPadOS, macOS) _(needs an Xcode app project; flows specified in docs/DEVICE_TESTING.md)_
+- [ ] 13.2 Write XCUITest E2E flows: render a complex document (code/math/mermaid/tables) and edit it (toolbar commands, checkbox toggle, list continuation) _(flows specified; pending host app)_
+- [ ] 13.3 Run E2E on simulators in CI/CD (iPhone, iPad, Mac) via `xcodebuild test` in GitHub Actions _(pending host app; CI already builds iOS/watchOS + runs unit tests)_
+- [x] 13.4 Add an on-device test plan for a physical iPad with Apple Pencil: Scribble insertion, scratch-out delete, hover preview, double-tap/squeeze action
+- [x] 13.5 Document the device-testing matrix and Pencil verification steps (manual or device-farm) in the repo
