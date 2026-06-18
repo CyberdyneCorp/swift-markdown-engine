@@ -72,3 +72,35 @@ final class MarkdownEditorTests: XCTestCase {
         XCTAssertEqual(result.text, "[text](url)")
     }
 }
+
+extension MarkdownEditorTests {
+    func testSuppressionRangesDetectsCodeAndMath() {
+        let text = "plain `code` and $x$ and [[wiki]]"
+        let ranges = EditorScanning.suppressionRanges(in: text)
+        XCTAssertEqual(ranges.count, 3) // inline code, math, wiki
+    }
+
+    func testIsInSuppressedRange() {
+        let text = "a `code` b"
+        // Caret inside the backticks.
+        XCTAssertTrue(EditorScanning.isInSuppressedRange(text, location: 4))
+        // Caret in plain text.
+        XCTAssertFalse(EditorScanning.isInSuppressedRange(text, location: 0))
+    }
+
+    func testActiveWikiQuery() {
+        let text = "see [[Page Na"
+        let result = EditorScanning.activeWikiQuery(text, caret: (text as NSString).length)
+        XCTAssertEqual(result?.query, "Page Na")
+    }
+
+    func testActiveWikiQueryNilWhenClosed() {
+        let text = "see [[Page]] done"
+        XCTAssertNil(EditorScanning.activeWikiQuery(text, caret: (text as NSString).length))
+    }
+
+    func testActiveWikiQueryNilOutsideContext() {
+        let text = "just text"
+        XCTAssertNil(EditorScanning.activeWikiQuery(text, caret: 4))
+    }
+}

@@ -11,14 +11,21 @@ public struct MarkdownEditor: View {
     @Binding private var text: String
     private let explicitTheme: MarkdownTheme?
     private let showsToolbar: Bool
+    private let wikiResolver: (any WikiLinkResolver)?
 
     @Environment(\.colorScheme) private var colorScheme
     @StateObject private var controller = MarkdownEditorController()
 
-    public init(text: Binding<String>, theme: MarkdownTheme? = nil, showsToolbar: Bool = true) {
+    public init(
+        text: Binding<String>,
+        theme: MarkdownTheme? = nil,
+        showsToolbar: Bool = true,
+        wikiLinkResolver: (any WikiLinkResolver)? = nil
+    ) {
         self._text = text
         self.explicitTheme = theme
         self.showsToolbar = showsToolbar
+        self.wikiResolver = wikiLinkResolver
     }
 
     private var theme: MarkdownTheme {
@@ -31,9 +38,38 @@ public struct MarkdownEditor: View {
                 MarkdownEditorToolbar(controller: controller, theme: theme)
                 Divider()
             }
-            MarkdownTextViewRepresentable(text: $text, theme: theme, controller: controller)
+            MarkdownTextViewRepresentable(text: $text, theme: theme, controller: controller, wikiResolver: wikiResolver)
+                .frame(maxWidth: theme.readingWidth ?? .infinity) // reading column
+                .frame(maxWidth: .infinity)
+                .overlay(alignment: .topLeading) { wikiSuggestionsOverlay }
         }
         .background(theme.background)
+    }
+
+    @ViewBuilder private var wikiSuggestionsOverlay: some View {
+        if !controller.wikiSuggestions.isEmpty {
+            VStack(alignment: .leading, spacing: 0) {
+                ForEach(controller.wikiSuggestions.prefix(6), id: \.identifier) { target in
+                    Button {
+                        controller.completeWiki(target)
+                    } label: {
+                        HStack {
+                            Text(target.title).foregroundStyle(theme.textPrimary)
+                            if !target.exists { Text("new").font(.caption2).foregroundStyle(theme.textSecondary) }
+                            Spacer()
+                        }
+                        .padding(.horizontal, 10).padding(.vertical, 6)
+                    }
+                    .buttonStyle(.plain)
+                    Divider()
+                }
+            }
+            .frame(maxWidth: 260, alignment: .leading)
+            .background(theme.surface)
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .overlay(RoundedRectangle(cornerRadius: 8).stroke(theme.border))
+            .padding(8)
+        }
     }
 }
 

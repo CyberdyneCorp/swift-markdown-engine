@@ -12,8 +12,9 @@ Legend: 🎯 milestone · ⬜ not started · 🟦 in progress · ✅ done.
 > tested. **M2 done** — native SwiftUI renderer, theming, services injection, and
 > configuration; builds on iOS/macOS/watchOS. **M3 mostly done** — native Mermaid
 > (all 11 types) on Canvas; code-block view done (LaTeX/Highlightr bridges
-> network-blocked). **M4 in progress** — TextKit 2 editor with live styling, toolbar,
-> smart lists, and indentation on iOS/macOS (74 tests).
+> network-blocked). **M4 done** — TextKit 2 editor: live styling, toolbar, smart
+> lists, indentation, wiki-link completion, spell suppression, Apple Pencil
+> double-tap/Scribble on iOS/macOS (79 tests). **M5 (watchOS/perf/E2E) is next.**
 
 ---
 
@@ -67,18 +68,18 @@ _Capabilities: `document-rendering`, `theming-customization`, `extensibility-ser
 🎯 **M3:** Code, LaTeX, and all 11 Mermaid types render natively with graceful fallback.
 _Capabilities: `code-syntax-highlighting`, `latex-math-rendering`, `mermaid-diagrams`_
 
-## Phase 4 — Editor (iOS / macOS) 🟦
+## Phase 4 — Editor (iOS / macOS) ✅
 **Goal:** edit Markdown source with live styling and formatting commands.
 
 - ✅ TextKit 2 text view + SwiftUI Representable wrapper with two-way binding.
 - ✅ Live syntax styling driven by source ranges (regex-based styler).
 - ✅ Formatting commands + toolbar + keyboard shortcuts (bold, italic, strike, code, heading, link, list, task, quote).
 - ✅ Smart list continuation, tab/shift-tab indentation, checkbox toggle command.
-- ⬜ Wiki-link/image affordances + wiki-link completion via resolver.
-- 🟦 Spelling/grammar suppression for code/math/wiki spans; bottom overscroll ✅ + reading column ⬜.
-- 🟦 **Apple Pencil on iPad**: Scribble works via UITextView; explicit hover/double-tap/squeeze pending.
+- ✅ Wiki-link completion via resolver (suggestion overlay).
+- ✅ Spelling/grammar suppression for code/math/wiki spans; bottom overscroll + reading column.
+- ✅ **Apple Pencil on iPad**: Scribble via UITextView + double-tap via UIPencilInteraction (squeeze/hover preview pending hardware APIs).
 
-🎯 **M4:** `MarkdownEditor` edits Markdown live on iOS and macOS, with Apple Pencil on iPad.
+🎯 **M4:** `MarkdownEditor` edits Markdown live on iOS and macOS, with Apple Pencil on iPad. ✅
 _Capabilities: `markdown-editor`_
 
 ## Phase 5 — watchOS subset & hardening

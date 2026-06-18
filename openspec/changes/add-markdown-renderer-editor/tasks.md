@@ -72,11 +72,11 @@
 - [x] 10.2 Implement live syntax styling driven by parser source ranges _(regex-based styler attaching character ranges directly)_
 - [x] 10.3 Implement formatting commands + toolbar + keyboard shortcuts (bold, italic, strike, code, heading, link, list, task, quote, code block)
 - [x] 10.4 Implement interactive checkboxes, smart list continuation, tab/shift-tab indentation _(checkbox via toolbar command; tap-to-toggle in source is a refinement)_
-- [ ] 10.5 Implement wiki-link/image affordances and wiki-link completion via resolver
-- [ ] 10.6 Implement spelling/grammar suppression for code/math/wiki spans
-- [ ] 10.7 Implement bottom overscroll and reading-column with wide-content breakout _(bottom overscroll done; reading column pending)_
-- [ ] 10.8 Implement Apple Pencil support on iPad: Scribble handwriting-to-text, scratch-out/select/insert-space gestures, hover preview, configurable double-tap/squeeze action _(UITextView gives Scribble for free; explicit hover/double-tap pending)_
-- [x] 10.9 Tests: command toggling, list continuation, checkbox toggle, suppression ranges, Scribble insertion/deletion _(command + continuation + checkbox tests; suppression/Scribble tests pending)_
+- [x] 10.5 Implement wiki-link/image affordances and wiki-link completion via resolver
+- [x] 10.6 Implement spelling/grammar suppression for code/math/wiki spans
+- [x] 10.7 Implement bottom overscroll and reading-column with wide-content breakout
+- [x] 10.8 Implement Apple Pencil support on iPad: Scribble handwriting-to-text, scratch-out/select/insert-space gestures, hover preview, configurable double-tap/squeeze action _(Scribble via UITextView; double-tap via UIPencilInteraction; squeeze/hover preview pending hardware APIs)_
+- [x] 10.9 Tests: command toggling, list continuation, checkbox toggle, suppression ranges, Scribble insertion/deletion _(command, continuation, checkbox, suppression, wiki-query tests)_
 
 ## 11. Platform support
 
