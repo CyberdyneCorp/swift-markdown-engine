@@ -1,0 +1,92 @@
+## 1. Package scaffolding
+
+- [ ] 1.1 Create the `Package.swift` with products `SwiftMarkdownEngine` (core), `MarkdownEditor`, `MarkdownEngineCodeBlocks`, `MarkdownEngineLatex`; platforms iOS 17 / macOS 14 / watchOS 10; Swift 6 tools, strict concurrency on
+- [ ] 1.2 Add the CommonMark spec test suite and GFM example fixtures as test resources
+- [ ] 1.3 Configure CI to run `openspec validate --all --strict`, the spec-conformance gate, and `swift test` on all platforms
+
+## 2. Document model
+
+- [ ] 2.1 Define the `Sendable` value-type AST (`Block`, `Inline`, list/table/code nodes) with UTF-8 source ranges
+- [ ] 2.2 Define extension nodes: inline/block math, mermaid, footnote def/ref, callout, wiki-link, task item, frontmatter
+- [ ] 2.3 Implement `Equatable`/diffing support and a `MarkdownDocument` wrapper exposing frontmatter metadata
+
+## 3. Parser
+
+- [ ] 3.1 Implement CommonMark block parsing (headings, paragraphs, thematic breaks, code blocks, block quotes, lists incl. tight/loose & nesting, HTML blocks)
+- [ ] 3.2 Implement CommonMark inline parsing (emphasis/strong, code spans, links inline+reference, images, autolinks, escapes, breaks, inline HTML)
+- [ ] 3.3 Implement GFM extensions (tables w/ alignment, task items, strikethrough, extended autolinks)
+- [ ] 3.4 Implement math extension parsing with currency false-positive guard
+- [ ] 3.5 Implement mermaid fence recognition
+- [ ] 3.6 Implement frontmatter, footnotes, callouts, wiki-links
+- [ ] 3.7 Implement malformed-input resilience (no crash; literal fallback) and deterministic-parse guarantees
+- [ ] 3.8 Pass the CommonMark + GFM conformance suites; add regression tests for each extension
+
+## 4. Service protocols & configuration
+
+- [ ] 4.1 Define `SyntaxHighlighter`, `LatexRenderer`, `WikiLinkResolver`, `EmbeddedImageProvider` protocols with default no-op/plain implementations
+- [ ] 4.2 Implement `MarkdownServices` container and SwiftUI environment injection
+- [ ] 4.3 Implement `MarkdownConfiguration` (feature toggles, interactivity, code options, reading width)
+
+## 5. Theming
+
+- [ ] 5.1 Implement `MarkdownTheme` semantic tokens with built-in light/dark values and typography scale
+- [ ] 5.2 Implement per-element styling and SwiftUI environment integration
+- [ ] 5.3 Wire theme defaults into code, math, and mermaid subsystems
+
+## 6. Renderer (document-rendering)
+
+- [ ] 6.1 Implement recursive SwiftUI block renderer (headings, paragraphs, quotes, rules, lists, task lists)
+- [ ] 6.2 Implement inline renderer with flow layout interleaving text, links, wiki-links, inline code, inline math
+- [ ] 6.3 Implement GFM table rendering with per-column alignment and horizontal overflow scrolling
+- [ ] 6.4 Implement image rendering via `EmbeddedImageProvider` with loading/failure placeholders and alt-text accessibility
+- [ ] 6.5 Implement interactive checkbox callback path and link-open handler
+- [ ] 6.6 Implement accessibility (heading traits/levels, focusable links, Dynamic Type) and wide-content overflow handling
+- [ ] 6.7 Add snapshot/behavior tests for block, inline, table, and accessibility scenarios
+
+## 7. Code syntax highlighting
+
+- [ ] 7.1 Implement code-block view: distinct surface, whitespace-preserving, horizontal scroll, optional line numbers + copy
+- [ ] 7.2 Implement language alias resolution and unknown-language fallback
+- [ ] 7.3 Implement `MarkdownEngineCodeBlocks` Highlightr bridge with configurable code theme
+- [ ] 7.4 Tests: highlighted vs. plain fallback, alias resolution, core-has-no-dependency check
+
+## 8. LaTeX math rendering
+
+- [ ] 8.1 Implement inline (baseline-flowed) and block (centered) math views via `LatexRenderer`
+- [ ] 8.2 Implement invalid-LaTeX fallback to monospaced source and theme-aware coloring
+- [ ] 8.3 Implement `MarkdownEngineLatex` SwiftMath bridge (UIView/NSView representable)
+- [ ] 8.4 Tests: fraction/superscript rendering, malformed fallback, dark-mode color, core-has-no-dependency check
+
+## 9. Mermaid diagrams
+
+- [ ] 9.1 Port pure-value-type parsers for all 11 diagram types
+- [ ] 9.2 Port/implement layout engines per diagram family
+- [ ] 9.3 Implement SwiftUI Canvas renderers (shapes, edges, subgraphs, self-loops, styling)
+- [ ] 9.4 Implement inline-style + theme-fallback color resolution and light/dark adaptation
+- [ ] 9.5 Implement unsupported-type fallback to highlighted source and diagram overflow scrolling
+- [ ] 9.6 Tests: one parse+render test per diagram type plus fallback and styling cases
+
+## 10. Editor (iOS/macOS)
+
+- [ ] 10.1 Implement the TextKit 2 text view and SwiftUI Representable wrapper with two-way binding
+- [ ] 10.2 Implement live syntax styling driven by parser source ranges
+- [ ] 10.3 Implement formatting commands + toolbar + keyboard shortcuts (bold, italic, strike, code, heading, link, list, task, quote, code block)
+- [ ] 10.4 Implement interactive checkboxes, smart list continuation, tab/shift-tab indentation
+- [ ] 10.5 Implement wiki-link/image affordances and wiki-link completion via resolver
+- [ ] 10.6 Implement spelling/grammar suppression for code/math/wiki spans
+- [ ] 10.7 Implement bottom overscroll and reading-column with wide-content breakout
+- [ ] 10.8 Tests: command toggling, list continuation, checkbox toggle, suppression ranges
+
+## 11. Platform support
+
+- [ ] 11.1 Verify core + renderer compile for iOS, macOS, watchOS
+- [ ] 11.2 Implement watchOS render subset and diagram degradation; exclude the editor target from watchOS
+- [ ] 11.3 Verify off-main-actor parsing and `Sendable` model under strict concurrency
+- [ ] 11.4 Add platform-conditional tests / build matrix
+
+## 12. Documentation & example
+
+- [ ] 12.1 Write README with feature matrix, platform support, and quick-start
+- [ ] 12.2 Add DocC for public API (`MarkdownView`, `MarkdownEditor`, `MarkdownDocument`, `MarkdownTheme`, services)
+- [ ] 12.3 Add an example app demonstrating rendering + editing on iOS/macOS and rendering on watchOS
+- [ ] 12.4 Validate the change (`openspec validate add-markdown-renderer-editor --strict`) and run the full test suite before PR

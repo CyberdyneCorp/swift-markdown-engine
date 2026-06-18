@@ -1,0 +1,4 @@
+schema: spec-driven
+created: 2026-06-18
+goal: Provide a complete native Markdown engine (CommonMark+GFM+extensions) with
+  rendering on all Apple platforms and editing on iOS/macOS
