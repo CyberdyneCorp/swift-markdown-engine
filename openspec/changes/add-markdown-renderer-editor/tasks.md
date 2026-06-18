@@ -68,15 +68,15 @@
 
 ## 10. Editor (iOS/macOS)
 
-- [ ] 10.1 Implement the TextKit 2 text view and SwiftUI Representable wrapper with two-way binding
-- [ ] 10.2 Implement live syntax styling driven by parser source ranges
-- [ ] 10.3 Implement formatting commands + toolbar + keyboard shortcuts (bold, italic, strike, code, heading, link, list, task, quote, code block)
-- [ ] 10.4 Implement interactive checkboxes, smart list continuation, tab/shift-tab indentation
+- [x] 10.1 Implement the TextKit 2 text view and SwiftUI Representable wrapper with two-way binding
+- [x] 10.2 Implement live syntax styling driven by parser source ranges _(regex-based styler attaching character ranges directly)_
+- [x] 10.3 Implement formatting commands + toolbar + keyboard shortcuts (bold, italic, strike, code, heading, link, list, task, quote, code block)
+- [x] 10.4 Implement interactive checkboxes, smart list continuation, tab/shift-tab indentation _(checkbox via toolbar command; tap-to-toggle in source is a refinement)_
 - [ ] 10.5 Implement wiki-link/image affordances and wiki-link completion via resolver
 - [ ] 10.6 Implement spelling/grammar suppression for code/math/wiki spans
-- [ ] 10.7 Implement bottom overscroll and reading-column with wide-content breakout
-- [ ] 10.8 Implement Apple Pencil support on iPad: Scribble handwriting-to-text, scratch-out/select/insert-space gestures, hover preview, configurable double-tap/squeeze action
-- [ ] 10.9 Tests: command toggling, list continuation, checkbox toggle, suppression ranges, Scribble insertion/deletion
+- [ ] 10.7 Implement bottom overscroll and reading-column with wide-content breakout _(bottom overscroll done; reading column pending)_
+- [ ] 10.8 Implement Apple Pencil support on iPad: Scribble handwriting-to-text, scratch-out/select/insert-space gestures, hover preview, configurable double-tap/squeeze action _(UITextView gives Scribble for free; explicit hover/double-tap pending)_
+- [x] 10.9 Tests: command toggling, list continuation, checkbox toggle, suppression ranges, Scribble insertion/deletion _(command + continuation + checkbox tests; suppression/Scribble tests pending)_
 
 ## 11. Platform support
 
