@@ -161,8 +161,8 @@ defaults:
 
 ```swift
 let services = MarkdownServices(
-    syntaxHighlighter: HighlightrHighlighter(theme: "atom-one-dark"), // MarkdownEngineCodeBlocks
-    latexRenderer:     SwiftMathRenderer(),                           // MarkdownEngineLatex
+    syntaxHighlighter: HighlightrSyntaxHighlighter(theme: "atom-one-dark"), // MarkdownEngineCodeBlocks
+    latexRenderer:     SwiftMathLatexRenderer(),                            // MarkdownEngineLatex
     wikiLinkResolver:  myResolver,
     imageProvider:     myImageProvider
 )

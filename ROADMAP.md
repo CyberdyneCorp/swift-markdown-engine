@@ -15,9 +15,9 @@ Legend: 🎯 milestone · ⬜ not started · 🟦 in progress · ✅ done.
 > network-blocked). **M4 done** — TextKit 2 editor: live styling, toolbar, smart
 > lists, indentation, wiki-link completion, spell suppression, Apple Pencil
 > double-tap/Scribble on iOS/macOS. **M5 mostly done** — watchOS subset, concurrency
-> tests, LazyVStack, device-testing docs. **M6 in progress** — DocC catalog, example
-> app, block math via LatexRenderer (82 tests). Remaining: Highlightr/SwiftMath
-> bridges (network-blocked), then 1.0 tag + archive.
+> tests, LazyVStack, device-testing docs. **M3 now complete** — Highlightr code bridge
+> and SwiftMath LaTeX bridge implemented and tested. **M6 in progress** — DocC catalog,
+> example app done (88 tests). Remaining: XCUITest host app, then 1.0 tag + archive.
 
 ---
 
@@ -62,13 +62,13 @@ _Capabilities: `document-rendering`, `theming-customization`, `extensibility-ser
 **Goal:** the differentiators — highlighted code, LaTeX, and native diagrams.
 
 - ✅ Code block view: distinct surface, horizontal scroll, optional line numbers + copy; alias resolution; unknown-language fallback.
-- ⬜ `MarkdownEngineCodeBlocks` Highlightr bridge (configurable code theme) _(needs network to vendor Highlightr)_.
+- ✅ `MarkdownEngineCodeBlocks` Highlightr bridge (configurable code theme).
 - 🟦 Inline + block math views; invalid-LaTeX fallback; theme-aware color _(block math renders via injected LatexRenderer; inline baseline-flow pending; fallback + theme color done)_.
-- ⬜ `MarkdownEngineLatex` SwiftMath bridge _(needs network to vendor SwiftMath)_.
+- ✅ `MarkdownEngineLatex` SwiftMath bridge.
 - ✅ Mermaid: native Canvas renderers for **all 11 types** (flowchart, sequence, pie, state, class, ER, mindmap, gantt, gitGraph, journey, timeline). Subgraph boxes & self-loop curves are a future refinement.
 - ✅ Mermaid inline-style + theme-fallback colors; unsupported-type fallback to highlighted source; overflow scrolling.
 
-🎯 **M3:** Code, LaTeX, and all 11 Mermaid types render natively with graceful fallback.
+🎯 **M3:** Code, LaTeX, and all 11 Mermaid types render natively with graceful fallback. ✅
 _Capabilities: `code-syntax-highlighting`, `latex-math-rendering`, `mermaid-diagrams`_
 
 ## Phase 4 — Editor (iOS / macOS) ✅

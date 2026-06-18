@@ -47,15 +47,15 @@
 
 - [x] 7.1 Implement code-block view: distinct surface, whitespace-preserving, horizontal scroll, optional line numbers + copy
 - [x] 7.2 Implement language alias resolution and unknown-language fallback
-- [ ] 7.3 Implement `MarkdownEngineCodeBlocks` Highlightr bridge with configurable code theme
-- [ ] 7.4 Tests: highlighted vs. plain fallback, alias resolution, core-has-no-dependency check
+- [x] 7.3 Implement `MarkdownEngineCodeBlocks` Highlightr bridge with configurable code theme
+- [x] 7.4 Tests: highlighted vs. plain fallback, alias resolution, core-has-no-dependency check
 
 ## 8. LaTeX math rendering
 
 - [ ] 8.1 Implement inline (baseline-flowed) and block (centered) math views via `LatexRenderer` _(block math renders via injected renderer; inline baseline-flow via text attachment pending)_
 - [x] 8.2 Implement invalid-LaTeX fallback to monospaced source and theme-aware coloring
-- [ ] 8.3 Implement `MarkdownEngineLatex` SwiftMath bridge (UIView/NSView representable) _(network-blocked: vendoring SwiftMath)_
-- [ ] 8.4 Tests: fraction/superscript rendering, malformed fallback, dark-mode color, core-has-no-dependency check _(blocked on the SwiftMath bridge)_
+- [x] 8.3 Implement `MarkdownEngineLatex` SwiftMath bridge (UIView/NSView representable)
+- [x] 8.4 Tests: fraction/superscript rendering, malformed fallback, dark-mode color, core-has-no-dependency check
 
 ## 9. Mermaid diagrams
 

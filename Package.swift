@@ -20,6 +20,11 @@ let package = Package(
         .library(name: "MarkdownEngineCodeBlocks", targets: ["MarkdownEngineCodeBlocks"]),
         .library(name: "MarkdownEngineLatex", targets: ["MarkdownEngineLatex"]),
     ],
+    dependencies: [
+        // Used only by the optional bridge targets; the core stays dependency-free.
+        .package(url: "https://github.com/raspu/Highlightr", from: "2.3.0"),
+        .package(url: "https://github.com/mgriebling/SwiftMath", from: "1.7.3"),
+    ],
     targets: [
         .target(
             name: "SwiftMarkdownEngine",
@@ -32,12 +37,18 @@ let package = Package(
         ),
         .target(
             name: "MarkdownEngineCodeBlocks",
-            dependencies: ["SwiftMarkdownEngine"],
+            dependencies: [
+                "SwiftMarkdownEngine",
+                .product(name: "Highlightr", package: "Highlightr"),
+            ],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .target(
             name: "MarkdownEngineLatex",
-            dependencies: ["SwiftMarkdownEngine"],
+            dependencies: [
+                "SwiftMarkdownEngine",
+                .product(name: "SwiftMath", package: "SwiftMath"),
+            ],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
         .testTarget(
@@ -49,6 +60,11 @@ let package = Package(
         .testTarget(
             name: "MarkdownEditorTests",
             dependencies: ["MarkdownEditor"],
+            swiftSettings: [.swiftLanguageMode(.v6)]
+        ),
+        .testTarget(
+            name: "MarkdownBridgesTests",
+            dependencies: ["MarkdownEngineCodeBlocks", "MarkdownEngineLatex", "SwiftMarkdownEngine"],
             swiftSettings: [.swiftLanguageMode(.v6)]
         ),
     ]

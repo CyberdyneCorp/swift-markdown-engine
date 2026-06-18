@@ -28,9 +28,12 @@ app target.
 Inject the optional bridges to enable real syntax highlighting and LaTeX:
 
 ```swift
+import MarkdownEngineCodeBlocks
+import MarkdownEngineLatex
+
 let services = MarkdownServices(
-    syntaxHighlighter: /* MarkdownEngineCodeBlocks bridge */ nil,
-    latexRenderer:     /* MarkdownEngineLatex bridge */ nil
+    syntaxHighlighter: HighlightrSyntaxHighlighter(theme: "atom-one-dark"),
+    latexRenderer:     SwiftMathLatexRenderer()
 )
 
 MarkdownView(text).markdownServices(services)
