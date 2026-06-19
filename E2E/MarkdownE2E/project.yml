@@ -3,6 +3,7 @@ options:
   bundleIdPrefix: ai.cyberdyne.markdowne2e
   deploymentTarget:
     iOS: "17.0"
+    macOS: "14.0"
   createIntermediateGroups: true
 
 packages:
@@ -10,6 +11,7 @@ packages:
     path: ../..
 
 targets:
+  # ---- iOS ----
   MarkdownE2EApp:
     type: application
     platform: iOS
@@ -21,7 +23,7 @@ targets:
       - package: SwiftMarkdownEngine
         product: MarkdownEditor
     info:
-      path: App/Info.generated.plist
+      path: App/Info.iOS.generated.plist
       properties:
         UILaunchScreen: {}
         UIApplicationSceneManifest:
@@ -43,6 +45,43 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: ai.cyberdyne.markdowne2e.uitests
         TEST_TARGET_NAME: MarkdownE2EApp
+        GENERATE_INFOPLIST_FILE: YES
+        CODE_SIGNING_ALLOWED: NO
+
+  # ---- macOS ----
+  MarkdownE2EApp-mac:
+    type: application
+    platform: macOS
+    sources:
+      - App
+    dependencies:
+      - package: SwiftMarkdownEngine
+        product: SwiftMarkdownEngine
+      - package: SwiftMarkdownEngine
+        product: MarkdownEditor
+    info:
+      path: App/Info.mac.generated.plist
+      properties:
+        NSPrincipalClass: NSApplication
+        NSHighResolutionCapable: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: ai.cyberdyne.markdowne2e.app
+        GENERATE_INFOPLIST_FILE: NO
+        CODE_SIGNING_ALLOWED: NO
+
+  MarkdownE2EUITests-mac:
+    type: bundle.ui-testing
+    platform: macOS
+    sources:
+      - UITests
+    dependencies:
+      - target: MarkdownE2EApp-mac
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: ai.cyberdyne.markdowne2e.uitests
+        TEST_TARGET_NAME: MarkdownE2EApp-mac
+        GENERATE_INFOPLIST_FILE: YES
         CODE_SIGNING_ALLOWED: NO
 
 schemes:
@@ -54,3 +93,11 @@ schemes:
     test:
       targets:
         - MarkdownE2EUITests
+  MarkdownE2E-mac:
+    build:
+      targets:
+        MarkdownE2EApp-mac: all
+        MarkdownE2EUITests-mac: [test]
+    test:
+      targets:
+        - MarkdownE2EUITests-mac

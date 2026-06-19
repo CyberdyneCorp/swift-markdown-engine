@@ -19,13 +19,13 @@ separately; this document defines the flows it must cover and the device matrix.
 
 ## Simulator E2E matrix (CI)
 
-Run with `xcodebuild test` once the host app exists:
+The host app exists at `E2E/MarkdownE2E` (XcodeGen). CI runs these via `xcodebuild test`:
 
-| Device | OS | Purpose |
-|--------|----|---------|
-| iPhone (latest) | iOS 17+ | Phone rendering + editing |
-| iPad (latest) | iPadOS 17+ | Split layout, Scribble (simulated) |
-| Mac (My Mac) | macOS 14+ | Pointer/keyboard editing |
+| Device | OS | Status |
+|--------|----|--------|
+| iPhone (latest) | iOS 17+ | ✅ 6 flows (CI `e2e`) |
+| iPad (latest) | iPadOS 17+ | ✅ 6 flows (CI `e2e`) |
+| Mac (My Mac) | macOS 14+ | ✅ 4 flows (CI `e2e-mac`); the 2 overflow-menu flows are skipped — SwiftUI `Menu` items aren't reliably drivable by XCUITest on macOS |
 
 ### E2E flows to assert
 
