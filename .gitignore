@@ -14,5 +14,9 @@ DerivedData/
 *.xcodeproj/
 *.generated.plist
 
+## Xcode workspace user state (keep contents.xcworkspacedata)
+*.xcworkspace/xcuserdata/
+*.xcworkspace/xcshareddata/
+
 ## macOS
 .DS_Store

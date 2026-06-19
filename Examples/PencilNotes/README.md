@@ -13,13 +13,20 @@ git-ignored.
 brew install xcodegen          # once
 cd Examples/PencilNotes
 xcodegen generate
-open PencilNotes.xcodeproj      # then Run on an iPad simulator or device
+open PencilNotes.xcworkspace    # ← open the WORKSPACE, then Run on an iPad
 ```
+
+> **Open `PencilNotes.xcworkspace`, not `PencilNotes.xcodeproj`.** The engine package
+> lives at the repo root (the parent of this folder). Opening the bare project makes
+> Xcode reach the package through a security-scoped bookmark, which can leave it stuck
+> showing `?` under *Package Dependencies*. The workspace includes the package as a
+> first-class member, so it always resolves. If you ever see a stuck `?`, quit Xcode
+> and `rm -rf ../../.swiftpm` (a stale, git-ignored cache).
 
 Or from the command line:
 
 ```bash
-xcodebuild build -project PencilNotes.xcodeproj -scheme PencilNotes \
+xcodebuild build -workspace PencilNotes.xcworkspace -scheme PencilNotes \
   -destination 'platform=iOS Simulator,name=iPad Pro 11-inch (M4)' CODE_SIGNING_ALLOWED=NO
 ```
 
