@@ -1,32 +1,35 @@
 # PencilNotes — iPad + Apple Pencil example
 
 An iPad-first example app for SwiftMarkdownEngine that showcases the editor with
-**Apple Pencil** next to a live, fully-featured preview. The `.xcodeproj` is generated
-from `project.yml` (via [XcodeGen](https://github.com/yonaskolb/XcodeGen)) and is
-git-ignored.
+**Apple Pencil** next to a live, fully-featured preview. The app's Swift sources live
+here in `App/`; the Xcode project is generated **at the repository root** (next to
+`Package.swift`) via [XcodeGen](https://github.com/yonaskolb/XcodeGen) and is git-ignored.
 
 ![PencilNotes on iPad](screenshot.png)
 
 ## Run
 
 ```bash
-brew install xcodegen          # once
-cd Examples/PencilNotes
-xcodegen generate
-open PencilNotes.xcworkspace    # ← open the WORKSPACE, then Run on an iPad
+brew install xcodegen                       # once
+cd /path/to/swift-markdown-engine           # the REPO ROOT
+xcodegen generate --spec pencilnotes.yml    # writes PencilNotes.xcodeproj at the root
+open PencilNotes.xcodeproj                   # then pick your iPad + team and Run ▶
 ```
 
-> **Open `PencilNotes.xcworkspace`, not `PencilNotes.xcodeproj`.** The engine package
-> lives at the repo root (the parent of this folder). Opening the bare project makes
-> Xcode reach the package through a security-scoped bookmark, which can leave it stuck
-> showing `?` under *Package Dependencies*. The workspace includes the package as a
-> first-class member, so it always resolves. If you ever see a stuck `?`, quit Xcode
-> and `rm -rf ../../.swiftpm` (a stale, git-ignored cache).
+> **Why the project is generated at the repo root:** so it references the engine
+> package with `relativePath = .` (the package is in the *same* folder), exactly like a
+> normal single-package app. If the project instead lived in this subfolder it would
+> reference the package as a parent (`../..`), and Xcode's GUI reaches a parent-folder
+> local package through a security-scoped bookmark that can get stuck showing `?` under
+> *Package Dependencies*. Generating at the root avoids that entirely.
+>
+> If you ever see a stuck `?`, quit Xcode and `rm -rf .swiftpm` (a stale, git-ignored
+> cache), then reopen.
 
-Or from the command line:
+Command-line build (simulator):
 
 ```bash
-xcodebuild build -workspace PencilNotes.xcworkspace -scheme PencilNotes \
+xcodebuild build -project PencilNotes.xcodeproj -scheme PencilNotes \
   -destination 'platform=iOS Simulator,name=iPad Pro 11-inch (M4)' CODE_SIGNING_ALLOWED=NO
 ```
 
