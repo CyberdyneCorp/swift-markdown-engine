@@ -12,20 +12,25 @@ public struct MarkdownEditor: View {
     private let explicitTheme: MarkdownTheme?
     private let showsToolbar: Bool
     private let wikiResolver: (any WikiLinkResolver)?
+    private let pencilDoubleTap: ((MarkdownEditorController) -> Void)?
 
     @Environment(\.colorScheme) private var colorScheme
     @StateObject private var controller = MarkdownEditorController()
 
+    /// - Parameter onPencilDoubleTap: Action invoked on an Apple Pencil double-tap
+    ///   (iPad). Receives the editor's command surface; defaults to toggling bold.
     public init(
         text: Binding<String>,
         theme: MarkdownTheme? = nil,
         showsToolbar: Bool = true,
-        wikiLinkResolver: (any WikiLinkResolver)? = nil
+        wikiLinkResolver: (any WikiLinkResolver)? = nil,
+        onPencilDoubleTap: ((MarkdownEditorController) -> Void)? = nil
     ) {
         self._text = text
         self.explicitTheme = theme
         self.showsToolbar = showsToolbar
         self.wikiResolver = wikiLinkResolver
+        self.pencilDoubleTap = onPencilDoubleTap
     }
 
     private var theme: MarkdownTheme {
@@ -38,7 +43,8 @@ public struct MarkdownEditor: View {
                 MarkdownEditorToolbar(controller: controller, theme: theme)
                 Divider()
             }
-            MarkdownTextViewRepresentable(text: $text, theme: theme, controller: controller, wikiResolver: wikiResolver)
+            MarkdownTextViewRepresentable(text: $text, theme: theme, controller: controller,
+                                          wikiResolver: wikiResolver, pencilDoubleTap: pencilDoubleTap)
                 .frame(maxWidth: theme.readingWidth ?? .infinity) // reading column
                 .frame(maxWidth: .infinity)
                 .overlay(alignment: .topLeading) { wikiSuggestionsOverlay }

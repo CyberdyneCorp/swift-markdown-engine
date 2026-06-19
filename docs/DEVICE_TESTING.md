@@ -56,12 +56,14 @@ build in the release checklist.
 | 6 | Hover preview | Hover the Pencil near the text (Pencil Pro / M2 iPad) | Caret position previews without committing input |
 | 7 | Squeeze | Squeeze the Pencil (Pencil Pro) | The configured squeeze action fires |
 
-Items 1–5 are supported today (Scribble via `UITextView`, double-tap via
-`UIPencilInteraction`). Items 6–7 depend on hover/squeeze hardware APIs and are
-pending.
+Items 1–5 are **implemented**: Scribble (1–4) is provided automatically by `UITextView`
+on iPad; the double-tap (5) is wired via `UIPencilInteraction` and is configurable through
+`MarkdownEditor(text:onPencilDoubleTap:)` (defaults to Bold). Items 6–7 depend on
+hover/squeeze hardware APIs and are pending.
 
-## Device-farm note
+## Automation limits
 
-`xcodebuild test` on a self-hosted runner with a tethered iPad can execute items 1–5
-through Scribble's accessibility path; items 6–7 remain manual. Log any coverage gaps
-in the PR so "device tested" is never overstated.
+None of items 1–7 can be exercised by automated tests: XCUITest cannot synthesize Apple
+Pencil, Scribble, hover, or squeeze input, and CI has no physical iPad. These are
+**manual, on-device** checks — run them on a real iPad before a release and record
+pass/fail in the release checklist. Never report them as "tested" from a CI run.

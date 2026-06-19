@@ -152,7 +152,9 @@ struct MarkdownTextViewRepresentable {
     let theme: MarkdownTheme
     let controller: MarkdownEditorController
     let wikiResolver: (any WikiLinkResolver)?
+    let pencilDoubleTap: ((MarkdownEditorController) -> Void)?
 
+    @MainActor
     func makeCoordinator() -> Coordinator { Coordinator(self) }
 
     @MainActor
@@ -160,6 +162,11 @@ struct MarkdownTextViewRepresentable {
         controller.styler = MarkdownSyntaxStyler(theme: theme)
         controller.textView = textView
         controller.wikiResolver = wikiResolver
+        if let pencilDoubleTap {
+            controller.onPencilDoubleTap = { [weak controller] in
+                if let controller { pencilDoubleTap(controller) }
+            }
+        }
         controller.onChange = { coordinator.parent.text = $0 }
         controller.setText(text, selection: textView.selectedRange)
     }
@@ -167,7 +174,7 @@ struct MarkdownTextViewRepresentable {
     @MainActor
     final class Coordinator: NSObject {
         var parent: MarkdownTextViewRepresentable
-        nonisolated init(_ parent: MarkdownTextViewRepresentable) { self.parent = parent }
+        init(_ parent: MarkdownTextViewRepresentable) { self.parent = parent }
 
         func handleReturn(_ textView: PlatformTextView) -> Bool {
             let text = currentText(textView)
