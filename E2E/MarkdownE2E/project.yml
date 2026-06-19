@@ -32,6 +32,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: ai.cyberdyne.markdowne2e.app
         GENERATE_INFOPLIST_FILE: NO
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         CODE_SIGNING_ALLOWED: NO
 
   MarkdownE2EUITests:
@@ -68,6 +69,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: ai.cyberdyne.markdowne2e.app
         GENERATE_INFOPLIST_FILE: NO
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         CODE_SIGNING_ALLOWED: NO
 
   MarkdownE2EUITests-mac:

@@ -25,6 +25,14 @@ xcodebuild test -project MarkdownE2E.xcodeproj -scheme MarkdownE2E-mac \
 CI runs the same steps (see `.github/workflows/ci.yml`, jobs `e2e` for iPhone/iPad and
 `e2e-mac` for macOS).
 
+## App icon
+
+The example apps use a generated full-bleed Markdown "M↓" icon in
+`App/Assets.xcassets/AppIcon.appiconset` (iOS universal 1024 + the full macOS size set).
+Regenerate it with `python3 AppIconGenerator.py` (requires Pillow). Reuse the same
+asset catalog in your own Xcode app by adding `App/Assets.xcassets` and setting the
+app-icon name to `AppIcon`.
+
 ## What it covers
 
 Six flows, green on **iPhone and iPad** simulators (CI runs both). The editor buffer is
