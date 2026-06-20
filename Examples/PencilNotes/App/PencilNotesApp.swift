@@ -296,7 +296,7 @@ struct RootView: View {
 
     A direct video file plays inline with the native AVKit player:
 
-    ![Sample clip](https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4)
+    ![Sample clip](https://www.w3schools.com/html/mov_bbb.mp4)
 
     ## Image
     Images load from a URL (needs a network connection):
