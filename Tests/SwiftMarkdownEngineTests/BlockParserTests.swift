@@ -49,6 +49,17 @@ final class BlockParserTests: XCTestCase {
         XCTAssertEqual(multi, "a+b")
     }
 
+    func testBlockMathInterruptsParagraphWithoutBlankLine() {
+        // Regression: a `$$…$$` block placed directly under a text line (no blank line)
+        // used to be folded into the paragraph, leaving the `$$` delimiters as literal text.
+        let blocks = parser.parse("A matrix:\n$$\\begin{bmatrix} a & b \\\\ c & d \\end{bmatrix}$$\n").blocks
+        XCTAssertEqual(blocks.count, 2)
+        guard case .paragraph? = blocks.first?.kind else { return XCTFail("first block should be the text paragraph") }
+        guard case .mathBlock(let body)? = blocks.last?.kind else { return XCTFail("second block should be math, not text") }
+        XCTAssertEqual(body, "\\begin{bmatrix} a & b \\\\ c & d \\end{bmatrix}")
+        XCTAssertFalse(body.contains("$"), "math body must not retain the $$ delimiters")
+    }
+
     func testBlockQuote() {
         guard case .blockQuote(let blocks)? = firstBlock("> quoted\n") else { return XCTFail("not quote") }
         guard case .paragraph(let inlines)? = blocks.first?.kind else { return XCTFail("no paragraph") }

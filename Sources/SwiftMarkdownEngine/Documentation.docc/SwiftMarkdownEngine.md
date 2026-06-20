@@ -1,7 +1,12 @@
 # ``SwiftMarkdownEngine``
 
 A fully native Markdown renderer for iOS, macOS, and watchOS — CommonMark + GFM plus
-code, tables, LaTeX math, and Mermaid diagrams, with no WebView.
+code, tables, LaTeX math, Mermaid diagrams, and inline video, with no WebView.
+
+Video: an image whose source is a direct video file (`![](clip.mp4)`) plays inline via
+AVKit, and a linked thumbnail (`[![alt](thumb)](url)`) renders as a tappable preview —
+direct files play in-app while provider URLs (YouTube/Vimeo) open externally, so the
+renderer stays WebView-free.
 
 ## Overview
 

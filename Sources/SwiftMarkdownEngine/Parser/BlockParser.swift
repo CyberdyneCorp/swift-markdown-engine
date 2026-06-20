@@ -370,6 +370,9 @@ struct BlockParser {
         let t = line.trimmedLeft
         if t.hasPrefix("#"), t.prefix(7).contains(" ") || t.allSatisfy({ $0 == "#" }) { return true }
         if t.hasPrefix("```") || t.hasPrefix("~~~") { return true }
+        // A `$$` block opener interrupts a paragraph; otherwise it gets folded into the
+        // preceding text and the inline parser renders the `$$` delimiters as literal text.
+        if mathEnabled, t.hasPrefix("$$") { return true }
         if t.hasPrefix(">") { return true }
         if listMarker(line) != nil { return true }
         return false

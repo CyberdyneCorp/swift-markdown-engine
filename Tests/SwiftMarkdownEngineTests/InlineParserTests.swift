@@ -52,6 +52,19 @@ final class InlineParserTests: XCTestCase {
         if case .image(let src, _, let alt) = img.kind { XCTAssertEqual(src, "a.png"); XCTAssertEqual(alt, "alt") }
     }
 
+    func testLinkedImageBalancesNestedBrackets() {
+        // `[![alt](thumb)](url)` must parse to a link wrapping a single image — the basis
+        // for video thumbnails. Relies on matchBracket balancing the nested [ ].
+        guard case .link(let dest, _, let children)? = inlines("[![Watch](thumb.png)](https://youtu.be/x)").first?.kind else {
+            return XCTFail("expected a link node")
+        }
+        XCTAssertEqual(dest, "https://youtu.be/x")
+        XCTAssertEqual(children.count, 1)
+        guard case .image(let src, _, let alt)? = children.first?.kind else { return XCTFail("link should wrap an image") }
+        XCTAssertEqual(src, "thumb.png")
+        XCTAssertEqual(alt, "Watch")
+    }
+
     func testAutolinkAngleAndBare() {
         XCTAssertTrue(kinds("<https://example.com>").contains { if case .autolink = $0 { return true } else { return false } })
         XCTAssertTrue(kinds("see https://example.com here").contains { if case .autolink = $0 { return true } else { return false } })

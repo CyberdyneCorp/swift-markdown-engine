@@ -6,6 +6,7 @@ struct BlockView: View {
 
     @Environment(\.resolvedMarkdownTheme) private var theme
     @Environment(\.markdownServices) private var services
+    @Environment(\.displayScale) private var displayScale
 
     var body: some View {
         switch block.kind {
@@ -37,25 +38,49 @@ struct BlockView: View {
     }
 
     private func headingView(level: Int, inlines: [InlineNode]) -> some View {
-        inlineText(inlines)
-            .font(theme.headingFont(level))
-            .foregroundStyle(theme.textPrimary)
+        inlineText(inlines, font: theme.headingFont(level))
             .accessibilityAddTraits(.isHeader)
             .accessibilityHeading(headingLevel(level))
             .padding(.top, level <= 2 ? 6 : 2)
     }
 
-    private func inlineText(_ inlines: [InlineNode]) -> some View {
-        // A paragraph that is solely an image renders the image as a block.
-        if inlines.count == 1, case .image(let source, _, let alt) = inlines[0].kind {
-            return AnyView(MarkdownImageView(source: source, alt: alt))
+    private func inlineText(_ inlines: [InlineNode], font: Font? = nil) -> some View {
+        // A block that is solely an image or a linked image renders as media.
+        if inlines.count == 1, let media = mediaView(for: inlines[0]) {
+            return media
         }
+        // The font is baked into the runs (see InlineRenderer.applyBaseFont) so headings
+        // actually render at their heading size; a matching `.font` keeps any non-text
+        // fallback consistent.
+        let resolvedFont = font ?? theme.bodyFont
         return AnyView(
-            InlineRenderer(theme: theme, latexRenderer: services.latexRenderer).text(for: inlines)
-                .font(theme.bodyFont)
+            InlineRenderer(theme: theme, latexRenderer: services.latexRenderer, displayScale: displayScale)
+                .text(for: inlines, baseFont: resolvedFont)
+                .font(resolvedFont)
                 .foregroundStyle(theme.textPrimary)
                 .fixedSize(horizontal: false, vertical: true)
         )
+    }
+
+    /// Renders a solo image / linked image as media: a direct video file as an inline
+    /// player, a linked video thumbnail as a tappable preview, and anything else as a
+    /// plain image. Returns nil for nodes that are not standalone media (so prose,
+    /// including non-video linked images, falls through to normal text rendering).
+    private func mediaView(for node: InlineNode) -> AnyView? {
+        switch node.kind {
+        case .image(let source, _, let alt):
+            if VideoSource.classify(source) == .directFile, let url = URL(string: source) {
+                return AnyView(VideoPlayerView(url: url))
+            }
+            return AnyView(MarkdownImageView(source: source, alt: alt))
+        case .link(let destination, _, let children):
+            guard children.count == 1, case .image(let thumb, _, let alt) = children[0].kind else { return nil }
+            let kind = VideoSource.classify(destination)
+            guard kind != .notVideo else { return nil }
+            return AnyView(VideoThumbnailView(thumbnail: thumb, alt: alt, destination: destination, source: kind))
+        default:
+            return nil
+        }
     }
 
     private func quoteView(_ blocks: [BlockNode]) -> some View {

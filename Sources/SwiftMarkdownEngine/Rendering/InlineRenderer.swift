@@ -10,28 +10,44 @@ struct InlineRenderer {
     /// When present, inline math is rendered as a baseline-flowed image instead of
     /// styled source text.
     var latexRenderer: (any LatexRenderer)?
+    /// The display scale to decode rasterized math at, so it renders at its true size
+    /// (the LaTeX renderer draws at the screen scale; see `makeImage`).
+    var displayScale: CGFloat = 1
 
-    init(theme: MarkdownTheme, latexRenderer: (any LatexRenderer)? = nil) {
+    init(theme: MarkdownTheme, latexRenderer: (any LatexRenderer)? = nil, displayScale: CGFloat = 1) {
         self.theme = theme
         self.latexRenderer = latexRenderer
+        self.displayScale = displayScale
     }
 
-    func attributedString(for inlines: [InlineNode]) -> AttributedString {
+    func attributedString(for inlines: [InlineNode], baseFont: Font? = nil) -> AttributedString {
         var result = AttributedString()
         for node in inlines {
             result.append(render(node, intent: []))
         }
+        if let baseFont { Self.applyBaseFont(baseFont, to: &result) }
         return result
+    }
+
+    /// Stamps `font` onto every run that has no explicit font of its own (e.g. plain
+    /// text and emphasis), while leaving runs that set their own font (inline code)
+    /// untouched. Baking the font into the runs means the resulting `Text` renders at
+    /// the intended size regardless of any outer `.font()` modifier — which is why
+    /// headings must pass their heading font here rather than rely on a wrapper.
+    static func applyBaseFont(_ font: Font, to attr: inout AttributedString) {
+        let ranges = attr.runs.filter { $0.font == nil }.map(\.range)
+        for range in ranges { attr[range].font = font }
     }
 
     /// Builds a SwiftUI `Text` that flows styled runs together with inline math
     /// images (when a `LatexRenderer` is available), interleaving them inline.
-    func text(for inlines: [InlineNode]) -> Text {
+    func text(for inlines: [InlineNode], baseFont: Font? = nil) -> Text {
         var result = Text("")
         var buffer = AttributedString()
 
         func flush() {
             if !buffer.characters.isEmpty {
+                if let baseFont { Self.applyBaseFont(baseFont, to: &buffer) }
                 result = result + Text(buffer)
                 buffer = AttributedString()
             }
@@ -42,7 +58,7 @@ struct InlineRenderer {
                let renderer = latexRenderer,
                let data = renderer.renderToPNG(mathBody, displayMode: false, pointSize: 16,
                                                hexColor: theme.textPrimary.hexString()),
-               let image = makeImage(from: data) {
+               let image = makeImage(from: data, scale: displayScale) {
                 flush()
                 result = result + Text(image)
             } else {

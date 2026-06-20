@@ -56,6 +56,67 @@ final class RenderingTests: XCTestCase {
         XCTAssertNotEqual(MarkdownTheme.light, MarkdownTheme.dark)
     }
 
+    // MARK: - Heading sizing regression (headings rendered at body size)
+
+    private func headingInlines(_ source: String) -> [InlineNode] {
+        guard case .heading(_, let nodes)? = MarkdownParser().parse(source).blocks.first?.kind else { return [] }
+        return nodes
+    }
+
+    func testHeadingFontsAreDistinctPerLevelAndFromBody() {
+        let theme = MarkdownTheme.light
+        for level in 1...6 {
+            XCTAssertNotEqual(theme.headingFont(level), theme.bodyFont,
+                              "Heading level \(level) must not equal the body font")
+        }
+        XCTAssertNotEqual(theme.headingFont(1), theme.headingFont(2))
+        XCTAssertNotEqual(theme.headingFont(2), theme.headingFont(3))
+    }
+
+    func testHeadingRunsCarryHeadingFontNotBody() {
+        // Regression: headings used to render at body size because the body font was
+        // baked into the Text and the heading font (applied to an outer wrapper) lost.
+        let theme = MarkdownTheme.light
+        let renderer = InlineRenderer(theme: theme)
+        let h1 = renderer.attributedString(for: headingInlines("# **Title**"),
+                                           baseFont: theme.headingFont(1))
+        XCTAssertTrue(h1.runs.allSatisfy { $0.font == theme.headingFont(1) },
+                      "Every heading run should carry the heading font")
+        XCTAssertFalse(h1.runs.contains { $0.font == theme.bodyFont },
+                       "No heading run should fall back to the body font")
+    }
+
+    // MARK: - Video URL classification
+
+    func testVideoClassifyDirectFiles() {
+        XCTAssertEqual(VideoSource.classify("https://cdn.example.com/clip.mp4"), .directFile)
+        XCTAssertEqual(VideoSource.classify("https://x.com/a.MOV"), .directFile)            // case-insensitive
+        XCTAssertEqual(VideoSource.classify("https://x.com/stream.m3u8?token=abc"), .directFile) // ignores query
+        XCTAssertEqual(VideoSource.classify("https://x.com/movie.m4v"), .directFile)
+    }
+
+    func testVideoClassifyProviders() {
+        XCTAssertEqual(VideoSource.classify("https://www.youtube.com/watch?v=abc"), .provider)
+        XCTAssertEqual(VideoSource.classify("https://youtu.be/abc"), .provider)
+        XCTAssertEqual(VideoSource.classify("https://m.youtube.com/watch?v=abc"), .provider) // strips m.
+        XCTAssertEqual(VideoSource.classify("https://vimeo.com/12345"), .provider)
+    }
+
+    func testVideoClassifyNonVideo() {
+        XCTAssertEqual(VideoSource.classify("https://example.com/photo.png"), .notVideo)
+        XCTAssertEqual(VideoSource.classify("https://example.com/article"), .notVideo)
+        XCTAssertEqual(VideoSource.classify("not a url at all"), .notVideo)
+    }
+
+    func testBaseFontLeavesInlineCodeFontIntact() {
+        // The base font must not clobber runs that set their own font (inline code).
+        let theme = MarkdownTheme.light
+        let a = InlineRenderer(theme: theme).attributedString(for: inlines("plain `code`"),
+                                                              baseFont: theme.headingFont(2))
+        XCTAssertTrue(a.runs.contains { $0.font == theme.codeFont }, "inline code keeps its font")
+        XCTAssertTrue(a.runs.contains { $0.font == theme.headingFont(2) }, "plain text gets the base font")
+    }
+
     func testViewsInitialize() {
         // Smoke test: views construct without crashing.
         _ = MarkdownView("# Hi\n\nbody")
