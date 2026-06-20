@@ -188,13 +188,117 @@ struct RootView: View {
     > "Make visible what, without you, might perhaps never have been seen."
 
     ## Math
-    The area of a circle is $A = \\pi r^2$.
+    Inline: the area of a circle is $A = \\pi r^2$.
 
-    ## Diagram
+    A 2×2 matrix:
+    $$\\begin{bmatrix} a & b \\\\ c & d \\end{bmatrix}$$
+
+    The Gaussian integral:
+    $$\\int_{0}^{\\infty} e^{-x^{2}}\\,dx = \\frac{\\sqrt{\\pi}}{2}$$
+
+    A derivative (power rule):
+    $$\\frac{d}{dx}\\left( x^{n} \\right) = n\\,x^{n-1}$$
+
+    ## Mindmap
+    ```mermaid
+    mindmap
+      root((PencilNotes))
+        Editing
+          Apple Pencil
+          Scribble
+        Live Preview
+          Mermaid
+          LaTeX
+          Code
+        Themes
+          Light
+          Dark
+    ```
+
+    ## Git graph
+    ```mermaid
+    gitGraph
+      commit
+      branch feature
+      checkout feature
+      commit
+      commit
+      checkout main
+      merge feature
+      commit tag:"v1.0"
+    ```
+
+    ## Flowchart
     ```mermaid
     flowchart LR
       Idea --> Sketch --> Notes --> Share
     ```
+
+    ## Sequence diagram
+    ```mermaid
+    sequenceDiagram
+      participant User
+      participant Editor
+      participant Preview
+      User->>Editor: Type Markdown
+      Editor->>Preview: Update
+      Preview-->>User: Rendered view
+    ```
+
+    ## Class diagram
+    ```mermaid
+    classDiagram
+      class Document
+      class Block
+      class Inline
+      Document : +String text
+      Document : +render()
+      Document --> Block
+      Block --> Inline
+    ```
+
+    ## Gantt
+    ```mermaid
+    gantt
+      title PencilNotes roadmap
+      section Design
+      Sketch : a1, 3d
+      Ink : after a1, 2d
+      section Build
+      Editor : b1, 4d
+      Preview : after b1, 3d
+      Launch : milestone, 1d
+    ```
+
+    ## Use case (UML)
+    Mermaid has no native use-case diagram, so it's modeled as a flowchart —
+    actors as circles, use cases as stadium shapes:
+
+    ```mermaid
+    flowchart LR
+      User((User))
+      Pencil((Apple Pencil))
+      User --> Write([Write a note])
+      User --> Preview([Preview Markdown])
+      User --> Theme([Toggle light or dark])
+      Pencil --> Scribble([Scribble to text])
+      Pencil --> Bold([Double-tap to bold])
+      Preview --> Render([Render math and diagrams])
+    ```
+
+    ## Video
+    A linked thumbnail opens the video (YouTube opens externally — no WebView):
+
+    [![Watch on YouTube](https://img.youtube.com/vi/aqz-KE-bpKQ/hqdefault.jpg)](https://www.youtube.com/watch?v=aqz-KE-bpKQ)
+
+    A direct video file plays inline with a native player:
+
+    ![Sample clip](https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4)
+
+    ## Image
+    Images load from a URL (needs a network connection):
+
+    ![Placeholder scenery](https://picsum.photos/seed/pencilnotes/640/320)
 
     ```swift
     let note = "drawn with a pencil"
