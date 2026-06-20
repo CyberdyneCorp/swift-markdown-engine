@@ -8,10 +8,10 @@
 
 ## 2. WYSIWYG block framework (PencilNotes)
 
-- [ ] 2.1 Add an `EditableBlock` model (id + Markdown fragment) and a document split/join helper that maps the bound Markdown string ↔ ordered fragments
-- [ ] 2.2 Add a `WysiwygEditorView` that renders each block read-only via the existing renderer in a `LazyVStack`, with selection state
-- [ ] 2.3 Insert (`+`) menu, reorder, and delete; write changes back to the shared `@Binding<String>`
-- [ ] 2.4 Add a 3-way mode switch (Raw | Preview | Edit) in PencilNotes; Edit binds to the same text as Raw/Preview
+- [x] 2.1 Add an `EditableBlock` model (id + Markdown fragment) and a document split/join helper that maps the bound Markdown string ↔ ordered fragments
+- [x] 2.2 Add a `WysiwygEditorView` that renders each block read-only via the existing renderer in a `LazyVStack`, with selection state
+- [x] 2.3 Insert (`+`) menu, reorder, and delete; write changes back to the shared `@Binding<String>`
+- [x] 2.4 Add a 3-way mode switch (Raw | Preview | Edit) in PencilNotes; Edit binds to the same text as Raw/Preview
 
 ## 3. Text block visual editing
 

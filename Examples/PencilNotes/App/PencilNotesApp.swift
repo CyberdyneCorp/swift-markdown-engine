@@ -15,11 +15,16 @@ struct PencilNotesApp: App {
 }
 
 struct RootView: View {
-    @Environment(\.horizontalSizeClass) private var sizeClass
     @State private var text = Self.sample
     @State private var isDark = false
     @State private var showHint = true
     @State private var pencilFlash: String?
+    @State private var mode: Mode = .edit
+
+    private enum Mode: String, CaseIterable, Identifiable {
+        case raw = "Raw", preview = "Preview", edit = "Edit"
+        var id: String { rawValue }
+    }
 
     private var theme: MarkdownTheme {
         var t = isDark ? MarkdownTheme.dark : MarkdownTheme.light
@@ -34,13 +39,16 @@ struct RootView: View {
 
             VStack(spacing: 16) {
                 header
-                if sizeClass == .regular {
-                    HStack(spacing: 16) { editorPanel; previewPanel }
-                } else {
-                    TabView {
-                        editorPanel.tabItem { Label("Edit", systemImage: "applepencil") }
-                        previewPanel.tabItem { Label("Preview", systemImage: "eye") }
-                    }
+                Picker("Mode", selection: $mode) {
+                    ForEach(Mode.allCases) { Text($0.rawValue).tag($0) }
+                }
+                .pickerStyle(.segmented)
+                .frame(maxWidth: 420)
+
+                switch mode {
+                case .raw: editorPanel
+                case .preview: previewPanel
+                case .edit: wysiwygPanel
                 }
             }
             .padding(16)
@@ -115,6 +123,12 @@ struct RootView: View {
                 .markdownTheme(theme)
                 .markdownServices(services)
                 .markdownConfiguration(MarkdownConfiguration(interactiveCheckboxes: true))
+        }
+    }
+
+    private var wysiwygPanel: some View {
+        panel(title: "Edit", systemImage: "wand.and.stars") {
+            WysiwygEditorView(text: $text, theme: theme, services: services)
         }
     }
 

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0CEC191CC3BB9D9ECE84F981 /* WysiwygEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 320F0F7976BDB44F8A719C11 /* WysiwygEditorView.swift */; };
 		2BAB6ACA0A5ABAFB7852EBFA /* PencilNotesApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8546F4E0079D31440D4A03F2 /* PencilNotesApp.swift */; };
 		2DA0B7B5F9CAE6E918E741CC /* MarkdownEditor in Frameworks */ = {isa = PBXBuildFile; productRef = C9620B66F518BA8CC451F0EA /* MarkdownEditor */; };
 		2F6153342E2F6648637633C4 /* MarkdownEngineLatex in Frameworks */ = {isa = PBXBuildFile; productRef = A29060BCF88248D350BAB246 /* MarkdownEngineLatex */; };
@@ -17,6 +18,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		320F0F7976BDB44F8A719C11 /* WysiwygEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WysiwygEditorView.swift; sourceTree = "<group>"; };
 		36726DF1D641D56F5C56A7F6 /* PencilNotes.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = PencilNotes.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8546F4E0079D31440D4A03F2 /* PencilNotesApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PencilNotesApp.swift; sourceTree = "<group>"; };
 		8AE6AEB5AF09961FE3FE0BA4 /* YouTubeEmbedder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YouTubeEmbedder.swift; sourceTree = "<group>"; };
@@ -51,6 +53,7 @@
 			children = (
 				96EA481B4C84DDBFD21B4A97 /* Assets.xcassets */,
 				8546F4E0079D31440D4A03F2 /* PencilNotesApp.swift */,
+				320F0F7976BDB44F8A719C11 /* WysiwygEditorView.swift */,
 				8AE6AEB5AF09961FE3FE0BA4 /* YouTubeEmbedder.swift */,
 			);
 			path = App;
@@ -141,6 +144,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				2BAB6ACA0A5ABAFB7852EBFA /* PencilNotesApp.swift in Sources */,
+				0CEC191CC3BB9D9ECE84F981 /* WysiwygEditorView.swift in Sources */,
 				B5B3E9F4A7D13B340355894F /* YouTubeEmbedder.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
