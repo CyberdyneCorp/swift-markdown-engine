@@ -99,11 +99,13 @@ struct RootView: View {
         }
     }
 
-    /// Optional bridges: highlighted code (Highlightr) and rendered LaTeX (SwiftMath).
+    /// Optional bridges: highlighted code (Highlightr), rendered LaTeX (SwiftMath), and an
+    /// inline YouTube/Vimeo player (WKWebView, injected here so the engine stays WebView-free).
     private var services: MarkdownServices {
         MarkdownServices(
             syntaxHighlighter: HighlightrSyntaxHighlighter(theme: isDark ? "atom-one-dark" : "xcode"),
-            latexRenderer: SwiftMathLatexRenderer()
+            latexRenderer: SwiftMathLatexRenderer(),
+            videoEmbedder: YouTubeEmbedder()
         )
     }
 
@@ -287,11 +289,12 @@ struct RootView: View {
     ```
 
     ## Video
-    A linked thumbnail opens the video (YouTube opens externally — no WebView):
+    Tap the thumbnail to play the YouTube video inline (this demo injects a WebView
+    player; the engine core itself stays WebView-free):
 
     [![Watch on YouTube](https://img.youtube.com/vi/aqz-KE-bpKQ/hqdefault.jpg)](https://www.youtube.com/watch?v=aqz-KE-bpKQ)
 
-    A direct video file plays inline with a native player:
+    A direct video file plays inline with the native AVKit player:
 
     ![Sample clip](https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4)
 

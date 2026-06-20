@@ -12,12 +12,14 @@
 		2F6153342E2F6648637633C4 /* MarkdownEngineLatex in Frameworks */ = {isa = PBXBuildFile; productRef = A29060BCF88248D350BAB246 /* MarkdownEngineLatex */; };
 		5FDC21758B5184E25E00F36D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 96EA481B4C84DDBFD21B4A97 /* Assets.xcassets */; };
 		627FA897011E153D6F3152DC /* MarkdownEngineCodeBlocks in Frameworks */ = {isa = PBXBuildFile; productRef = 356158D76E6E22CC72F8712A /* MarkdownEngineCodeBlocks */; };
+		B5B3E9F4A7D13B340355894F /* YouTubeEmbedder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AE6AEB5AF09961FE3FE0BA4 /* YouTubeEmbedder.swift */; };
 		F4BA81E742F6F94E21A764E3 /* SwiftMarkdownEngine in Frameworks */ = {isa = PBXBuildFile; productRef = 92B980C54823A0B5ABDA7AF7 /* SwiftMarkdownEngine */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		36726DF1D641D56F5C56A7F6 /* PencilNotes.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = PencilNotes.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8546F4E0079D31440D4A03F2 /* PencilNotesApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PencilNotesApp.swift; sourceTree = "<group>"; };
+		8AE6AEB5AF09961FE3FE0BA4 /* YouTubeEmbedder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YouTubeEmbedder.swift; sourceTree = "<group>"; };
 		96EA481B4C84DDBFD21B4A97 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -49,6 +51,7 @@
 			children = (
 				96EA481B4C84DDBFD21B4A97 /* Assets.xcassets */,
 				8546F4E0079D31440D4A03F2 /* PencilNotesApp.swift */,
+				8AE6AEB5AF09961FE3FE0BA4 /* YouTubeEmbedder.swift */,
 			);
 			path = App;
 			sourceTree = "<group>";
@@ -138,6 +141,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				2BAB6ACA0A5ABAFB7852EBFA /* PencilNotesApp.swift in Sources */,
+				B5B3E9F4A7D13B340355894F /* YouTubeEmbedder.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
