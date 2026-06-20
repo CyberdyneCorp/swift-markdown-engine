@@ -4,19 +4,25 @@
 Package.resolved
 
 ## Xcode
-xcuserdata/
-*.xcuserstate
-DerivedData/
-*.xcscmblueprint
-*.xccheckout
-
-## xcodegen-generated (regenerated from project.yml)
-*.xcodeproj/
+# The PencilNotes example is opened through the repo-root PencilNotes.xcworkspace.
+# Both the workspace (its contents.xcworkspacedata defines the members) and the
+# committed Examples/PencilNotes/PencilNotes.xcodeproj are tracked so a fresh clone
+# just opens and resolves — see scripts/generate-pencilnotes.sh for regeneration.
+# Other generated projects (e.g. the E2E host) stay ignored.
+/E2E/MarkdownE2E/MarkdownE2E.xcodeproj/
 *.generated.plist
 
-## Xcode workspace user state (keep contents.xcworkspacedata)
+# User-specific / cache state (incl. the auto-generated workspace inside .xcodeproj).
+project.xcworkspace/
 *.xcworkspace/xcuserdata/
 *.xcworkspace/xcshareddata/
+xcuserdata/
+**/xcuserdata/
+DerivedData/
+*.xcuserstate
+*.xcscmblueprint
+*.xccheckout
+build/
 
 ## macOS
 .DS_Store

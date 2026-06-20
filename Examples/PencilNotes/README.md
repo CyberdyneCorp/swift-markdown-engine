@@ -2,34 +2,58 @@
 
 An iPad-first example app for SwiftMarkdownEngine that showcases the editor with
 **Apple Pencil** next to a live, fully-featured preview. The app's Swift sources live
-here in `App/`; the Xcode project is generated **at the repository root** (next to
-`Package.swift`) via [XcodeGen](https://github.com/yonaskolb/XcodeGen) and is git-ignored.
+here in `Examples/PencilNotes/App/`; the Xcode project lives in
+`Examples/PencilNotes/PencilNotes.xcodeproj` and is committed. **You open the app through
+`PencilNotes.xcworkspace` at the repository root.**
 
 ![PencilNotes on iPad](screenshot.png)
 
 ## Run
 
 ```bash
-brew install xcodegen                       # once
-cd /path/to/swift-markdown-engine           # the REPO ROOT
-xcodegen generate --spec pencilnotes.yml    # writes PencilNotes.xcodeproj at the root
-open PencilNotes.xcodeproj                   # then pick your iPad + team and Run ▶
+cd /path/to/swift-markdown-engine     # the REPO ROOT
+open PencilNotes.xcworkspace          # then pick your iPad + team and Run ▶
 ```
 
-> **Why the project is generated at the repo root:** so it references the engine
-> package with `relativePath = .` (the package is in the *same* folder), exactly like a
-> normal single-package app. If the project instead lived in this subfolder it would
-> reference the package as a parent (`../..`), and Xcode's GUI reaches a parent-folder
-> local package through a security-scoped bookmark that can get stuck showing `?` under
-> *Package Dependencies*. Generating at the root avoids that entirely.
+That's it — nothing to regenerate; both the workspace and the project are committed.
+
+### Why a workspace (and not just the `.xcodeproj`)
+
+**Xcode 16+ refuses to resolve a local Swift package that is an _ancestor_ of the
+`.xcodeproj`** — it silently shows a stuck `?` next to the package under *Package
+Dependencies* (Apple's own note:
+<https://developer.apple.com/forums/thread/758317>). Because the engine's `Package.swift`
+sits at the repo root, it is *always* an ancestor of any in-repo app project, so a normal
+`XCLocalSwiftPackageReference` (what `xcodegen` emits) is doomed to the `?`.
+
+The fix is to not reference the package from the project at all. Instead:
+
+- `PencilNotes.xcworkspace` lists **two members**: the engine package (the repo root,
+  `self:`) and this app project. The package is a first-class *workspace member*, not a
+  project dependency, so the ancestor rule never applies.
+- The app target links the engine **products** (`SwiftMarkdownEngine`, `MarkdownEditor`,
+  `MarkdownEngineCodeBlocks`, `MarkdownEngineLatex`) by name; the workspace supplies them.
+- `scripts/generate-pencilnotes.sh` runs `xcodegen` and then strips the project-level
+  local-package reference (`scripts/strip_local_package_ref.py`) so the generated project
+  never reintroduces the offending ancestor reference.
+
+> **Only regenerate when you change `Examples/PencilNotes/project.yml`** (e.g. add a
+> source path or product). Do it with Xcode closed, then commit the result:
 >
-> If you ever see a stuck `?`, quit Xcode and `rm -rf .swiftpm` (a stale, git-ignored
-> cache), then reopen.
+> ```bash
+> brew install xcodegen                  # once
+> cd /path/to/swift-markdown-engine
+> scripts/generate-pencilnotes.sh        # xcodegen generate + strip the ancestor ref
+> ```
+>
+> Do **not** run bare `xcodegen` — that re-adds the ancestor package reference and the `?`
+> comes back. Also avoid opening `Package.swift` directly in Xcode alongside this app; it
+> creates a competing `.swiftpm/xcode/package.xcworkspace` for the same folder.
 
 Command-line build (simulator):
 
 ```bash
-xcodebuild build -project PencilNotes.xcodeproj -scheme PencilNotes \
+xcodebuild build -workspace PencilNotes.xcworkspace -scheme PencilNotes \
   -destination 'platform=iOS Simulator,name=iPad Pro 11-inch (M4)' CODE_SIGNING_ALLOWED=NO
 ```
 

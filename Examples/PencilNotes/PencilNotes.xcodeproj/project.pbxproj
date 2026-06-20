@@ -1,0 +1,352 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		2BAB6ACA0A5ABAFB7852EBFA /* PencilNotesApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8546F4E0079D31440D4A03F2 /* PencilNotesApp.swift */; };
+		2DA0B7B5F9CAE6E918E741CC /* MarkdownEditor in Frameworks */ = {isa = PBXBuildFile; productRef = C9620B66F518BA8CC451F0EA /* MarkdownEditor */; };
+		2F6153342E2F6648637633C4 /* MarkdownEngineLatex in Frameworks */ = {isa = PBXBuildFile; productRef = A29060BCF88248D350BAB246 /* MarkdownEngineLatex */; };
+		5FDC21758B5184E25E00F36D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 96EA481B4C84DDBFD21B4A97 /* Assets.xcassets */; };
+		627FA897011E153D6F3152DC /* MarkdownEngineCodeBlocks in Frameworks */ = {isa = PBXBuildFile; productRef = 356158D76E6E22CC72F8712A /* MarkdownEngineCodeBlocks */; };
+		F4BA81E742F6F94E21A764E3 /* SwiftMarkdownEngine in Frameworks */ = {isa = PBXBuildFile; productRef = 92B980C54823A0B5ABDA7AF7 /* SwiftMarkdownEngine */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		36726DF1D641D56F5C56A7F6 /* PencilNotes.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = PencilNotes.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8546F4E0079D31440D4A03F2 /* PencilNotesApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PencilNotesApp.swift; sourceTree = "<group>"; };
+		96EA481B4C84DDBFD21B4A97 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		D8D16B22A4BB83B8A8D92E0D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F4BA81E742F6F94E21A764E3 /* SwiftMarkdownEngine in Frameworks */,
+				2DA0B7B5F9CAE6E918E741CC /* MarkdownEditor in Frameworks */,
+				627FA897011E153D6F3152DC /* MarkdownEngineCodeBlocks in Frameworks */,
+				2F6153342E2F6648637633C4 /* MarkdownEngineLatex in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		4C3E5234AEB5548526FD5B3C /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				36726DF1D641D56F5C56A7F6 /* PencilNotes.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		864B6548E46886A081A976AB /* App */ = {
+			isa = PBXGroup;
+			children = (
+				96EA481B4C84DDBFD21B4A97 /* Assets.xcassets */,
+				8546F4E0079D31440D4A03F2 /* PencilNotesApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		B4C62C372BCD247AF5D7A479 = {
+			isa = PBXGroup;
+			children = (
+				864B6548E46886A081A976AB /* App */,
+				4C3E5234AEB5548526FD5B3C /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		5B374DCA116EEC7EEA95C7FE /* PencilNotes */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 409FA5685F1EC39A38EDA8BE /* Build configuration list for PBXNativeTarget "PencilNotes" */;
+			buildPhases = (
+				00A808469988E043C4FF9627 /* Sources */,
+				CF2A6F8B436B31C7500DED34 /* Resources */,
+				D8D16B22A4BB83B8A8D92E0D /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = PencilNotes;
+			packageProductDependencies = (
+				92B980C54823A0B5ABDA7AF7 /* SwiftMarkdownEngine */,
+				C9620B66F518BA8CC451F0EA /* MarkdownEditor */,
+				356158D76E6E22CC72F8712A /* MarkdownEngineCodeBlocks */,
+				A29060BCF88248D350BAB246 /* MarkdownEngineLatex */,
+			);
+			productName = PencilNotes;
+			productReference = 36726DF1D641D56F5C56A7F6 /* PencilNotes.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		EDEA3D1DFB0B276491F23CBB /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					5B374DCA116EEC7EEA95C7FE = {
+						DevelopmentTeam = 2C69VJZSNR;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 68DC9CF7A3D6E103E559A53A /* Build configuration list for PBXProject "PencilNotes" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = B4C62C372BCD247AF5D7A479;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 4C3E5234AEB5548526FD5B3C /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				5B374DCA116EEC7EEA95C7FE /* PencilNotes */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		CF2A6F8B436B31C7500DED34 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5FDC21758B5184E25E00F36D /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		00A808469988E043C4FF9627 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				2BAB6ACA0A5ABAFB7852EBFA /* PencilNotesApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		5343319343E140142DEFA69A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = ai.cyberdynecorp.pencilnotes.app;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		651B47F8F53951CBC962E9BE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = ai.cyberdynecorp.pencilnotes.app;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		8CD020A6933438ED5AE68372 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 2C69VJZSNR;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		C097D5B3CBF67EA74DBCD1BF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 2C69VJZSNR;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		409FA5685F1EC39A38EDA8BE /* Build configuration list for PBXNativeTarget "PencilNotes" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				651B47F8F53951CBC962E9BE /* Debug */,
+				5343319343E140142DEFA69A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		68DC9CF7A3D6E103E559A53A /* Build configuration list for PBXProject "PencilNotes" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8CD020A6933438ED5AE68372 /* Debug */,
+				C097D5B3CBF67EA74DBCD1BF /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+
+/* Begin XCSwiftPackageProductDependency section */
+		356158D76E6E22CC72F8712A /* MarkdownEngineCodeBlocks */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MarkdownEngineCodeBlocks;
+		};
+		92B980C54823A0B5ABDA7AF7 /* SwiftMarkdownEngine */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = SwiftMarkdownEngine;
+		};
+		A29060BCF88248D350BAB246 /* MarkdownEngineLatex */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MarkdownEngineLatex;
+		};
+		C9620B66F518BA8CC451F0EA /* MarkdownEditor */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MarkdownEditor;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = EDEA3D1DFB0B276491F23CBB /* Project object */;
+}
