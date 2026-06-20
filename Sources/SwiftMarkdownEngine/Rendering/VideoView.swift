@@ -1,5 +1,7 @@
 import SwiftUI
-#if canImport(AVKit)
+// AVKit's module is importable on watchOS, but `VideoPlayer`/`AVPlayer` are not available
+// there — so gate on the platform, not just `canImport`, and fall back to opening the URL.
+#if canImport(AVKit) && !os(watchOS)
 import AVKit
 #endif
 
@@ -43,7 +45,7 @@ struct VideoPlayerView: View {
     @Environment(\.openURL) private var openURL
 
     var body: some View {
-        #if canImport(AVKit)
+        #if canImport(AVKit) && !os(watchOS)
         AVKitPlayer(url: url)
             .aspectRatio(16.0 / 9.0, contentMode: .fit)
             .frame(maxWidth: .infinity)
@@ -56,7 +58,7 @@ struct VideoPlayerView: View {
     }
 }
 
-#if canImport(AVKit)
+#if canImport(AVKit) && !os(watchOS)
 /// Wraps `VideoPlayer` and holds the `AVPlayer` in state so it is created once rather
 /// than on every body evaluation.
 private struct AVKitPlayer: View {
@@ -87,10 +89,11 @@ struct VideoThumbnailView: View {
 
     @State private var playingInline = false
     @Environment(\.openURL) private var openURL
+    @Environment(\.markdownServices) private var services
 
     var body: some View {
-        if playingInline, let url = URL(string: destination) {
-            VideoPlayerView(url: url)
+        if playingInline, let url = URL(string: destination), let player = inlinePlayer(for: url) {
+            player
         } else {
             Button(action: activate) {
                 MarkdownImageView(source: thumbnail, alt: alt)
@@ -109,12 +112,30 @@ struct VideoThumbnailView: View {
         }
     }
 
-    private func activate() {
+    /// The inline player for the current source: a native player for direct files, or the
+    /// host-injected embedder for provider videos. Nil means "open externally instead".
+    private func inlinePlayer(for url: URL) -> AnyView? {
         switch source {
         case .directFile:
+            return AnyView(VideoPlayerView(url: url))
+        case .provider:
+            return services.videoEmbedder?.embedView(for: url)
+        case .notVideo:
+            return nil
+        }
+    }
+
+    private func activate() {
+        let canPlayInline: Bool
+        switch source {
+        case .directFile: canPlayInline = true
+        case .provider: canPlayInline = services.videoEmbedder != nil
+        case .notVideo: canPlayInline = false
+        }
+        if canPlayInline {
             playingInline = true
-        case .provider, .notVideo:
-            if let url = URL(string: destination) { openURL(url) }
+        } else if let url = URL(string: destination) {
+            openURL(url)  // no inline player available → open in the browser/app
         }
     }
 }

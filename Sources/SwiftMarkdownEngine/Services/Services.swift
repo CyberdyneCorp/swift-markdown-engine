@@ -1,4 +1,15 @@
 import Foundation
+import SwiftUI
+
+/// Supplies an inline player view for a provider video (e.g. YouTube/Vimeo). The core
+/// never embeds a WebView itself — a host app injects an implementation (typically
+/// WebKit-backed) so provider videos can play inline while the core stays WebView-free.
+/// When no embedder is provided, provider videos open externally instead.
+public protocol VideoEmbedder: Sendable {
+    /// Returns a view that plays the provider video at `url` inline, or `nil` to fall
+    /// back to opening the URL externally. Called on the main actor.
+    @MainActor func embedView(for url: URL) -> AnyView?
+}
 
 /// Produces highlighted output for a fenced code block.
 public protocol SyntaxHighlighter: Sendable {

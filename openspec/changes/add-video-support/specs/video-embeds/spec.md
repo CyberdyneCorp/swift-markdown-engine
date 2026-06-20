@@ -54,6 +54,25 @@ The system SHALL render an image node whose source is a direct video file
 - **THEN** the implementation SHALL NOT instantiate a WebView/`WKWebView`; provider videos
   open externally and direct files play via AVKit
 
+### Requirement: Injectable provider embedder
+The system SHALL allow a host app to provide an inline player for provider videos via an
+injected `VideoEmbedder` service, without the core importing a WebView. When an embedder
+is configured, tapping a provider thumbnail SHALL play the video inline; when none is
+configured, the provider video SHALL open externally.
+
+#### Scenario: Embedder configured
+- **WHEN** a `VideoEmbedder` is supplied via `MarkdownServices` and the user taps a
+  provider thumbnail
+- **THEN** the system SHALL render the embedder's view inline in place of the thumbnail
+
+#### Scenario: No embedder configured
+- **WHEN** no `VideoEmbedder` is supplied and the user taps a provider thumbnail
+- **THEN** the system SHALL open the video URL externally
+
+#### Scenario: Core remains WebView-free
+- **WHEN** the core module is compiled
+- **THEN** it SHALL NOT import WebKit; any WebView-backed embedder lives in the host app
+
 ### Requirement: Graceful fallback
 The system SHALL degrade gracefully when inline playback is unavailable on the current
 platform or the media cannot be loaded.

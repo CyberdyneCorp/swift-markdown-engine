@@ -6,7 +6,9 @@ code, tables, LaTeX math, Mermaid diagrams, and inline video, with no WebView.
 Video: an image whose source is a direct video file (`![](clip.mp4)`) plays inline via
 AVKit, and a linked thumbnail (`[![alt](thumb)](url)`) renders as a tappable preview —
 direct files play in-app while provider URLs (YouTube/Vimeo) open externally, so the
-renderer stays WebView-free.
+renderer stays WebView-free. An app can inject a ``VideoEmbedder`` through
+``MarkdownServices`` to play provider videos inline (the WebView then lives in the app,
+not the engine).
 
 ## Overview
 

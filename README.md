@@ -25,7 +25,7 @@ all of it natively in one package, so it works offline, runs fast, and reaches t
 | **Code** | Fenced blocks with language-aware syntax highlighting, line numbers, copy button |
 | **Math** | Inline `$…$` / `\(…\)` and block `$$…$$` / `\[…\]` LaTeX, rendered with CoreText |
 | **Mermaid** | 11 diagram types rendered natively (see below) |
-| **Video** | `![](clip.mp4)` plays inline via AVKit; `[![alt](thumb)](url)` is a tappable thumbnail — direct files (`.mp4`/`.mov`/`.m4v`/`.m3u8`) play in-app, YouTube/Vimeo open externally (still no WebView) |
+| **Video** | `![](clip.mp4)` plays inline via AVKit; `[![alt](thumb)](url)` is a tappable thumbnail. Direct files (`.mp4`/`.mov`/`.m4v`/`.m3u8`) play in-app. YouTube/Vimeo open externally by default — or play inline when the app injects a `VideoEmbedder` (the WebView lives in the app, never the core) |
 | **Extensions** | Footnotes, callouts/admonitions, wiki-links `[[…]]`, YAML frontmatter |
 | **Editor** | TextKit 2 editor with live styling, formatting toolbar, interactive checkboxes (iOS/macOS) |
 | **Theming** | Semantic light/dark tokens, full per-element customization |
