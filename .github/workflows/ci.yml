@@ -27,7 +27,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode_26.app
+        run: |
+          # Pick the newest installed Xcode 26.x, else the newest Xcode, else the default.
+          XCODE=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -1)
+          XCODE=${XCODE:-$(ls -d /Applications/Xcode_*.app 2>/dev/null | sort -V | tail -1)}
+          XCODE=${XCODE:-/Applications/Xcode.app}
+          echo "Selecting $XCODE"
+          sudo xcode-select -s "$XCODE"
+          xcodebuild -version
       - name: Swift build & test
         run: swift test
 
@@ -45,7 +52,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode_26.app
+        run: |
+          # Pick the newest installed Xcode 26.x, else the newest Xcode, else the default.
+          XCODE=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -1)
+          XCODE=${XCODE:-$(ls -d /Applications/Xcode_*.app 2>/dev/null | sort -V | tail -1)}
+          XCODE=${XCODE:-/Applications/Xcode.app}
+          echo "Selecting $XCODE"
+          sudo xcode-select -s "$XCODE"
+          xcodebuild -version
       - name: Build core for ${{ matrix.platform }}
         run: >
           xcodebuild build
@@ -63,7 +77,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode_26.app
+        run: |
+          # Pick the newest installed Xcode 26.x, else the newest Xcode, else the default.
+          XCODE=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -1)
+          XCODE=${XCODE:-$(ls -d /Applications/Xcode_*.app 2>/dev/null | sort -V | tail -1)}
+          XCODE=${XCODE:-/Applications/Xcode.app}
+          echo "Selecting $XCODE"
+          sudo xcode-select -s "$XCODE"
+          xcodebuild -version
       - name: Install xcodegen
         run: brew install xcodegen
       - name: Generate project
@@ -87,7 +108,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Select Xcode
-        run: sudo xcode-select -s /Applications/Xcode_26.app
+        run: |
+          # Pick the newest installed Xcode 26.x, else the newest Xcode, else the default.
+          XCODE=$(ls -d /Applications/Xcode_26*.app 2>/dev/null | sort -V | tail -1)
+          XCODE=${XCODE:-$(ls -d /Applications/Xcode_*.app 2>/dev/null | sort -V | tail -1)}
+          XCODE=${XCODE:-/Applications/Xcode.app}
+          echo "Selecting $XCODE"
+          sudo xcode-select -s "$XCODE"
+          xcodebuild -version
       - name: Install xcodegen
         run: brew install xcodegen
       - name: Generate project
