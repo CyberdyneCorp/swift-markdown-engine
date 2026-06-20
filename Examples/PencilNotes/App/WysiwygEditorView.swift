@@ -54,7 +54,7 @@ struct WysiwygEditorView: View {
 
             if isSelected {
                 controls(for: block)
-                sourceEditor(for: block)   // interim editor — visual per-type editors come next
+                editor(for: block)
             }
         }
         .padding(10)
@@ -79,6 +79,33 @@ struct WysiwygEditorView: View {
             insertButton(label: "Insert below", at: (index(of: block.id) ?? blocks.count - 1) + 1)
         }
         .font(.system(size: 15, weight: .medium))
+    }
+
+    /// Routes text blocks (paragraph/heading/simple quote) to the visual text editor; every
+    /// other block type keeps the interim source editor until its visual editor ships.
+    @ViewBuilder
+    private func editor(for block: Binding<EditableBlock>) -> some View {
+        if isTextBlock(block.wrappedValue.markdown) {
+            TextBlockEditor(markdown: Binding(
+                get: { block.wrappedValue.markdown },
+                set: { block.wrappedValue.markdown = $0; writeBack() }
+            ), theme: theme)
+        } else {
+            sourceEditor(for: block)
+        }
+    }
+
+    private func isTextBlock(_ markdown: String) -> Bool {
+        guard let kind = MarkdownParser().parse(markdown).blocks.first?.kind else { return false }
+        switch kind {
+        case .paragraph, .heading:
+            return true
+        case .blockQuote(let blocks):
+            if blocks.count == 1, case .paragraph = blocks[0].kind { return true }
+            return false
+        default:
+            return false
+        }
     }
 
     private func sourceEditor(for block: Binding<EditableBlock>) -> some View {

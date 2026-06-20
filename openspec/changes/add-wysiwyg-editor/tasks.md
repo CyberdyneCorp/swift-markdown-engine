@@ -15,10 +15,10 @@
 
 ## 3. Text block visual editing
 
-- [ ] 3.1 Inline editable text for paragraph/heading/list/quote/task with focus-to-edit
-- [ ] 3.2 Formatting toolbar: bold, italic, strikethrough, inline code, link (wrap selection in Markdown)
-- [ ] 3.3 Block-type controls: heading level, bullet/ordered list, task checkbox toggle, convert between text kinds
-- [ ] 3.4 Re-render the block on commit; verify Markdown updates correctly
+- [x] 3.1 Inline editable text for paragraph/heading/quote with focus-to-edit (UITextView-backed; list/task editing still uses the source editor)
+- [x] 3.2 Formatting toolbar: bold, italic, strikethrough, inline code, link (wrap selection in Markdown)
+- [ ] 3.3 Block-type controls: heading level ✓ and convert paragraph/heading/quote ✓ done; bullet/ordered list + task checkbox toggle still pending
+- [x] 3.4 Re-render the block on commit; verify Markdown updates correctly
 
 ## 4. Visual table editor
 
