@@ -105,7 +105,7 @@ struct GitGraphView: View {
                 }
             }
         }
-        .frame(width: width, height: height)
+        .diagramFrame(width: width, height: height)
     }
 
     private func position(_ commit: GitCommit, height: CGFloat) -> CGPoint {

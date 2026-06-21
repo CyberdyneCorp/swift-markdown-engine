@@ -78,7 +78,7 @@ struct SequenceDiagramView: View {
             drawMessages(context, columns: columns)
             drawHeaders(context, columns: columns)
         }
-        .frame(width: size.width, height: size.height)
+        .diagramFrame(width: size.width, height: size.height)
     }
 
     private func columnCenters() -> [String: CGFloat] {

@@ -152,6 +152,15 @@ extension MermaidTests {
         XCTAssertEqual(model.entries[1].events, ["Modern"])
     }
 
+    func testDiagramSizingDefaultsToScroll() {
+        // Oversized diagrams scroll by default; fit-to-width is opt-in (used by the Live editor).
+        XCTAssertEqual(MarkdownConfiguration.default.diagramSizing, .scroll)
+        var config = MarkdownConfiguration()
+        config.diagramSizing = .fitToWidth
+        XCTAssertEqual(config.diagramSizing, .fitToWidth)
+        XCTAssertNotEqual(MarkdownConfiguration(diagramSizing: .fitToWidth), MarkdownConfiguration.default)
+    }
+
     func testAllElevenTypesRenderNatively() {
         // None of the 11 supported types should be classified as unknown.
         let headers = ["flowchart TD", "sequenceDiagram", "pie", "stateDiagram-v2",

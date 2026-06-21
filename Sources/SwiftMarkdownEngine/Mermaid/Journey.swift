@@ -79,6 +79,6 @@ struct JourneyView: View {
                 }
             }
         }
-        .frame(width: width, height: 110)
+        .diagramFrame(width: width, height: 110)
     }
 }

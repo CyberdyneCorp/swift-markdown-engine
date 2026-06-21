@@ -7,6 +7,7 @@ struct MermaidView: View {
     let source: String
 
     @Environment(\.resolvedMarkdownTheme) private var theme
+    @Environment(\.markdownConfiguration) private var configuration
 
     var body: some View {
         #if os(watchOS)
@@ -50,10 +51,50 @@ struct MermaidView: View {
         }
     }
 
-    private func scrollable<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
-        ScrollView(.horizontal, showsIndicators: false) {
+    /// In scroll mode, wraps an oversized diagram in a horizontal scroll view. In fit-to-width
+    /// mode the diagram scales itself (see `diagramFrame`), so the content passes through.
+    @ViewBuilder private func scrollable<Content: View>(@ViewBuilder _ content: () -> Content) -> some View {
+        switch configuration.diagramSizing {
+        case .scroll:
+            ScrollView(.horizontal, showsIndicators: false) { content().padding(8) }
+        case .fitToWidth:
             content().padding(8)
         }
     }
     #endif
 }
+
+#if !os(watchOS)
+/// Sizes a fixed-size diagram view. In `.scroll` mode it just applies the natural frame; in
+/// `.fitToWidth` mode it scales the diagram down (never up) to fit the available width, keeping
+/// the whole diagram visible. The natural size is known at the call site, so the fit is computed
+/// synchronously (no preference round-trip) and works inside hosted/measured contexts.
+private struct DiagramFrame: ViewModifier {
+    let natural: CGSize
+    @Environment(\.markdownConfiguration) private var configuration
+
+    func body(content: Content) -> some View {
+        let framed = content.frame(width: natural.width, height: natural.height)
+        switch configuration.diagramSizing {
+        case .scroll:
+            framed
+        case .fitToWidth:
+            GeometryReader { geo in
+                let scale = (natural.width > geo.size.width && natural.width > 0) ? geo.size.width / natural.width : 1
+                framed
+                    .scaleEffect(scale, anchor: .topLeading)
+                    .frame(width: geo.size.width, height: natural.height * scale, alignment: .topLeading)
+            }
+            .aspectRatio(natural.height > 0 ? natural.width / natural.height : 1, contentMode: .fit)
+            .frame(maxWidth: natural.width)   // cap at natural size — never upscale
+        }
+    }
+}
+
+extension View {
+    /// Applies a diagram's natural frame, scaling it to fit the available width in fit-to-width mode.
+    func diagramFrame(width: CGFloat, height: CGFloat) -> some View {
+        modifier(DiagramFrame(natural: CGSize(width: width, height: height)))
+    }
+}
+#endif

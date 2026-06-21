@@ -94,7 +94,7 @@ struct FlowchartView: View {
             drawEdges(context, layout: layout)
             drawNodes(context, layout: layout)
         }
-        .frame(width: layout.size.width, height: layout.size.height)
+        .diagramFrame(width: layout.size.width, height: layout.size.height)
     }
 
     private func drawNodes(_ context: GraphicsContext, layout: FlowchartLayout) {

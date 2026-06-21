@@ -68,9 +68,15 @@ rendering the diagram source as a highlighted code block rather than failing.
 
 ### Requirement: Diagram sizing and overflow
 Diagrams SHALL fit within the available width when possible and SHALL become scrollable
-or zoomable when their intrinsic size exceeds the viewport.
+or zoomable when their intrinsic size exceeds the viewport. The presentation of an
+oversized diagram SHALL be selectable via `MarkdownConfiguration.diagramSizing`
+(`.scroll`, the default, or `.fitToWidth`).
 
 #### Scenario: Oversized diagram scrolls
-- **WHEN** a rendered diagram is wider than the available width
+- **WHEN** a rendered diagram is wider than the available width and `diagramSizing` is `.scroll`
 - **THEN** the diagram SHALL be horizontally scrollable within its own container
+
+#### Scenario: Oversized diagram scales to fit
+- **WHEN** a rendered diagram is wider than the available width and `diagramSizing` is `.fitToWidth`
+- **THEN** the diagram SHALL be uniformly scaled down (never up) so the whole diagram is visible
 

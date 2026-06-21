@@ -78,7 +78,7 @@ struct MindmapView: View {
                              at: CGPoint(x: rect.midX, y: rect.midY))
             }
         }
-        .frame(width: canvasSize(frames).width, height: canvasSize(frames).height)
+        .diagramFrame(width: canvasSize(frames).width, height: canvasSize(frames).height)
     }
 
     private func computeFrames() -> [Int: CGRect] {

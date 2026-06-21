@@ -279,7 +279,8 @@ struct LiveTextView: UIViewRepresentable {
                     let attachment = BlockAttachment(source: source, theme: parent.theme,
                                                      services: parent.services, width: width,
                                                      isMedia: LiveStyler.isMedia(block),
-                                                     scrollable: LiveStyler.isScrollable(block))
+                                                     scrollable: LiveStyler.isScrollable(block),
+                                                     fitToWidth: LiveStyler.isDiagram(block))
                     attachment.measureHeight()
                     attachment.onTap = { [weak self] in self?.parent.onBlockTap(index, source) }
                     let attr = NSMutableAttributedString(attachment: attachment)
@@ -298,10 +299,21 @@ struct LiveTextView: UIViewRepresentable {
             lastRenderedSource = markdown
             syncInlineMath()
             syncListMarkers()
-            styler.collapseMarkers(in: tv, activeParagraph: tv.selectedRange)
+            styler.collapseMarkers(in: tv, active: activeParagraph(tv))
         }
 
         // MARK: Editing & selection
+
+        func textViewDidBeginEditing(_ tv: UITextView) { refreshReveal(tv) }
+        func textViewDidEndEditing(_ tv: UITextView) { refreshReveal(tv) }
+
+        /// Re-applies render/reveal after focus changes: when focused the cursor's line reveals its
+        /// raw Markdown; when unfocused everything renders (so e.g. a heading shows no `#`).
+        @MainActor private func refreshReveal(_ tv: UITextView) {
+            syncInlineMath()
+            syncListMarkers()
+            LiveStyler(theme: parent.theme).collapseMarkers(in: tv, active: activeParagraph(tv))
+        }
 
         func textViewDidChange(_ tv: UITextView) {
             parent.text = reconstructMarkdown(tv)
@@ -365,7 +377,7 @@ struct LiveTextView: UIViewRepresentable {
         func textViewDidChangeSelection(_ tv: UITextView) {
             syncInlineMath()
             syncListMarkers()
-            LiveStyler(theme: parent.theme).collapseMarkers(in: tv, activeParagraph: tv.selectedRange)
+            LiveStyler(theme: parent.theme).collapseMarkers(in: tv, active: activeParagraph(tv))
         }
 
         func didMutateProgrammatically() {
@@ -400,7 +412,7 @@ struct LiveTextView: UIViewRepresentable {
                 if target.location + target.length <= storage.length { storage.addAttributes(attrs, range: target) }
             }
             storage.endEditing()
-            LiveStyler(theme: parent.theme).collapseMarkers(in: tv, activeParagraph: tv.selectedRange)
+            LiveStyler(theme: parent.theme).collapseMarkers(in: tv, active: activeParagraph(tv))
         }
 
         // MARK: Inline math (Typora-style)
@@ -411,26 +423,36 @@ struct LiveTextView: UIViewRepresentable {
         /// cursor, which keeps the editable `$…$` source. Reversible: the source is recovered
         /// from each attachment (tagged with its `$…$` string), so moving the cursor into a
         /// paragraph reveals its math source and moving away re-renders it.
+        /// The paragraph the cursor is in, or nil when the editor is not focused — then nothing
+        /// reveals and the document renders fully (markers/math/markers all hidden), like Preview.
+        private func activeParagraph(_ tv: UITextView) -> NSRange? {
+            guard tv.isFirstResponder, tv.textStorage.length > 0 else { return nil }
+            let loc = max(0, min(tv.selectedRange.location, tv.textStorage.length - 1))
+            return (tv.textStorage.string as NSString).paragraphRange(for: NSRange(location: loc, length: 0))
+        }
+
         @MainActor func syncInlineMath() {
             guard !isSyncing, let tv = textView else { return }
             let storage = tv.textStorage
             guard storage.length > 0 else { return }
             let scale = max(2, tv.traitCollection.displayScale)
             var cursor = min(tv.selectedRange.location, storage.length)
-            let probe = min(cursor, max(0, storage.length - 1))
-            let active = (storage.string as NSString).paragraphRange(for: NSRange(location: probe, length: 0))
+            let active = activeParagraph(tv)
 
             var ops: [(range: NSRange, replacement: NSAttributedString)] = []
             // Reveal: expand inline-math attachments inside the active paragraph back to source.
-            storage.enumerateAttribute(.attachment, in: active) { value, range, _ in
-                guard let math = value as? InlineMathAttachment else { return }
-                ops.append((range, NSAttributedString(string: "$\(math.latex)$",
-                    attributes: [.font: LiveStyler.bodyFont, .foregroundColor: UIColor(parent.theme.accent)])))
+            if let active {
+                storage.enumerateAttribute(.attachment, in: active) { value, range, _ in
+                    guard let math = value as? InlineMathAttachment else { return }
+                    ops.append((range, NSAttributedString(string: "$\(math.latex)$",
+                        attributes: [.font: LiveStyler.bodyFont, .foregroundColor: UIColor(parent.theme.accent)])))
+                }
             }
             // Render: collapse `$…$` source in every other paragraph into an image attachment.
             let whole = NSRange(location: 0, length: storage.length)
             LiveStyler.inlineMathRegex.enumerateMatches(in: storage.string, range: whole) { match, _, _ in
-                guard let match, NSIntersectionRange(match.range, active).length == 0 else { return }
+                guard let match else { return }
+                if let active, NSIntersectionRange(match.range, active).length > 0 { return }
                 let latex = (storage.string as NSString).substring(with: match.range(at: 1))
                 guard let image = inlineMathImage(latex, scale: scale) else { return }
                 let attachment = InlineMathAttachment(latex: latex, image: image, font: LiveStyler.bodyFont)
@@ -462,16 +484,17 @@ struct LiveTextView: UIViewRepresentable {
             let styler = LiveStyler(theme: parent.theme)
             let ns = storage.string as NSString
             var cursor = min(tv.selectedRange.location, storage.length)
-            let probe = min(cursor, max(0, storage.length - 1))
-            let active = ns.paragraphRange(for: NSRange(location: probe, length: 0))
+            let active = activeParagraph(tv)
 
             var ops: [(range: NSRange, replacement: NSAttributedString)] = []
             // Reveal: expand glyph runs on the active line back to their raw marker source.
-            storage.enumerateAttribute(liveListGlyphKey, in: active) { value, range, _ in
-                guard value != nil,
-                      let source = storage.attribute(liveBlockSourceKey, at: range.location, effectiveRange: nil) as? String
-                else { return }
-                ops.append((range, styler.styled(source)))
+            if let active {
+                storage.enumerateAttribute(liveListGlyphKey, in: active) { value, range, _ in
+                    guard value != nil,
+                          let source = storage.attribute(liveBlockSourceKey, at: range.location, effectiveRange: nil) as? String
+                    else { return }
+                    ops.append((range, styler.styled(source)))
+                }
             }
             // Render: collapse bullet/checkbox markers on every other line into a glyph.
             var p = 0
@@ -479,7 +502,7 @@ struct LiveTextView: UIViewRepresentable {
                 let line = ns.paragraphRange(for: NSRange(location: p, length: 0))
                 guard line.length > 0 else { break }
                 p = line.location + line.length
-                if NSIntersectionRange(line, active).length > 0 { continue }
+                if let active, NSIntersectionRange(line, active).length > 0 { continue }
                 if lineHasAttribute(storage, .attachment, in: line) || lineHasAttribute(storage, liveListGlyphKey, in: line) { continue }
                 guard let info = ListLine.parse(ns.substring(with: line)), info.bullet != nil else { continue }
                 let prefix = ns.substring(with: NSRange(location: line.location, length: info.prefixLength))
@@ -623,6 +646,9 @@ final class BlockAttachment: NSTextAttachment {
     /// their inner horizontal scroll view can pan; otherwise the view stays passive and taps
     /// fall through to the text view's block-tap handler.
     let scrollable: Bool
+    /// Diagrams are scaled to fit the column width (via the engine's fit-to-width diagram sizing)
+    /// instead of cropping/scrolling, so the whole diagram is visible.
+    let fitToWidth: Bool
     /// Opens this block's editor; invoked by the interactive hosted view's tap recognizer.
     var onTap: (() -> Void)?
     /// Block height, measured eagerly during rebuild (see `measuredHeight(...)`). The view
@@ -631,9 +657,9 @@ final class BlockAttachment: NSTextAttachment {
     var height: CGFloat
 
     init(source: String, theme: MarkdownTheme, services: MarkdownServices, width: CGFloat,
-         isMedia: Bool, scrollable: Bool) {
+         isMedia: Bool, scrollable: Bool, fitToWidth: Bool) {
         self.source = source; self.theme = theme; self.services = services
-        self.width = width; self.isMedia = isMedia; self.scrollable = scrollable
+        self.width = width; self.isMedia = isMedia; self.scrollable = scrollable; self.fitToWidth = fitToWidth
         self.height = isMedia ? BlockAttachment.mediaHeight(width: width) : 24
         super.init(data: nil, ofType: nil)
     }
@@ -643,11 +669,13 @@ final class BlockAttachment: NSTextAttachment {
     /// front (capped) instead of letting them collapse to one line before the asset loads.
     static func mediaHeight(width: CGFloat) -> CGFloat { min(280, width * 9.0 / 16.0) }
 
-    /// The SwiftUI content for this block, shared by measurement and the hosted view.
+    /// The SwiftUI content for this block, shared by measurement and the hosted view. Diagram
+    /// blocks opt into fit-to-width sizing so a wide diagram scales down rather than cropping.
     @MainActor func content() -> AnyView {
         let view = MarkdownView(source)
             .markdownTheme(theme)
             .markdownServices(services)
+            .markdownConfiguration(MarkdownConfiguration(diagramSizing: fitToWidth ? .fitToWidth : .scroll))
             .padding(.vertical, 4)
         return isMedia
             ? AnyView(view.frame(width: width, height: BlockAttachment.mediaHeight(width: width), alignment: .leading))
@@ -657,7 +685,16 @@ final class BlockAttachment: NSTextAttachment {
     /// Measures the block's intrinsic height with a throwaway hosting controller. Reliable for
     /// synchronous content (text, code, math, Mermaid Canvas); async media uses the floor above.
     @MainActor func measureHeight() {
-        let measured = UIHostingController(rootView: content())
+        // Diagrams display via the engine's fit-to-width container (async layout that doesn't
+        // settle in a one-shot sizeThatFits), so measure their height with the synchronous scroll
+        // layout instead — it reports the diagram's natural height, which bounds the fitted one.
+        let measureView = MarkdownView(source)
+            .markdownTheme(theme)
+            .markdownServices(services)
+            .markdownConfiguration(MarkdownConfiguration(diagramSizing: .scroll))
+            .padding(.vertical, 4)
+            .frame(width: width, alignment: .leading)
+        let measured = UIHostingController(rootView: measureView)
             .sizeThatFits(in: CGSize(width: width, height: .greatestFiniteMagnitude)).height
         let floor = isMedia ? BlockAttachment.mediaHeight(width: width) : 24
         height = max(floor, measured.isFinite ? measured : 0)
@@ -771,6 +808,12 @@ private struct LiveStyler {
         }
     }
 
+    /// Mermaid diagrams are scaled to fit the column width rather than scrolled.
+    static func isDiagram(_ block: BlockNode) -> Bool {
+        if case .mermaid = block.kind { return true }
+        return false
+    }
+
     /// Matches inline `$…$` math (single dollars, not the `$$` of block math).
     static let inlineMathRegex: NSRegularExpression =
         (try? NSRegularExpression(pattern: "(?<!\\$)\\$([^$\\n]+)\\$(?!\\$)")) ?? NSRegularExpression()
@@ -869,17 +912,17 @@ private struct LiveStyler {
         s.addAttribute(liveMarkerFontKey, value: base, range: r)
     }
 
-    /// Hides (collapses) all tagged markers, then reveals those on the paragraph holding the cursor.
-    func collapseMarkers(in tv: UITextView, activeParagraph selection: NSRange) {
+    /// Hides (collapses) all tagged markers, then reveals those on the active paragraph (the line
+    /// holding the cursor). A nil `active` reveals nothing — everything renders, used when the
+    /// editor is not focused so the document reads like the preview.
+    func collapseMarkers(in tv: UITextView, active: NSRange?) {
         let storage = tv.textStorage
         let full = NSRange(location: 0, length: storage.length)
-        let loc = min(selection.location, max(0, storage.length - 1))
-        let active = storage.length == 0 ? NSRange(location: 0, length: 0) : (storage.string as NSString).paragraphRange(for: NSRange(location: loc, length: 0))
         storage.beginEditing()
         storage.enumerateAttribute(liveMarkerKey, in: full) { value, range, _ in
             guard value != nil else { return }
             let base = (storage.attribute(liveMarkerFontKey, at: range.location, effectiveRange: nil) as? UIFont) ?? Self.bodyFont
-            if NSIntersectionRange(range, active).length > 0 {
+            if let active, NSIntersectionRange(range, active).length > 0 {
                 storage.addAttribute(.font, value: base, range: range)
                 storage.addAttribute(.foregroundColor, value: UIColor(theme.textSecondary), range: range)
             } else {

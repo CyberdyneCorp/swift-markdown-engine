@@ -69,6 +69,6 @@ struct TimelineView: View {
                 }
             }
         }
-        .frame(width: width, height: height)
+        .diagramFrame(width: width, height: height)
     }
 }

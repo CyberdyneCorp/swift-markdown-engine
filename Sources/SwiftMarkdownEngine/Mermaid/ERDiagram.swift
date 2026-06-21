@@ -99,6 +99,6 @@ struct ERDiagramView: View {
                              at: CGPoint(x: rect.midX, y: rect.midY))
             }
         }
-        .frame(width: layout.size.width, height: layout.size.height)
+        .diagramFrame(width: layout.size.width, height: layout.size.height)
     }
 }

@@ -122,6 +122,6 @@ struct ClassDiagramView: View {
                 }
             }
         }
-        .frame(width: layout.size.width, height: layout.size.height)
+        .diagramFrame(width: layout.size.width, height: layout.size.height)
     }
 }
