@@ -146,6 +146,7 @@ private let liveBlockSourceKey = NSAttributedString.Key("liveBlockSource")
 private let liveBlockIndexKey = NSAttributedString.Key("liveBlockIndex")
 private let liveMarkerKey = NSAttributedString.Key("liveMarker")
 private let liveMarkerFontKey = NSAttributedString.Key("liveMarkerFont")
+private let liveListGlyphKey = NSAttributedString.Key("liveListGlyph")
 
 /// A parsed list-item line: its marker, indentation, optional checkbox, and where the body starts.
 /// Powers Enter-continuation, Tab indentation, and checkbox toggling in the Live editor.
@@ -296,6 +297,7 @@ struct LiveTextView: UIViewRepresentable {
             tv.selectedRange = NSRange(location: min(selected.location, result.length), length: 0)
             lastRenderedSource = markdown
             syncInlineMath()
+            syncListMarkers()
             styler.collapseMarkers(in: tv, activeParagraph: tv.selectedRange)
         }
 
@@ -362,6 +364,7 @@ struct LiveTextView: UIViewRepresentable {
 
         func textViewDidChangeSelection(_ tv: UITextView) {
             syncInlineMath()
+            syncListMarkers()
             LiveStyler(theme: parent.theme).collapseMarkers(in: tv, activeParagraph: tv.selectedRange)
         }
 
@@ -402,14 +405,14 @@ struct LiveTextView: UIViewRepresentable {
 
         // MARK: Inline math (Typora-style)
 
-        private var isSyncingMath = false
+        private var isSyncing = false
 
         /// Renders `$…$` math as inline images on every paragraph except the one holding the
         /// cursor, which keeps the editable `$…$` source. Reversible: the source is recovered
         /// from each attachment (tagged with its `$…$` string), so moving the cursor into a
         /// paragraph reveals its math source and moving away re-renders it.
         @MainActor func syncInlineMath() {
-            guard !isSyncingMath, let tv = textView else { return }
+            guard !isSyncing, let tv = textView else { return }
             let storage = tv.textStorage
             guard storage.length > 0 else { return }
             let scale = max(2, tv.traitCollection.displayScale)
@@ -438,7 +441,7 @@ struct LiveTextView: UIViewRepresentable {
             }
             guard !ops.isEmpty else { return }
 
-            isSyncingMath = true
+            isSyncing = true
             storage.beginEditing()
             for op in ops.sorted(by: { $0.range.location > $1.range.location }) {
                 storage.replaceCharacters(in: op.range, with: op.replacement)
@@ -446,7 +449,79 @@ struct LiveTextView: UIViewRepresentable {
             }
             storage.endEditing()
             tv.selectedRange = NSRange(location: max(0, min(cursor, storage.length)), length: 0)
-            isSyncingMath = false
+            isSyncing = false
+        }
+
+        /// Renders bullet/checkbox list markers as glyphs (`•`, `☐`, `☑`) on every line except the
+        /// one holding the cursor, which reveals the editable raw `- [ ] ` source. Reversible like
+        /// `syncInlineMath`: each glyph run is tagged with its raw marker for reconstruction.
+        @MainActor func syncListMarkers() {
+            guard !isSyncing, let tv = textView else { return }
+            let storage = tv.textStorage
+            guard storage.length > 0 else { return }
+            let styler = LiveStyler(theme: parent.theme)
+            let ns = storage.string as NSString
+            var cursor = min(tv.selectedRange.location, storage.length)
+            let probe = min(cursor, max(0, storage.length - 1))
+            let active = ns.paragraphRange(for: NSRange(location: probe, length: 0))
+
+            var ops: [(range: NSRange, replacement: NSAttributedString)] = []
+            // Reveal: expand glyph runs on the active line back to their raw marker source.
+            storage.enumerateAttribute(liveListGlyphKey, in: active) { value, range, _ in
+                guard value != nil,
+                      let source = storage.attribute(liveBlockSourceKey, at: range.location, effectiveRange: nil) as? String
+                else { return }
+                ops.append((range, styler.styled(source)))
+            }
+            // Render: collapse bullet/checkbox markers on every other line into a glyph.
+            var p = 0
+            while p < storage.length {
+                let line = ns.paragraphRange(for: NSRange(location: p, length: 0))
+                guard line.length > 0 else { break }
+                p = line.location + line.length
+                if NSIntersectionRange(line, active).length > 0 { continue }
+                if lineHasAttribute(storage, .attachment, in: line) || lineHasAttribute(storage, liveListGlyphKey, in: line) { continue }
+                guard let info = ListLine.parse(ns.substring(with: line)), info.bullet != nil else { continue }
+                let prefix = ns.substring(with: NSRange(location: line.location, length: info.prefixLength))
+                ops.append((NSRange(location: line.location, length: info.prefixLength), listGlyph(info, source: prefix)))
+            }
+            guard !ops.isEmpty else { return }
+
+            isSyncing = true
+            storage.beginEditing()
+            for op in ops.sorted(by: { $0.range.location > $1.range.location }) {
+                storage.replaceCharacters(in: op.range, with: op.replacement)
+                if op.range.location < cursor { cursor += op.replacement.length - op.range.length }
+            }
+            storage.endEditing()
+            tv.selectedRange = NSRange(location: max(0, min(cursor, storage.length)), length: 0)
+            isSyncing = false
+        }
+
+        private func lineHasAttribute(_ storage: NSTextStorage, _ key: NSAttributedString.Key, in range: NSRange) -> Bool {
+            var found = false
+            storage.enumerateAttribute(key, in: range) { v, _, stop in if v != nil { found = true; stop.pointee = true } }
+            return found
+        }
+
+        /// The glyph that replaces a bullet/checkbox marker, tagged with its raw source so the
+        /// active-line reveal and Markdown reconstruction can recover it.
+        private func listGlyph(_ info: ListLine, source: String) -> NSAttributedString {
+            let glyph: String, color: UIColor
+            if info.checkMarkOffset != nil {
+                let checked = source.lowercased().contains("[x]")
+                glyph = checked ? "☑" : "☐"
+                color = checked ? .systemGreen : UIColor(parent.theme.textSecondary)
+            } else {
+                glyph = "•"; color = UIColor(parent.theme.accent)
+            }
+            let attr = NSMutableAttributedString(string: info.indent + glyph + " ",
+                attributes: [.font: UIFont.systemFont(ofSize: LiveStyler.bodyFont.pointSize, weight: .semibold),
+                             .foregroundColor: color])
+            let full = NSRange(location: 0, length: attr.length)
+            attr.addAttribute(liveListGlyphKey, value: true, range: full)
+            attr.addAttribute(liveBlockSourceKey, value: source, range: full)
+            return attr
         }
 
         @MainActor private func inlineMathImage(_ latex: String, scale: CGFloat) -> UIImage? {
@@ -482,6 +557,7 @@ struct LiveTextView: UIViewRepresentable {
             guard let position = tv.closestPosition(to: point) else { return }
             let index = tv.offset(from: tv.beginningOfDocument, to: position)
             let storage = tv.textStorage
+            if toggleGlyphCheckboxIfTapped(tv, at: index) { return }
             if toggleCheckboxIfTapped(tv, at: index) { return }
             for probe in [index, max(0, index - 1)] where probe < storage.length {
                 // Scrollable blocks have an interactive hosted view that handles its own tap.
@@ -509,6 +585,26 @@ struct LiveTextView: UIViewRepresentable {
             storage.replaceCharacters(in: NSRange(location: markLocation, length: 1),
                                       with: bodyText(current.lowercased() == "x" ? " " : "x"))
             tv.selectedRange = NSRange(location: lineRange.location + info.prefixLength, length: 0)
+            afterProgrammaticEdit()
+            return true
+        }
+
+        /// Toggles a checkbox rendered as a `☐`/`☑` glyph (an inactive checklist line). The glyph
+        /// run carries its raw marker source; we flip it and reveal the (now active) raw line.
+        @MainActor private func toggleGlyphCheckboxIfTapped(_ tv: UITextView, at index: Int) -> Bool {
+            let storage = tv.textStorage
+            guard index < storage.length else { return false }
+            var runRange = NSRange()
+            guard storage.attribute(liveListGlyphKey, at: index, effectiveRange: &runRange) != nil,
+                  let source = storage.attribute(liveBlockSourceKey, at: index, effectiveRange: nil) as? String
+            else { return false }
+            let lower = source.lowercased()
+            guard lower.contains("[x]") || source.contains("[ ]") else { return false }
+            let toggled = lower.contains("[x]")
+                ? source.replacingOccurrences(of: "[x]", with: "[ ]").replacingOccurrences(of: "[X]", with: "[ ]")
+                : source.replacingOccurrences(of: "[ ]", with: "[x]")
+            storage.replaceCharacters(in: runRange, with: LiveStyler(theme: parent.theme).styled(toggled))
+            tv.selectedRange = NSRange(location: runRange.location + (toggled as NSString).length, length: 0)
             afterProgrammaticEdit()
             return true
         }
