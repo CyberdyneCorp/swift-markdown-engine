@@ -25,7 +25,7 @@ struct LiveEditorView: View {
             editing = EditingBlock(index: index, source: source)
         }
         .sheet(item: $editing) { block in
-            BlockSourceSheet(source: block.source, theme: theme) { newSource in
+            BlockEditSheet(source: block.source, theme: theme, services: services) { newSource in
                 replaceBlock(at: block.index, with: newSource)
             }
         }
@@ -40,22 +40,25 @@ struct LiveEditorView: View {
     }
 }
 
-/// A simple sheet to edit one block's Markdown source (Phase-1 block editing).
-private struct BlockSourceSheet: View {
+/// Edits one block with its per-type visual editor (Phase 2), with a live preview above.
+private struct BlockEditSheet: View {
     @State var source: String
     let theme: MarkdownTheme
+    let services: MarkdownServices
     let onSave: (String) -> Void
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {
-                MarkdownView(source).markdownTheme(theme).padding()
-                Divider()
-                TextEditor(text: $source)
-                    .font(.system(.callout, design: .monospaced))
-                    .padding(8)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 12) {
+                    MarkdownView(source).markdownTheme(theme).markdownServices(services)
+                    Divider()
+                    BlockEditorView(markdown: $source, theme: theme)
+                }
+                .padding()
             }
+            .background(theme.background)
             .navigationTitle("Edit block")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
@@ -101,7 +104,7 @@ struct LiveTextView: UIViewRepresentable {
         private let parent: LiveTextView
         weak var textView: UITextView?
         var lastRenderedSource: String = "\u{0}"   // sentinel so first updateUIView doesn't rebuild over makeUIView
-        private var blockRanges: [(range: NSRange, index: Int, source: String)] = []
+        private var generation = 0                 // bumped per rebuild; stale async renders are dropped
 
         init(_ parent: LiveTextView) { self.parent = parent }
 
@@ -109,23 +112,25 @@ struct LiveTextView: UIViewRepresentable {
 
         @MainActor func rebuild(_ markdown: String) {
             guard let tv = textView else { return }
+            generation += 1
+            let gen = generation
             let styler = LiveStyler(theme: parent.theme)
             let result = NSMutableAttributedString()
-            blockRanges = []
             let width = max(240, tv.bounds.width - 24)
+            var pending: [(attachment: NSTextAttachment, source: String)] = []
             for (i, block) in MarkdownParser().parse(markdown).blocks.enumerated() {
                 if LiveStyler.isTextBlock(block) {
                     result.append(styler.styled(block.markdown()))
                 } else {
                     let source = block.markdown()
                     let attachment = NSTextAttachment()
-                    attachment.image = renderBlock(source, width: width) ?? UIImage()
+                    attachment.image = Self.placeholder(width: width, theme: parent.theme)  // filled in async
                     let attr = NSMutableAttributedString(attachment: attachment)
                     let r = NSRange(location: 0, length: attr.length)
                     attr.addAttribute(liveBlockSourceKey, value: source, range: r)
                     attr.addAttribute(liveBlockIndexKey, value: i, range: r)
-                    blockRanges.append((NSRange(location: result.length, length: attr.length), i, source))
                     result.append(attr)
+                    pending.append((attachment, source))
                 }
                 result.append(NSAttributedString(string: "\n\n",
                                                   attributes: [.font: LiveStyler.bodyFont,
@@ -136,6 +141,38 @@ struct LiveTextView: UIViewRepresentable {
             tv.selectedRange = NSRange(location: min(selected.location, result.length), length: 0)
             lastRenderedSource = markdown
             styler.applyMarkerReveal(in: tv, activeParagraph: tv.selectedRange)
+            // Render block previews incrementally so the text shows immediately and a doc with
+            // many diagrams doesn't hang on open.
+            renderNext(pending, width: width, generation: gen, at: 0)
+        }
+
+        @MainActor private func renderNext(_ pending: [(attachment: NSTextAttachment, source: String)],
+                                           width: CGFloat, generation gen: Int, at index: Int) {
+            guard gen == generation, index < pending.count, let tv = textView else { return }
+            let item = pending[index]
+            if let image = renderBlock(item.source, width: width) {
+                item.attachment.image = image
+                let storage = tv.textStorage
+                storage.enumerateAttribute(.attachment, in: NSRange(location: 0, length: storage.length)) { value, range, stop in
+                    if (value as AnyObject) === item.attachment {
+                        storage.beginEditing()
+                        storage.edited(.editedAttributes, range: range, changeInLength: 0)
+                        storage.endEditing()
+                        stop.pointee = true
+                    }
+                }
+            }
+            DispatchQueue.main.async { [weak self] in
+                self?.renderNext(pending, width: width, generation: gen, at: index + 1)
+            }
+        }
+
+        private static func placeholder(width: CGFloat, theme: MarkdownTheme) -> UIImage {
+            let size = CGSize(width: max(1, width), height: 44)
+            return UIGraphicsImageRenderer(size: size).image { _ in
+                UIColor(theme.surface).setFill()
+                UIBezierPath(roundedRect: CGRect(origin: .zero, size: size), cornerRadius: 8).fill()
+            }
         }
 
         @MainActor private func renderBlock(_ source: String, width: CGFloat) -> UIImage? {
