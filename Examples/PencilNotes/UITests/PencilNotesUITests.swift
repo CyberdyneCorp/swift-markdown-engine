@@ -112,6 +112,61 @@ final class PencilNotesUITests: XCTestCase {
                       "Live editor did not show the sample content")
     }
 
+    func testLiveToolbarPresent() {
+        let app = launch()
+        select(mode: "Live", in: app)
+        XCTAssertTrue(app.buttons["Bold"].waitForExistence(timeout: 12), "Live toolbar Bold missing")
+        XCTAssertTrue(app.buttons["Italic"].exists, "Live toolbar Italic missing")
+        XCTAssertTrue(app.buttons["Strikethrough"].exists, "Live toolbar Strikethrough missing")
+        XCTAssertTrue(app.buttons["Code"].exists, "Live toolbar Code missing")
+        XCTAssertTrue(app.buttons["Link"].exists, "Live toolbar Link missing")
+        XCTAssertTrue(app.buttons["Insert"].exists, "Live toolbar Insert missing")
+    }
+
+    func testLiveTypingReconstructsSource() {
+        let app = launch()
+        select(mode: "Live", in: app)
+        let editor = app.textViews.firstMatch
+        XCTAssertTrue(editor.waitForExistence(timeout: 12))
+        // Tap near the top (heading/intro text) to focus the keyboard — the center of the
+        // document is a rendered block image, which isn't editable text.
+        editor.coordinate(withNormalizedOffset: CGVector(dx: 0.15, dy: 0.03)).tap()
+        editor.typeText("ZZZUNIQUEMARK")
+        // Round-trips to the shared Markdown — visible in Raw mode.
+        select(mode: "Raw", in: app)
+        let raw = app.textViews.firstMatch
+        XCTAssertTrue(raw.waitForExistence(timeout: 6))
+        XCTAssertTrue((raw.value as? String ?? "").contains("ZZZUNIQUEMARK"),
+                      "text typed in Live did not reach the source")
+    }
+
+    func testLiveInsertBlockUpdatesSource() {
+        let app = launch()
+        select(mode: "Live", in: app)
+        XCTAssertTrue(app.buttons["Insert"].waitForExistence(timeout: 12))
+        app.buttons["Insert"].tap()
+        let table = app.buttons["Table"]
+        XCTAssertTrue(table.waitForExistence(timeout: 6), "Insert menu missing Table")
+        table.tap()
+        select(mode: "Raw", in: app)
+        let raw = app.textViews.firstMatch
+        XCTAssertTrue(raw.waitForExistence(timeout: 6))
+        XCTAssertTrue((raw.value as? String ?? "").contains("| A | B |"),
+                      "inserted table did not reach the source")
+    }
+
+    func testLiveToolbarActionsDoNotCrash() {
+        let app = launch()
+        select(mode: "Live", in: app)
+        let editor = app.textViews.firstMatch
+        XCTAssertTrue(editor.waitForExistence(timeout: 12))
+        editor.coordinate(withNormalizedOffset: CGVector(dx: 0.15, dy: 0.03)).tap()
+        for label in ["Bold", "Italic", "Strikethrough", "Code", "Link"] where app.buttons[label].exists {
+            app.buttons[label].tap()
+        }
+        XCTAssertTrue(editor.exists, "Live editor disappeared after toolbar actions (possible crash)")
+    }
+
     // MARK: - Diagram builders (Phase 2)
 
     func testInsertPieChartOpensVisualBuilder() {
