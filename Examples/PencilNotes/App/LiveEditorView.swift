@@ -42,7 +42,9 @@ struct LiveEditorView: View {
                 tb("bold", "Bold") { controller.wrap("**", "**") }
                 tb("italic", "Italic") { controller.wrap("*", "*") }
                 tb("strikethrough", "Strikethrough") { controller.wrap("~~", "~~") }
+                tb("highlighter", "Highlight") { controller.wrap("==", "==") }
                 tb("chevron.left.forwardslash.chevron.right", "Code") { controller.wrap("`", "`") }
+                tb("function", "Inline math") { controller.wrap("$", "$") }
                 tb("link", "Link") { controller.wrap("[", "](https://)") }
                 Divider().frame(height: 18)
                 tbInsertMenu
@@ -548,6 +550,10 @@ private struct LiveStyler {
             s.addAttribute(.font, value: UIFont.monospacedSystemFont(ofSize: Self.bodyFont.pointSize, weight: .regular), range: inner)
             s.addAttribute(.foregroundColor, value: accent, range: inner)
         }
+        stylePaired(result, "(==)(.+?)(==)") { s, inner in
+            s.addAttribute(.backgroundColor, value: UIColor.systemYellow.withAlphaComponent(0.35), range: inner)
+        }
+        styleLinks(result)
         // Hint that `$…$` is editable math source (shown only on the active line; elsewhere the
         // span is replaced by a rendered image — see Coordinator.syncInlineMath).
         Self.inlineMathRegex.enumerateMatches(in: result.string, range: NSRange(location: 0, length: ns.length)) { m, _, _ in
@@ -555,6 +561,19 @@ private struct LiveStyler {
             result.addAttribute(.foregroundColor, value: accent, range: m.range)
         }
         return result
+    }
+
+    /// Renders `[text](url)` as styled, underlined link text; the `[`, `](url)` syntax is tagged
+    /// so it collapses off the active line (revealed for editing when the cursor is on the line).
+    private func styleLinks(_ s: NSMutableAttributedString) {
+        regex("(?<!\\!)\\[([^\\]]+)\\]\\(([^)]+)\\)").enumerateMatches(in: s.string, range: NSRange(location: 0, length: (s.string as NSString).length)) { m, _, _ in
+            guard let m, let full = range(m, 0), let text = range(m, 1) else { return }
+            s.addAttribute(.foregroundColor, value: accent, range: text)
+            s.addAttribute(.underlineStyle, value: NSUnderlineStyle.single.rawValue, range: text)
+            tagMarker(s, NSRange(location: full.location, length: text.location - full.location))   // "["
+            let afterText = text.location + text.length
+            tagMarker(s, NSRange(location: afterText, length: full.location + full.length - afterText))  // "](url)"
+        }
     }
 
     private func styleInline(_ s: NSMutableAttributedString, _ pattern: String, trait: UIFontDescriptor.SymbolicTraits) {

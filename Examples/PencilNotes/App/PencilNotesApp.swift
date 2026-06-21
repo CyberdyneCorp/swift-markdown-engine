@@ -202,6 +202,10 @@ struct RootView: View {
     Tap into the editor and **write with your Apple Pencil** — Scribble turns
     handwriting into text. Try a *double-tap* to toggle bold.
 
+    Format text as **bold**, *italic*, ~~strikethrough~~, ==highlight==, `code`,
+    or a [link](https://example.com). Inline math like $e^{i\\pi} + 1 = 0$ renders
+    right in the sentence.
+
     ## Checklist
     - [x] Set up the easel
     - [ ] Sketch the harbor
