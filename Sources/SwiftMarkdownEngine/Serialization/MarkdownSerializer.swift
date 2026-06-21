@@ -80,16 +80,20 @@ enum MarkdownSerializer {
             case .bullet: marker = "- "
             case .ordered: marker = "\(number). "; number += 1
             }
-            // No trailing space: a task item's body keeps its own leading space after the
-            // checkbox, so adding one here would double it on re-parse.
-            let checkbox = item.checkbox.map { $0 == .checked ? "[x]" : "[ ]" } ?? ""
+            // Checkbox carries its own trailing space; strip a single leading space the parser
+            // may have left in the body so the result is exactly `- [x] text` either way (works
+            // for both re-parsed and programmatically-built task items).
+            let checkbox = item.checkbox.map { $0 == .checked ? "[x] " : "[ ] " } ?? ""
             // Join the item's own blocks with single newlines in a tight list so a nested
             // list immediately follows its paragraph (a blank line would un-nest it).
             let body = item.blocks.map(block).joined(separator: list.isTight ? "\n" : "\n\n")
             let indent = String(repeating: " ", count: marker.count)
             let itemLines = body.split(separator: "\n", omittingEmptySubsequences: false).enumerated().map {
-                offset, line -> String in
-                offset == 0 ? marker + checkbox + line : (line.isEmpty ? "" : indent + line)
+                offset, raw -> String in
+                guard offset == 0 else { return raw.isEmpty ? "" : indent + raw }
+                var first = String(raw)
+                if item.checkbox != nil, first.hasPrefix(" ") { first.removeFirst() }
+                return marker + checkbox + first
             }
             lines.append(itemLines.joined(separator: "\n"))
         }

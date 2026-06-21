@@ -83,6 +83,19 @@ final class SerializationTests: XCTestCase {
         """)
     }
 
+    func testProgrammaticTaskItemSerializesWithSpace() {
+        // A task item built in code (body has no leading space) must still serialize as
+        // "- [x] text" — the editor relies on this.
+        let para = BlockNode(.paragraph([InlineNode(.text("Buy milk"))]))
+        let item = ListItem(blocks: [para], checkbox: .checked)
+        let list = BlockNode(.list(MarkdownList(marker: .bullet, isTight: true, items: [item])))
+        let md = list.markdown()
+        XCTAssertEqual(md, "- [x] Buy milk")
+        // And it re-parses back to a checked task item.
+        guard case .list(let parsed)? = parser.parse(md).blocks.first?.kind else { return XCTFail("not a list") }
+        XCTAssertEqual(parsed.items.first?.checkbox, .checked)
+    }
+
     func testSingleBlockSerialization() {
         // A single table block serializes to only its own Markdown.
         let table = parser.parse("| a | b |\n| --- | --- |\n| 1 | 2 |\n").blocks.first
