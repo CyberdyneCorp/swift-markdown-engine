@@ -22,7 +22,7 @@ struct RootView: View {
     @State private var mode: Mode = .edit
 
     private enum Mode: String, CaseIterable, Identifiable {
-        case raw = "Raw", preview = "Preview", edit = "Edit"
+        case raw = "Raw", preview = "Preview", live = "Live", edit = "Edit"
         var id: String { rawValue }
     }
 
@@ -48,6 +48,7 @@ struct RootView: View {
                 switch mode {
                 case .raw: editorPanel
                 case .preview: previewPanel
+                case .live: livePanel
                 case .edit: wysiwygPanel
                 }
             }
@@ -129,6 +130,12 @@ struct RootView: View {
     private var wysiwygPanel: some View {
         panel(title: "Edit", systemImage: "wand.and.stars") {
             WysiwygEditorView(text: $text, theme: theme, services: services)
+        }
+    }
+
+    private var livePanel: some View {
+        panel(title: "Live", systemImage: "text.cursor") {
+            LiveEditorView(text: $text, theme: theme, services: services)
         }
     }
 

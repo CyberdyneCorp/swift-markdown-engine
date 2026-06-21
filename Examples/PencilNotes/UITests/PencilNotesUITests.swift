@@ -101,6 +101,17 @@ final class PencilNotesUITests: XCTestCase {
                       "inserted heading block did not render")
     }
 
+    // MARK: - Continuous Live editor
+
+    func testLiveModeLaunchesAndShowsDocument() {
+        let app = launch()
+        select(mode: "Live", in: app)
+        let editor = app.textViews.firstMatch
+        XCTAssertTrue(editor.waitForExistence(timeout: 15), "Live editor did not appear")
+        XCTAssertTrue((editor.value as? String ?? "").contains("Field Notes"),
+                      "Live editor did not show the sample content")
+    }
+
     // MARK: - Diagram builders (Phase 2)
 
     func testInsertPieChartOpensVisualBuilder() {
