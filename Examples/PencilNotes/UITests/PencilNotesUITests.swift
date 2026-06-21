@@ -27,6 +27,19 @@ final class PencilNotesUITests: XCTestCase {
         button.tap()
     }
 
+    /// Enters Edit mode, selects the first block, and opens its "Insert below" menu — waiting
+    /// for the menu to actually appear (the "Paragraph" item) to avoid menu-animation races.
+    private func openInsertBelowMenu(_ app: XCUIApplication) {
+        select(mode: "Edit", in: app)
+        let heading = app.staticTexts["Field Notes"]
+        XCTAssertTrue(heading.waitForExistence(timeout: 10))
+        heading.tap()
+        let insert = app.buttons["Insert below"]
+        XCTAssertTrue(insert.waitForExistence(timeout: 8), "Insert below not found")
+        insert.tap()
+        XCTAssertTrue(app.buttons["Paragraph"].waitForExistence(timeout: 6), "insert menu did not open")
+    }
+
     // MARK: - Launch & modes
 
     func testLaunchRendersWithoutCrashing() {
@@ -82,20 +95,28 @@ final class PencilNotesUITests: XCTestCase {
 
     func testInsertHeadingBlock() {
         let app = launch()
-        select(mode: "Edit", in: app)
-        // Select the first block to reveal its on-screen "Insert below" menu (the bottom
-        // "Add block" button is off-screen in the long sample's lazy stack).
-        let heading = app.staticTexts["Field Notes"]
-        XCTAssertTrue(heading.waitForExistence(timeout: 8))
-        heading.tap()
-        let insert = app.buttons["Insert below"]
-        XCTAssertTrue(insert.waitForExistence(timeout: 5), "Insert below menu not found")
-        insert.tap()
-        let headingItem = app.buttons["Heading"]
-        XCTAssertTrue(headingItem.waitForExistence(timeout: 5), "insert menu did not open")
-        headingItem.tap()
+        openInsertBelowMenu(app)
+        app.buttons["Heading"].tap()
         XCTAssertTrue(app.staticTexts["Heading"].waitForExistence(timeout: 5),
                       "inserted heading block did not render")
+    }
+
+    // MARK: - Diagram builders (Phase 2)
+
+    func testInsertPieChartOpensVisualBuilder() {
+        let app = launch()
+        openInsertBelowMenu(app)
+        app.buttons["Pie chart"].tap()
+        XCTAssertTrue(app.buttons["Slice"].waitForExistence(timeout: 5),
+                      "pie-chart visual builder did not open")
+    }
+
+    func testInsertFlowchartOpensVisualBuilder() {
+        let app = launch()
+        openInsertBelowMenu(app)
+        app.buttons["Flowchart"].tap()
+        XCTAssertTrue(app.buttons["Node"].waitForExistence(timeout: 5),
+                      "flowchart visual builder did not open")
     }
 
     // MARK: - Chrome

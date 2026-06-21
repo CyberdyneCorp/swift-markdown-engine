@@ -103,6 +103,10 @@ struct WysiwygEditorView: View {
             MathBlockEditor(markdown: boundMarkdown, theme: theme)
         case .media:
             ImageVideoEditor(markdown: boundMarkdown, theme: theme)
+        case .flowchart:
+            FlowchartBuilder(markdown: boundMarkdown, theme: theme)
+        case .pie:
+            PieChartBuilder(markdown: boundMarkdown, theme: theme)
         case .diagram:
             DiagramSourceEditor(markdown: boundMarkdown, theme: theme)
         case .other:
@@ -110,7 +114,7 @@ struct WysiwygEditorView: View {
         }
     }
 
-    private enum EditorKind { case text, table, list, code, math, media, diagram, other }
+    private enum EditorKind { case text, table, list, code, math, media, diagram, flowchart, pie, other }
 
     private func blockKind(_ markdown: String) -> EditorKind {
         guard let kind = MarkdownParser().parse(markdown).blocks.first?.kind else { return .other }
@@ -134,7 +138,11 @@ struct WysiwygEditorView: View {
             return .code
         case .mathBlock:
             return .math
-        case .mermaid:
+        case .mermaid(let source):
+            let header = source.split(separator: "\n").first
+                .map { $0.trimmingCharacters(in: .whitespaces).lowercased() } ?? ""
+            if header.hasPrefix("flowchart") || header.hasPrefix("graph") { return .flowchart }
+            if header.hasPrefix("pie") { return .pie }
             return .diagram
         case .list(let list):
             // Only flat lists (each item a single paragraph) get the visual editor; nested
@@ -179,6 +187,8 @@ struct WysiwygEditorView: View {
             Button("Quote") { insert("> Quote", at: offset) }
             Button("Code") { insert("```swift\ncode\n```", at: offset) }
             Button("Table") { insert("| A | B |\n| --- | --- |\n| 1 | 2 |", at: offset) }
+            Button("Flowchart") { insert("```mermaid\nflowchart LR\n  A[Start] --> B[End]\n```", at: offset) }
+            Button("Pie chart") { insert("```mermaid\npie title Chart\n  \"A\" : 1\n```", at: offset) }
             Button("Divider") { insert("---", at: offset) }
         } label: {
             Label(label, systemImage: "plus.circle.fill")
