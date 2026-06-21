@@ -160,19 +160,83 @@ final class PencilNotesUITests: XCTestCase {
                       "checklist item lost through Live list reconstruction")
     }
 
-    func testLiveInsertBlockUpdatesSource() {
+    /// Opens the Live editor's Insert menu and taps `label`. For diagram types it first opens the
+    /// nested "Diagram" submenu.
+    private func liveInsert(_ app: XCUIApplication, _ label: String, viaDiagram: Bool = false,
+                            file: StaticString = #filePath, line: UInt = #line) {
+        let insert = app.buttons["Insert"]
+        XCTAssertTrue(insert.waitForExistence(timeout: 8), "Insert button missing", file: file, line: line)
+        insert.tap()
+        if viaDiagram {
+            let submenu = app.buttons["Diagram"]
+            XCTAssertTrue(submenu.waitForExistence(timeout: 6), "Diagram submenu missing", file: file, line: line)
+            submenu.tap()
+        }
+        let item = app.buttons[label]
+        XCTAssertTrue(item.waitForExistence(timeout: 6), "Insert menu item '\(label)' missing", file: file, line: line)
+        item.tap()
+    }
+
+    /// Inserting every non-diagram block from the Live editor's Insert menu writes the expected
+    /// Markdown to the shared source.
+    func testLiveInsertAllBlocksReachSource() {
         let app = launch()
         select(mode: "Live", in: app)
         XCTAssertTrue(app.buttons["Insert"].waitForExistence(timeout: 12))
-        app.buttons["Insert"].tap()
-        let table = app.buttons["Table"]
-        XCTAssertTrue(table.waitForExistence(timeout: 6), "Insert menu missing Table")
-        table.tap()
+
+        // (menu label, expected Markdown snippet in the source)
+        let blocks: [(String, String)] = [
+            ("Bulleted list", "- Item"),
+            ("Numbered list", "1. Item"),
+            ("Checklist", "- [ ] Task"),
+            ("Quote", "> Quote"),
+            ("Table", "| A | B |"),
+            ("Code block", "```swift"),
+            ("Math", "E = mc^2"),
+            ("Image", "![alt]"),
+            ("Video", "mov_bbb.mp4"),
+        ]
+        for (label, _) in blocks { liveInsert(app, label) }
+
         select(mode: "Raw", in: app)
         let raw = app.textViews.firstMatch
         XCTAssertTrue(raw.waitForExistence(timeout: 6))
-        XCTAssertTrue((raw.value as? String ?? "").contains("| A | B |"),
-                      "inserted table did not reach the source")
+        let src = raw.value as? String ?? ""
+        for (label, expected) in blocks {
+            XCTAssertTrue(src.contains(expected), "Insert '\(label)' did not reach the source (expected '\(expected)')")
+        }
+    }
+
+    /// Inserting every Mermaid diagram type from the Insert menu's Diagram submenu writes the
+    /// expected diagram source.
+    func testLiveInsertAllDiagramsReachSource() {
+        let app = launch()
+        select(mode: "Live", in: app)
+        XCTAssertTrue(app.buttons["Insert"].waitForExistence(timeout: 12))
+
+        // (submenu label, expected mermaid header in the source)
+        let diagrams: [(String, String)] = [
+            ("Flowchart", "flowchart LR"),
+            ("Pie chart", "pie title Chart"),
+            ("Sequence", "sequenceDiagram"),
+            ("Mindmap", "mindmap"),
+            ("Gantt", "gantt"),
+            ("Class diagram", "classDiagram"),
+            ("State diagram", "stateDiagram-v2"),
+            ("ER diagram", "erDiagram"),
+            ("Git graph", "gitGraph"),
+            ("Journey", "journey"),
+            ("Timeline", "timeline"),
+        ]
+        for (label, _) in diagrams { liveInsert(app, label, viaDiagram: true) }
+
+        select(mode: "Raw", in: app)
+        let raw = app.textViews.firstMatch
+        XCTAssertTrue(raw.waitForExistence(timeout: 6))
+        let src = raw.value as? String ?? ""
+        for (label, expected) in diagrams {
+            XCTAssertTrue(src.contains(expected), "Insert diagram '\(label)' did not reach the source (expected '\(expected)')")
+        }
     }
 
     func testLiveToolbarActionsDoNotCrash() {

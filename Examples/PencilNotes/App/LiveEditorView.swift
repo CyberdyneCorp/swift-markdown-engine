@@ -69,7 +69,7 @@ struct LiveEditorView: View {
             Button("Checklist") { controller.insertBlock("- [ ] Task") }
             Button("Quote") { controller.insertBlock("> Quote") }
             Button("Table") { controller.insertBlock("| A | B |\n| --- | --- |\n| 1 | 2 |") }
-            Button("Code") { controller.insertBlock("```swift\ncode\n```") }
+            Button("Code block") { controller.insertBlock("```swift\ncode\n```") }
             Button("Math") { controller.insertBlock("$$\nE = mc^2\n$$") }
             Button("Image") { controller.insertBlock("![alt](https://picsum.photos/400/200)") }
             Button("Video") { controller.insertBlock("![clip](https://www.w3schools.com/html/mov_bbb.mp4)") }
