@@ -820,6 +820,7 @@ private struct LiveStyler {
 
     private var primary: UIColor { UIColor(theme.textPrimary) }
     private var accent: UIColor { UIColor(theme.accent) }
+    private var secondary: UIColor { UIColor(theme.textSecondary) }
 
     func styled(_ source: String) -> NSAttributedString {
         let result = NSMutableAttributedString(string: source, attributes: [.font: Self.bodyFont, .foregroundColor: primary])
@@ -842,6 +843,7 @@ private struct LiveStyler {
             s.addAttribute(.backgroundColor, value: UIColor.systemYellow.withAlphaComponent(0.35), range: inner)
         }
         styleListMarkers(result)
+        styleBlockQuotes(result)
         styleLinks(result)
         // Hint that `$…$` is editable math source (shown only on the active line; elsewhere the
         // span is replaced by a rendered image — see Coordinator.syncInlineMath).
@@ -868,6 +870,26 @@ private struct LiveStyler {
                 s.addAttribute(.foregroundColor, value: checked ? UIColor.systemGreen : UIColor(theme.textSecondary), range: checkbox)
                 s.addAttribute(.font, value: UIFont.monospacedSystemFont(ofSize: Self.bodyFont.pointSize, weight: .semibold), range: checkbox)
             }
+        }
+    }
+
+    /// Renders block quotes like the preview: hides the leading `>` (tagged so it collapses off
+    /// the active line) and shows the quote text indented in muted italic.
+    private func styleBlockQuotes(_ s: NSMutableAttributedString) {
+        let ns = s.string as NSString
+        regex("(?m)^(>[ \\t]?)").enumerateMatches(in: s.string, range: NSRange(location: 0, length: ns.length)) { m, _, _ in
+            guard let m, let marker = range(m, 1) else { return }
+            let line = ns.paragraphRange(for: marker)
+            let base = (s.attribute(.font, at: line.location, effectiveRange: nil) as? UIFont) ?? Self.bodyFont
+            if let italic = base.fontDescriptor.withSymbolicTraits(base.fontDescriptor.symbolicTraits.union(.traitItalic)) {
+                s.addAttribute(.font, value: UIFont(descriptor: italic, size: base.pointSize), range: line)
+            }
+            s.addAttribute(.foregroundColor, value: secondary, range: line)
+            let paragraph = NSMutableParagraphStyle()
+            paragraph.firstLineHeadIndent = 14
+            paragraph.headIndent = 14
+            s.addAttribute(.paragraphStyle, value: paragraph, range: line)
+            tagMarker(s, marker)
         }
     }
 
