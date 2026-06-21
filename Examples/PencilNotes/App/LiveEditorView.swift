@@ -238,6 +238,13 @@ struct LiveTextView: UIViewRepresentable {
         private let parent: LiveTextView
         weak var textView: UITextView?
         var lastRenderedSource: String = "\u{0}"
+        /// The caret location from the user's last selection. Insert uses this so a block lands
+        /// where the user was, even though tapping the toolbar resigns first responder (which can
+        /// drop the live `selectedRange`). nil ⇒ append at the end.
+        private var lastCaret: Int?
+        /// True while `rebuild` reinstalls the document, so its programmatic selection changes
+        /// don't overwrite the user's `lastCaret`.
+        private var isRebuilding = false
 
         init(_ parent: LiveTextView) { self.parent = parent }
 
@@ -264,6 +271,8 @@ struct LiveTextView: UIViewRepresentable {
 
         @MainActor func rebuild(_ markdown: String) {
             guard let tv = textView else { return }
+            isRebuilding = true
+            defer { isRebuilding = false }
             let styler = LiveStyler(theme: parent.theme)
             let result = NSMutableAttributedString()
             let width = max(240, availableWidth(tv))
@@ -375,6 +384,7 @@ struct LiveTextView: UIViewRepresentable {
         }
 
         func textViewDidChangeSelection(_ tv: UITextView) {
+            if !isSyncing, !isRebuilding { lastCaret = tv.selectedRange.location }   // user-driven caret moves
             syncInlineMath()
             syncListMarkers()
             LiveStyler(theme: parent.theme).collapseMarkers(in: tv, active: activeParagraph(tv))
@@ -387,9 +397,25 @@ struct LiveTextView: UIViewRepresentable {
             restyleActiveParagraph()
         }
 
+        /// Inserts a block after the paragraph holding the cursor (so blocks land where you are,
+        /// not only at the end). With the cursor at the end — or no cursor placed — it appends.
         func insertBlock(_ source: String) {
             guard let tv = textView else { return }
-            let md = reconstructMarkdown(tv).trimmingCharacters(in: .whitespacesAndNewlines) + "\n\n" + source + "\n"
+            let storage = tv.textStorage
+            let ns = storage.string as NSString
+            let splitAt: Int
+            if let caret = lastCaret, storage.length > 0 {
+                let cursor = max(0, min(caret, storage.length - 1))
+                let para = ns.paragraphRange(for: NSRange(location: cursor, length: 0))
+                splitAt = para.location + para.length   // just past the paragraph the user was in
+            } else {
+                splitAt = storage.length                // no caret placed → append at the end
+            }
+            let before = reconstructMarkdown(tv, in: NSRange(location: 0, length: splitAt))
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            let after = reconstructMarkdown(tv, in: NSRange(location: splitAt, length: storage.length - splitAt))
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            let md = [before, source, after].filter { !$0.isEmpty }.joined(separator: "\n\n") + "\n"
             parent.text = md
             lastRenderedSource = md
             rebuild(md)
@@ -563,13 +589,21 @@ struct LiveTextView: UIViewRepresentable {
         }
 
         private func reconstructMarkdown(_ tv: UITextView) -> String {
+            reconstructMarkdown(tv, in: NSRange(location: 0, length: tv.textStorage.length))
+                .trimmingCharacters(in: .whitespacesAndNewlines) + "\n"
+        }
+
+        /// Reconstructs the Markdown for a storage range, emitting each block/inline attachment's
+        /// tagged source and literal text elsewhere. Used to split the document for mid-document
+        /// insertion (see `insertBlock`).
+        private func reconstructMarkdown(_ tv: UITextView, in range: NSRange) -> String {
             let storage = tv.textStorage
             var out = ""
-            storage.enumerateAttribute(liveBlockSourceKey, in: NSRange(location: 0, length: storage.length)) { value, range, _ in
+            storage.enumerateAttribute(liveBlockSourceKey, in: range) { value, r, _ in
                 if let source = value as? String { out += source }
-                else { out += storage.attributedSubstring(from: range).string }
+                else { out += storage.attributedSubstring(from: r).string }
             }
-            return out.trimmingCharacters(in: .whitespacesAndNewlines) + "\n"
+            return out
         }
 
         // MARK: Tap on a block

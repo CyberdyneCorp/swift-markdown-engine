@@ -239,6 +239,36 @@ final class PencilNotesUITests: XCTestCase {
         }
     }
 
+    /// Inserting with the cursor near the top places the block in the middle of the document
+    /// (after the current paragraph), not appended at the end.
+    func testLiveInsertHappensAtCursorNotEnd() {
+        let app = launch()
+        select(mode: "Live", in: app)
+        let editor = app.textViews.firstMatch
+        XCTAssertTrue(editor.waitForExistence(timeout: 12))
+        // Place the cursor near the top. The first tap only focuses (caret defaults to the end);
+        // a second tap positions the caret near the top but pops up the iPad edit menu, whose
+        // full-screen dismiss region blocks the toolbar — so dismiss it before opening Insert.
+        editor.coordinate(withNormalizedOffset: CGVector(dx: 0.20, dy: 0.05)).tap()  // focus (scrolls to end)
+        Thread.sleep(forTimeInterval: 0.5)
+        for _ in 0..<12 { editor.swipeDown() }                                       // scroll back to the top
+        Thread.sleep(forTimeInterval: 0.5)
+        editor.coordinate(withNormalizedOffset: CGVector(dx: 0.45, dy: 0.05)).tap()  // position caret in the top text
+        Thread.sleep(forTimeInterval: 0.5)
+        editor.typeText(" ")   // typing dismisses the edit-menu popover and keeps the caret near the top
+        Thread.sleep(forTimeInterval: 0.3)
+        liveInsert(app, "Table")
+
+        select(mode: "Raw", in: app)
+        let src = app.textViews.firstMatch.value as? String ?? ""
+        guard let table = src.range(of: "| A | B |"), let checklist = src.range(of: "Checklist") else {
+            XCTFail("source missing the inserted table or the Checklist section")
+            return
+        }
+        XCTAssertTrue(table.lowerBound < checklist.lowerBound,
+                      "table inserted near the top should appear before the Checklist section, not appended at the end")
+    }
+
     func testLiveToolbarActionsDoNotCrash() {
         let app = launch()
         select(mode: "Live", in: app)
