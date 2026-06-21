@@ -205,10 +205,13 @@ struct LiveTextView: UIViewRepresentable {
                     // as live SwiftUI views inline via a TextKit 2 attachment view provider — so
                     // async content (images/video), Canvas (Mermaid) and LaTeX render for real.
                     let source = block.markdown()
+                    let index = i
                     let attachment = BlockAttachment(source: source, theme: parent.theme,
                                                      services: parent.services, width: width,
-                                                     isMedia: LiveStyler.isMedia(block))
+                                                     isMedia: LiveStyler.isMedia(block),
+                                                     scrollable: LiveStyler.isScrollable(block))
                     attachment.measureHeight()
+                    attachment.onTap = { [weak self] in self?.parent.onBlockTap(index, source) }
                     let attr = NSMutableAttributedString(attachment: attachment)
                     let r = NSRange(location: 0, length: attr.length)
                     attr.addAttribute(liveBlockSourceKey, value: source, range: r)
@@ -223,6 +226,7 @@ struct LiveTextView: UIViewRepresentable {
             tv.attributedText = result
             tv.selectedRange = NSRange(location: min(selected.location, result.length), length: 0)
             lastRenderedSource = markdown
+            syncInlineMath()
             styler.collapseMarkers(in: tv, activeParagraph: tv.selectedRange)
         }
 
@@ -235,6 +239,7 @@ struct LiveTextView: UIViewRepresentable {
         }
 
         func textViewDidChangeSelection(_ tv: UITextView) {
+            syncInlineMath()
             LiveStyler(theme: parent.theme).collapseMarkers(in: tv, activeParagraph: tv.selectedRange)
         }
 
@@ -273,6 +278,70 @@ struct LiveTextView: UIViewRepresentable {
             LiveStyler(theme: parent.theme).collapseMarkers(in: tv, activeParagraph: tv.selectedRange)
         }
 
+        // MARK: Inline math (Typora-style)
+
+        private var isSyncingMath = false
+
+        /// Renders `$…$` math as inline images on every paragraph except the one holding the
+        /// cursor, which keeps the editable `$…$` source. Reversible: the source is recovered
+        /// from each attachment (tagged with its `$…$` string), so moving the cursor into a
+        /// paragraph reveals its math source and moving away re-renders it.
+        @MainActor func syncInlineMath() {
+            guard !isSyncingMath, let tv = textView else { return }
+            let storage = tv.textStorage
+            guard storage.length > 0 else { return }
+            let scale = max(2, tv.traitCollection.displayScale)
+            var cursor = min(tv.selectedRange.location, storage.length)
+            let probe = min(cursor, max(0, storage.length - 1))
+            let active = (storage.string as NSString).paragraphRange(for: NSRange(location: probe, length: 0))
+
+            var ops: [(range: NSRange, replacement: NSAttributedString)] = []
+            // Reveal: expand inline-math attachments inside the active paragraph back to source.
+            storage.enumerateAttribute(.attachment, in: active) { value, range, _ in
+                guard let math = value as? InlineMathAttachment else { return }
+                ops.append((range, NSAttributedString(string: "$\(math.latex)$",
+                    attributes: [.font: LiveStyler.bodyFont, .foregroundColor: UIColor(parent.theme.accent)])))
+            }
+            // Render: collapse `$…$` source in every other paragraph into an image attachment.
+            let whole = NSRange(location: 0, length: storage.length)
+            LiveStyler.inlineMathRegex.enumerateMatches(in: storage.string, range: whole) { match, _, _ in
+                guard let match, NSIntersectionRange(match.range, active).length == 0 else { return }
+                let latex = (storage.string as NSString).substring(with: match.range(at: 1))
+                guard let image = inlineMathImage(latex, scale: scale) else { return }
+                let attachment = InlineMathAttachment(latex: latex, image: image, font: LiveStyler.bodyFont)
+                let attr = NSMutableAttributedString(attachment: attachment)
+                attr.addAttribute(liveBlockSourceKey, value: "$\(latex)$",
+                                  range: NSRange(location: 0, length: attr.length))
+                ops.append((match.range, attr))
+            }
+            guard !ops.isEmpty else { return }
+
+            isSyncingMath = true
+            storage.beginEditing()
+            for op in ops.sorted(by: { $0.range.location > $1.range.location }) {
+                storage.replaceCharacters(in: op.range, with: op.replacement)
+                if op.range.location < cursor { cursor += op.replacement.length - op.range.length }
+            }
+            storage.endEditing()
+            tv.selectedRange = NSRange(location: max(0, min(cursor, storage.length)), length: 0)
+            isSyncingMath = false
+        }
+
+        @MainActor private func inlineMathImage(_ latex: String, scale: CGFloat) -> UIImage? {
+            guard let renderer = parent.services.latexRenderer,
+                  let data = renderer.renderToPNG(latex, displayMode: false,
+                                                  pointSize: Double(LiveStyler.bodyFont.pointSize),
+                                                  hexColor: hexString(UIColor(parent.theme.textPrimary)))
+            else { return nil }
+            return UIImage(data: data, scale: scale)
+        }
+
+        private func hexString(_ color: UIColor) -> String {
+            var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+            color.getRed(&r, green: &g, blue: &b, alpha: &a)
+            return String(format: "#%02X%02X%02X", Int(round(r * 255)), Int(round(g * 255)), Int(round(b * 255)))
+        }
+
         private func reconstructMarkdown(_ tv: UITextView) -> String {
             let storage = tv.textStorage
             var out = ""
@@ -292,6 +361,9 @@ struct LiveTextView: UIViewRepresentable {
             let index = tv.offset(from: tv.beginningOfDocument, to: position)
             let storage = tv.textStorage
             for probe in [index, max(0, index - 1)] where probe < storage.length {
+                // Scrollable blocks have an interactive hosted view that handles its own tap.
+                if let att = storage.attribute(.attachment, at: probe, effectiveRange: nil) as? BlockAttachment,
+                   att.scrollable { return }
                 if let source = storage.attribute(liveBlockSourceKey, at: probe, effectiveRange: nil) as? String,
                    let blockIndex = storage.attribute(liveBlockIndexKey, at: probe, effectiveRange: nil) as? Int {
                     parent.onBlockTap(blockIndex, source)
@@ -310,14 +382,21 @@ final class BlockAttachment: NSTextAttachment {
     let services: MarkdownServices
     let width: CGFloat
     let isMedia: Bool
+    /// Overflow-prone blocks (diagrams, tables, wide code) get an interactive hosted view so
+    /// their inner horizontal scroll view can pan; otherwise the view stays passive and taps
+    /// fall through to the text view's block-tap handler.
+    let scrollable: Bool
+    /// Opens this block's editor; invoked by the interactive hosted view's tap recognizer.
+    var onTap: (() -> Void)?
     /// Block height, measured eagerly during rebuild (see `measuredHeight(...)`). The view
     /// provider returns this from `attachmentBounds`, so layout never depends on the
     /// provider's view lifecycle (which can query bounds before `loadView` runs).
     var height: CGFloat
 
-    init(source: String, theme: MarkdownTheme, services: MarkdownServices, width: CGFloat, isMedia: Bool) {
+    init(source: String, theme: MarkdownTheme, services: MarkdownServices, width: CGFloat,
+         isMedia: Bool, scrollable: Bool) {
         self.source = source; self.theme = theme; self.services = services
-        self.width = width; self.isMedia = isMedia
+        self.width = width; self.isMedia = isMedia; self.scrollable = scrollable
         self.height = isMedia ? BlockAttachment.mediaHeight(width: width) : 24
         super.init(data: nil, ofType: nil)
     }
@@ -364,12 +443,25 @@ final class BlockViewProvider: NSTextAttachmentViewProvider {
         MainActor.assumeIsolated {
             let controller = UIHostingController(rootView: att.content())
             controller.view.backgroundColor = .clear
-            controller.view.isUserInteractionEnabled = false
             // Pin to an explicit frame anchored at the line-fragment origin so the block's
             // leading edge isn't shifted off-screen (TextKit tracks this frame).
             controller.view.frame = CGRect(x: 0, y: 0, width: att.width, height: att.height)
+            if att.scrollable {
+                // Interactive: the inner horizontal scroll view pans (wide diagrams/tables/code),
+                // and a tap recognizer still opens the block editor.
+                controller.view.isUserInteractionEnabled = true
+                let tap = UITapGestureRecognizer(target: self, action: #selector(handleBlockTap))
+                tap.cancelsTouchesInView = false
+                controller.view.addGestureRecognizer(tap)
+            } else {
+                controller.view.isUserInteractionEnabled = false   // taps fall through to edit
+            }
             view = controller.view
         }
+    }
+
+    @objc private func handleBlockTap() {
+        MainActor.assumeIsolated { (textAttachment as? BlockAttachment)?.onTap?() }
     }
 
     override func attachmentBounds(for attributes: [NSAttributedString.Key: Any],
@@ -378,6 +470,23 @@ final class BlockViewProvider: NSTextAttachmentViewProvider {
         guard let att = textAttachment as? BlockAttachment else { return .zero }
         return CGRect(x: 0, y: 0, width: att.width, height: att.height)
     }
+}
+
+/// An inline LaTeX formula rendered as a small image, sized to sit on the text baseline. Used in
+/// the Live editor so `$…$` math renders within a line of prose; the paragraph holding the cursor
+/// reveals the editable `$…$` source instead (see Coordinator.syncInlineMath).
+final class InlineMathAttachment: NSTextAttachment {
+    let latex: String
+
+    init(latex: String, image: UIImage, font: UIFont) {
+        self.latex = latex
+        super.init(data: nil, ofType: nil)
+        self.image = image
+        // Vertically center the formula around the text's cap-height midline.
+        let y = (font.capHeight - image.size.height) / 2
+        bounds = CGRect(x: 0, y: y, width: image.size.width, height: image.size.height)
+    }
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 }
 
 /// Live attributed styling for text blocks: heading sizes, bold/italic/strikethrough/inline code.
@@ -406,6 +515,19 @@ private struct LiveStyler {
         return false
     }
 
+    /// Blocks whose content can exceed the editor width and therefore need an interactive,
+    /// horizontally scrollable hosted view (diagrams, tables, code).
+    static func isScrollable(_ block: BlockNode) -> Bool {
+        switch block.kind {
+        case .mermaid, .table, .codeBlock: return true
+        default: return false
+        }
+    }
+
+    /// Matches inline `$…$` math (single dollars, not the `$$` of block math).
+    static let inlineMathRegex: NSRegularExpression =
+        (try? NSRegularExpression(pattern: "(?<!\\$)\\$([^$\\n]+)\\$(?!\\$)")) ?? NSRegularExpression()
+
     private var primary: UIColor { UIColor(theme.textPrimary) }
     private var accent: UIColor { UIColor(theme.accent) }
 
@@ -425,6 +547,12 @@ private struct LiveStyler {
         stylePaired(result, "(`)([^`]+?)(`)") { s, inner in
             s.addAttribute(.font, value: UIFont.monospacedSystemFont(ofSize: Self.bodyFont.pointSize, weight: .regular), range: inner)
             s.addAttribute(.foregroundColor, value: accent, range: inner)
+        }
+        // Hint that `$…$` is editable math source (shown only on the active line; elsewhere the
+        // span is replaced by a rendered image — see Coordinator.syncInlineMath).
+        Self.inlineMathRegex.enumerateMatches(in: result.string, range: NSRange(location: 0, length: ns.length)) { m, _, _ in
+            guard let m else { return }
+            result.addAttribute(.foregroundColor, value: accent, range: m.range)
         }
         return result
     }
