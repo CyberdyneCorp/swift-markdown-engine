@@ -52,8 +52,26 @@ targets:
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         TARGETED_DEVICE_FAMILY: "1,2"
 
+  PencilNotesUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - UITests
+    dependencies:
+      - target: PencilNotes
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: ai.cyberdynecorp.pencilnotes.uitests
+        TEST_TARGET_NAME: PencilNotes
+        GENERATE_INFOPLIST_FILE: YES
+        TARGETED_DEVICE_FAMILY: "1,2"
+
 schemes:
   PencilNotes:
     build:
       targets:
         PencilNotes: all
+        PencilNotesUITests: [test]
+    test:
+      targets:
+        - PencilNotesUITests

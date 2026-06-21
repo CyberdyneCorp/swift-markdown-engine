@@ -35,6 +35,7 @@ struct WysiwygEditorView: View {
             .frame(maxWidth: .infinity)
         }
         .background(theme.background)
+        .accessibilityIdentifier("wysiwygEditor")
         .onAppear(perform: syncFromText)   // re-sync each time Edit mode is entered
     }
 

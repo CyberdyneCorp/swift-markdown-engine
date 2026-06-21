@@ -21,6 +21,20 @@
                ReferencedContainer = "container:PencilNotes.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
+         <BuildActionEntry
+            buildForTesting = "YES"
+            buildForRunning = "NO"
+            buildForProfiling = "NO"
+            buildForArchiving = "NO"
+            buildForAnalyzing = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "4353F3515A9494FE8426DE81"
+               BuildableName = "PencilNotesUITests.xctest"
+               BlueprintName = "PencilNotesUITests"
+               ReferencedContainer = "container:PencilNotes.xcodeproj">
+            </BuildableReference>
+         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction
@@ -39,7 +53,20 @@
          </BuildableReference>
       </MacroExpansion>
       <Testables>
+         <TestableReference
+            skipped = "NO"
+            parallelizable = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
+               BlueprintIdentifier = "4353F3515A9494FE8426DE81"
+               BuildableName = "PencilNotesUITests.xctest"
+               BlueprintName = "PencilNotesUITests"
+               ReferencedContainer = "container:PencilNotes.xcodeproj">
+            </BuildableReference>
+         </TestableReference>
       </Testables>
+      <CommandLineArguments>
+      </CommandLineArguments>
    </TestAction>
    <LaunchAction
       buildConfiguration = "Debug"
