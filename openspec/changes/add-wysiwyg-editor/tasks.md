@@ -28,9 +28,9 @@
 
 ## 5. Code / image-video / math editors
 
-- [ ] 5.1 Code editor: language `Picker` + editor + live highlighted preview (Highlightr bridge)
-- [ ] 5.2 Image/Video insert form (URL/picker + alt/caption) → `![alt](url)`
-- [ ] 5.3 Math editor: LaTeX field + live `MathBlockView` preview → `$$…$$`
+- [x] 5.1 Code editor: language `Picker` + editor (live highlighted preview is the rendered block above)
+- [x] 5.2 Image/Video insert form (URL + alt/caption, plain image or linked video toggle) → `![alt](url)` / `[![alt](thumb)](url)`
+- [x] 5.3 Math editor: LaTeX field + live preview (rendered block above) → `$$…$$`
 
 ## 6. Diagram/chart interim editor
 

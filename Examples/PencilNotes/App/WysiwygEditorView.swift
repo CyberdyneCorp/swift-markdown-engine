@@ -96,23 +96,41 @@ struct WysiwygEditorView: View {
             TableBlockEditor(markdown: boundMarkdown, theme: theme)
         case .list:
             ListBlockEditor(markdown: boundMarkdown, theme: theme)
+        case .code:
+            CodeBlockEditor(markdown: boundMarkdown, theme: theme)
+        case .math:
+            MathBlockEditor(markdown: boundMarkdown, theme: theme)
+        case .media:
+            ImageVideoEditor(markdown: boundMarkdown, theme: theme)
         case .other:
             sourceEditor(for: block)
         }
     }
 
-    private enum EditorKind { case text, table, list, other }
+    private enum EditorKind { case text, table, list, code, math, media, other }
 
     private func blockKind(_ markdown: String) -> EditorKind {
         guard let kind = MarkdownParser().parse(markdown).blocks.first?.kind else { return .other }
         switch kind {
-        case .paragraph, .heading:
+        case .paragraph(let inlines):
+            // A paragraph that is solely an image / linked image is media, not prose.
+            if inlines.count == 1 {
+                if case .image = inlines[0].kind { return .media }
+                if case .link(_, _, let children) = inlines[0].kind,
+                   children.count == 1, case .image = children[0].kind { return .media }
+            }
+            return .text
+        case .heading:
             return .text
         case .blockQuote(let blocks):
             if blocks.count == 1, case .paragraph = blocks[0].kind { return .text }
             return .other
         case .table:
             return .table
+        case .codeBlock:
+            return .code
+        case .mathBlock:
+            return .math
         case .list(let list):
             // Only flat lists (each item a single paragraph) get the visual editor; nested
             // lists keep the source editor.
