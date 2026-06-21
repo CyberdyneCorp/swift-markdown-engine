@@ -63,16 +63,28 @@ struct LiveEditorView: View {
     private var tbInsertMenu: some View {
         Menu {
             Button("Bulleted list") { controller.insertBlock("- Item") }
+            Button("Numbered list") { controller.insertBlock("1. Item") }
+            Button("Checklist") { controller.insertBlock("- [ ] Task") }
             Button("Quote") { controller.insertBlock("> Quote") }
             Button("Table") { controller.insertBlock("| A | B |\n| --- | --- |\n| 1 | 2 |") }
             Button("Code") { controller.insertBlock("```swift\ncode\n```") }
-            Button("Flowchart") { controller.insertBlock("```mermaid\nflowchart LR\n  A[Start] --> B[End]\n```") }
-            Button("Pie chart") { controller.insertBlock("```mermaid\npie title Chart\n  \"A\" : 1\n```") }
-            Button("Sequence") { controller.insertBlock("```mermaid\nsequenceDiagram\n  participant A\n  participant B\n  A->>B: Hello\n```") }
-            Button("Mindmap") { controller.insertBlock("```mermaid\nmindmap\n  root((Topic))\n    Idea\n```") }
-            Button("Gantt") { controller.insertBlock("```mermaid\ngantt\n  title Plan\n  section Phase\n  Task : 3d\n```") }
             Button("Math") { controller.insertBlock("$$\nE = mc^2\n$$") }
             Button("Image") { controller.insertBlock("![alt](https://picsum.photos/400/200)") }
+            Button("Video") { controller.insertBlock("![clip](https://www.w3schools.com/html/mov_bbb.mp4)") }
+            Divider()
+            Menu("Diagram") {
+                Button("Flowchart") { controller.insertBlock("```mermaid\nflowchart LR\n  A[Start] --> B[End]\n```") }
+                Button("Pie chart") { controller.insertBlock("```mermaid\npie title Chart\n  \"A\" : 1\n```") }
+                Button("Sequence") { controller.insertBlock("```mermaid\nsequenceDiagram\n  participant A\n  participant B\n  A->>B: Hello\n```") }
+                Button("Mindmap") { controller.insertBlock("```mermaid\nmindmap\n  root((Topic))\n    Idea\n```") }
+                Button("Gantt") { controller.insertBlock("```mermaid\ngantt\n  title Plan\n  section Phase\n  Task : 3d\n```") }
+                Button("Class diagram") { controller.insertBlock("```mermaid\nclassDiagram\n  class Animal\n  Animal : +int age\n```") }
+                Button("State diagram") { controller.insertBlock("```mermaid\nstateDiagram-v2\n  [*] --> Idle\n  Idle --> Active\n```") }
+                Button("ER diagram") { controller.insertBlock("```mermaid\nerDiagram\n  CUSTOMER ||--o{ ORDER : places\n```") }
+                Button("Git graph") { controller.insertBlock("```mermaid\ngitGraph\n  commit\n  branch dev\n  checkout dev\n  commit\n```") }
+                Button("Journey") { controller.insertBlock("```mermaid\njourney\n  title My Day\n  section Work\n  Code: 4: Me\n```") }
+                Button("Timeline") { controller.insertBlock("```mermaid\ntimeline\n  title History\n  2020 : Start\n```") }
+            }
         } label: { Label("Insert", systemImage: "plus.circle.fill").foregroundStyle(theme.accent) }
     }
 
@@ -171,7 +183,6 @@ struct LiveTextView: UIViewRepresentable {
         private let parent: LiveTextView
         weak var textView: UITextView?
         var lastRenderedSource: String = "\u{0}"
-        private var generation = 0
 
         init(_ parent: LiveTextView) { self.parent = parent }
 
@@ -183,24 +194,24 @@ struct LiveTextView: UIViewRepresentable {
 
         @MainActor func rebuild(_ markdown: String) {
             guard let tv = textView else { return }
-            generation += 1
-            let gen = generation
             let styler = LiveStyler(theme: parent.theme)
             let result = NSMutableAttributedString()
             let width = max(240, tv.bounds.width - 24)
-            var pending: [(attachment: NSTextAttachment, source: String)] = []
             for (i, block) in MarkdownParser().parse(markdown).blocks.enumerated() {
                 if LiveStyler.isTextBlock(block) {
                     result.append(styler.styled(block.markdown()))
                 } else {
+                    // Block elements (lists, tables, code, math, diagrams, images, video) render
+                    // as live SwiftUI views inline via a TextKit 2 attachment view provider — so
+                    // async content (images/video), Canvas (Mermaid) and LaTeX render for real.
                     let source = block.markdown()
-                    let attachment = NSTextAttachment()
-                    attachment.image = Self.placeholder(width: width, theme: parent.theme)
+                    let attachment = BlockAttachment(source: source, theme: parent.theme,
+                                                     services: parent.services, width: width)
                     let attr = NSMutableAttributedString(attachment: attachment)
-                    attr.addAttribute(liveBlockSourceKey, value: source, range: NSRange(location: 0, length: attr.length))
-                    attr.addAttribute(liveBlockIndexKey, value: i, range: NSRange(location: 0, length: attr.length))
+                    let r = NSRange(location: 0, length: attr.length)
+                    attr.addAttribute(liveBlockSourceKey, value: source, range: r)
+                    attr.addAttribute(liveBlockIndexKey, value: i, range: r)
                     result.append(attr)
-                    pending.append((attachment, source))
                 }
                 result.append(NSAttributedString(string: "\n\n",
                                                   attributes: [.font: LiveStyler.bodyFont,
@@ -211,40 +222,6 @@ struct LiveTextView: UIViewRepresentable {
             tv.selectedRange = NSRange(location: min(selected.location, result.length), length: 0)
             lastRenderedSource = markdown
             styler.collapseMarkers(in: tv, activeParagraph: tv.selectedRange)
-            renderNext(pending, width: width, generation: gen, at: 0)
-        }
-
-        @MainActor private func renderNext(_ pending: [(attachment: NSTextAttachment, source: String)],
-                                           width: CGFloat, generation gen: Int, at index: Int) {
-            guard gen == generation, index < pending.count, let tv = textView else { return }
-            let item = pending[index]
-            if let image = renderBlock(item.source, width: width) {
-                item.attachment.image = image
-                let storage = tv.textStorage
-                storage.enumerateAttribute(.attachment, in: NSRange(location: 0, length: storage.length)) { value, range, stop in
-                    if (value as AnyObject) === item.attachment {
-                        storage.beginEditing(); storage.edited(.editedAttributes, range: range, changeInLength: 0); storage.endEditing()
-                        stop.pointee = true
-                    }
-                }
-            }
-            DispatchQueue.main.async { [weak self] in self?.renderNext(pending, width: width, generation: gen, at: index + 1) }
-        }
-
-        private static func placeholder(width: CGFloat, theme: MarkdownTheme) -> UIImage {
-            let size = CGSize(width: max(1, width), height: 44)
-            return UIGraphicsImageRenderer(size: size).image { _ in
-                UIColor(theme.surface).setFill()
-                UIBezierPath(roundedRect: CGRect(origin: .zero, size: size), cornerRadius: 8).fill()
-            }
-        }
-
-        @MainActor private func renderBlock(_ source: String, width: CGFloat) -> UIImage? {
-            let view = MarkdownView(source).markdownTheme(parent.theme).markdownServices(parent.services)
-                .frame(width: width, alignment: .leading).background(parent.theme.surface)
-            let renderer = ImageRenderer(content: view)
-            renderer.scale = UIScreen.main.scale
-            return renderer.uiImage
         }
 
         // MARK: Editing & selection
@@ -323,6 +300,59 @@ struct LiveTextView: UIViewRepresentable {
     }
 }
 
+/// A text attachment that renders a Markdown block as a live SwiftUI view inline (so images,
+/// video, Mermaid Canvas and LaTeX render for real, unlike a static snapshot).
+final class BlockAttachment: NSTextAttachment {
+    let source: String
+    let theme: MarkdownTheme
+    let services: MarkdownServices
+    let width: CGFloat
+
+    init(source: String, theme: MarkdownTheme, services: MarkdownServices, width: CGFloat) {
+        self.source = source; self.theme = theme; self.services = services; self.width = width
+        super.init(data: nil, ofType: nil)
+    }
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    override func viewProvider(for parentView: UIView?, location: any NSTextLocation,
+                               textContainer: NSTextContainer?) -> NSTextAttachmentViewProvider? {
+        let provider = BlockViewProvider(textAttachment: self, parentView: parentView,
+                                         textLayoutManager: textContainer?.textLayoutManager, location: location)
+        provider.tracksTextAttachmentViewBounds = true
+        return provider
+    }
+}
+
+/// Hosts the SwiftUI `MarkdownView` for a block attachment. Read-only (user interaction off) so a
+/// tap falls through to the text view's block-tap handler, which opens the per-type editor sheet.
+final class BlockViewProvider: NSTextAttachmentViewProvider {
+    private var host: UIHostingController<AnyView>?
+
+    override func loadView() {
+        guard let att = textAttachment as? BlockAttachment else { return }
+        let controller = UIHostingController(rootView: AnyView(
+            MarkdownView(att.source)
+                .markdownTheme(att.theme)
+                .markdownServices(att.services)
+                .frame(width: att.width, alignment: .leading)
+                .padding(.vertical, 4)))
+        controller.view.backgroundColor = .clear
+        controller.view.isUserInteractionEnabled = false
+        host = controller
+        view = controller.view
+    }
+
+    override func attachmentBounds(for attributes: [NSAttributedString.Key: Any],
+                                   location: any NSTextLocation, textContainer: NSTextContainer?,
+                                   proposedLineFragment: CGRect, position: CGPoint) -> CGRect {
+        guard let v = view, let att = textAttachment as? BlockAttachment else { return .zero }
+        let fitting = v.systemLayoutSizeFitting(
+            CGSize(width: att.width, height: UIView.layoutFittingCompressedSize.height),
+            withHorizontalFittingPriority: .required, verticalFittingPriority: .fittingSizeLevel)
+        return CGRect(x: 0, y: 0, width: att.width, height: max(24, fitting.height))
+    }
+}
+
 /// Live attributed styling for text blocks: heading sizes, bold/italic/strikethrough/inline code.
 /// Markdown markers are tagged so they can be collapsed (hidden) off the active line.
 private struct LiveStyler {
@@ -334,8 +364,7 @@ private struct LiveStyler {
         case .heading, .paragraph: return true
         case .blockQuote(let blocks):
             return blocks.count == 1 && { if case .paragraph = blocks[0].kind { return true } else { return false } }()
-        case .list: return true
-        default: return false
+        default: return false   // lists, tables, code, math, diagrams, images render as live blocks
         }
     }
 

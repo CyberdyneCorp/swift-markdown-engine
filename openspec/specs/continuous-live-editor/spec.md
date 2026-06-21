@@ -32,30 +32,28 @@ the current paragraph immediately.
 - **THEN** the line SHALL immediately render as a heading
 
 ### Requirement: Inline-rendered block elements
-The system SHALL render block elements (fenced code, math, Mermaid, tables, images) inline
-within the continuous surface, rendering their previews asynchronously so the editor stays
-responsive, and SHALL let the user edit a block via its per-type visual editor.
+The system SHALL render block elements (lists/checklists, fenced code, math, Mermaid, tables,
+images, video) inline within the continuous surface as live SwiftUI views (not static
+snapshots), so async and Canvas/LaTeX content renders, and SHALL let the user edit a block via
+its per-type visual editor.
 
-#### Scenario: A block renders inline without blocking
-- **WHEN** the document contains many block elements
-- **THEN** the text SHALL appear immediately and the block previews SHALL fill in without a long
-  blocking hang
+#### Scenario: Rich blocks render inline for real
+- **WHEN** the document contains a checklist, a LaTeX block, a Mermaid diagram, an image, and a
+  video
+- **THEN** each SHALL appear rendered inline in the Live surface (checkboxes, formula, diagram,
+  image, video), not as Markdown source or a blank box
 
-#### Scenario: Editing a block with its visual editor
+#### Scenario: Editing a block
 - **WHEN** the user taps an inline block element
-- **THEN** the system SHALL open that block's per-type visual editor (e.g. a table grid or a
-  diagram builder) with a live preview, and apply changes back to the Markdown
+- **THEN** the system SHALL open that block's per-type visual editor and apply changes back to the Markdown
 
 ### Requirement: Live editor toolbar
 The system SHALL provide a toolbar in the Live editor with a heading menu, inline formatting
-(bold, italic, strikethrough, inline code, link) applied to the selection, and an Insert menu
-for blocks (list, quote, table, code, diagrams, math, image).
+(bold, italic, strikethrough, inline code, link), and a complete Insert menu: bulleted/numbered/
+checklist, quote, table, code, math, image, video, and all Mermaid diagram types.
 
-#### Scenario: Apply formatting from the toolbar
-- **WHEN** the user selects text and taps Bold
-- **THEN** the selection SHALL be wrapped and rendered bold
-
-#### Scenario: Insert a block from the toolbar
-- **WHEN** the user picks a block from the Insert menu
-- **THEN** that block SHALL be added to the document and rendered inline
+#### Scenario: Insert any block type
+- **WHEN** the user opens the Insert menu
+- **THEN** it SHALL offer lists/checklist, quote, table, code, math, image, video, and a Diagram
+  submenu covering every supported diagram type
 
