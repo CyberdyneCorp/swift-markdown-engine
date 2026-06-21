@@ -11,6 +11,7 @@
 		2BAB6ACA0A5ABAFB7852EBFA /* PencilNotesApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8546F4E0079D31440D4A03F2 /* PencilNotesApp.swift */; };
 		2DA0B7B5F9CAE6E918E741CC /* MarkdownEditor in Frameworks */ = {isa = PBXBuildFile; productRef = C9620B66F518BA8CC451F0EA /* MarkdownEditor */; };
 		2F6153342E2F6648637633C4 /* MarkdownEngineLatex in Frameworks */ = {isa = PBXBuildFile; productRef = A29060BCF88248D350BAB246 /* MarkdownEngineLatex */; };
+		36BECD4A082D46F9FAD7F1F6 /* TableBlockEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC5D31CD5DC8165469AD7242 /* TableBlockEditor.swift */; };
 		5FDC21758B5184E25E00F36D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 96EA481B4C84DDBFD21B4A97 /* Assets.xcassets */; };
 		627FA897011E153D6F3152DC /* MarkdownEngineCodeBlocks in Frameworks */ = {isa = PBXBuildFile; productRef = 356158D76E6E22CC72F8712A /* MarkdownEngineCodeBlocks */; };
 		914371A936FC504DDDF6AFB0 /* TextBlockEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2DAAEE4EFB6E35975216BB0 /* TextBlockEditor.swift */; };
@@ -24,6 +25,7 @@
 		8546F4E0079D31440D4A03F2 /* PencilNotesApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PencilNotesApp.swift; sourceTree = "<group>"; };
 		8AE6AEB5AF09961FE3FE0BA4 /* YouTubeEmbedder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YouTubeEmbedder.swift; sourceTree = "<group>"; };
 		96EA481B4C84DDBFD21B4A97 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		DC5D31CD5DC8165469AD7242 /* TableBlockEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableBlockEditor.swift; sourceTree = "<group>"; };
 		E2DAAEE4EFB6E35975216BB0 /* TextBlockEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextBlockEditor.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -55,6 +57,7 @@
 			children = (
 				96EA481B4C84DDBFD21B4A97 /* Assets.xcassets */,
 				8546F4E0079D31440D4A03F2 /* PencilNotesApp.swift */,
+				DC5D31CD5DC8165469AD7242 /* TableBlockEditor.swift */,
 				E2DAAEE4EFB6E35975216BB0 /* TextBlockEditor.swift */,
 				320F0F7976BDB44F8A719C11 /* WysiwygEditorView.swift */,
 				8AE6AEB5AF09961FE3FE0BA4 /* YouTubeEmbedder.swift */,
@@ -147,6 +150,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				2BAB6ACA0A5ABAFB7852EBFA /* PencilNotesApp.swift in Sources */,
+				36BECD4A082D46F9FAD7F1F6 /* TableBlockEditor.swift in Sources */,
 				914371A936FC504DDDF6AFB0 /* TextBlockEditor.swift in Sources */,
 				0CEC191CC3BB9D9ECE84F981 /* WysiwygEditorView.swift in Sources */,
 				B5B3E9F4A7D13B340355894F /* YouTubeEmbedder.swift in Sources */,

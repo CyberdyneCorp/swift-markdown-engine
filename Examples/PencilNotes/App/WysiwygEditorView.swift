@@ -85,26 +85,34 @@ struct WysiwygEditorView: View {
     /// other block type keeps the interim source editor until its visual editor ships.
     @ViewBuilder
     private func editor(for block: Binding<EditableBlock>) -> some View {
-        if isTextBlock(block.wrappedValue.markdown) {
-            TextBlockEditor(markdown: Binding(
-                get: { block.wrappedValue.markdown },
-                set: { block.wrappedValue.markdown = $0; writeBack() }
-            ), theme: theme)
-        } else {
+        let boundMarkdown = Binding(
+            get: { block.wrappedValue.markdown },
+            set: { block.wrappedValue.markdown = $0; writeBack() }
+        )
+        switch blockKind(block.wrappedValue.markdown) {
+        case .text:
+            TextBlockEditor(markdown: boundMarkdown, theme: theme)
+        case .table:
+            TableBlockEditor(markdown: boundMarkdown, theme: theme)
+        case .other:
             sourceEditor(for: block)
         }
     }
 
-    private func isTextBlock(_ markdown: String) -> Bool {
-        guard let kind = MarkdownParser().parse(markdown).blocks.first?.kind else { return false }
+    private enum EditorKind { case text, table, other }
+
+    private func blockKind(_ markdown: String) -> EditorKind {
+        guard let kind = MarkdownParser().parse(markdown).blocks.first?.kind else { return .other }
         switch kind {
         case .paragraph, .heading:
-            return true
+            return .text
         case .blockQuote(let blocks):
-            if blocks.count == 1, case .paragraph = blocks[0].kind { return true }
-            return false
+            if blocks.count == 1, case .paragraph = blocks[0].kind { return .text }
+            return .other
+        case .table:
+            return .table
         default:
-            return false
+            return .other
         }
     }
 

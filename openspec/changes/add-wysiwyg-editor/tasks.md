@@ -22,9 +22,9 @@
 
 ## 4. Visual table editor
 
-- [ ] 4.1 Grid editor: cell text fields, add/remove row & column
-- [ ] 4.2 Per-column alignment control (left/center/right)
-- [ ] 4.3 Serialize via `BlockNode.markdown()` and re-render
+- [x] 4.1 Grid editor: cell text fields, add/remove row & column
+- [x] 4.2 Per-column alignment control (left/center/right)
+- [x] 4.3 Serialize via `BlockNode.markdown()` and re-render
 
 ## 5. Code / image-video / math editors
 
