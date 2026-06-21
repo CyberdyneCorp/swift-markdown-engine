@@ -107,6 +107,12 @@ struct WysiwygEditorView: View {
             FlowchartBuilder(markdown: boundMarkdown, theme: theme)
         case .pie:
             PieChartBuilder(markdown: boundMarkdown, theme: theme)
+        case .sequence:
+            SequenceBuilder(markdown: boundMarkdown, theme: theme)
+        case .mindmap:
+            MindmapBuilder(markdown: boundMarkdown, theme: theme)
+        case .gantt:
+            GanttBuilder(markdown: boundMarkdown, theme: theme)
         case .diagram:
             DiagramSourceEditor(markdown: boundMarkdown, theme: theme)
         case .other:
@@ -114,7 +120,10 @@ struct WysiwygEditorView: View {
         }
     }
 
-    private enum EditorKind { case text, table, list, code, math, media, diagram, flowchart, pie, other }
+    private enum EditorKind {
+        case text, table, list, code, math, media
+        case diagram, flowchart, pie, sequence, mindmap, gantt, other
+    }
 
     private func blockKind(_ markdown: String) -> EditorKind {
         guard let kind = MarkdownParser().parse(markdown).blocks.first?.kind else { return .other }
@@ -143,6 +152,9 @@ struct WysiwygEditorView: View {
                 .map { $0.trimmingCharacters(in: .whitespaces).lowercased() } ?? ""
             if header.hasPrefix("flowchart") || header.hasPrefix("graph") { return .flowchart }
             if header.hasPrefix("pie") { return .pie }
+            if header.hasPrefix("sequencediagram") { return .sequence }
+            if header.hasPrefix("mindmap") { return .mindmap }
+            if header.hasPrefix("gantt") { return .gantt }
             return .diagram
         case .list(let list):
             // Only flat lists (each item a single paragraph) get the visual editor; nested
@@ -189,6 +201,9 @@ struct WysiwygEditorView: View {
             Button("Table") { insert("| A | B |\n| --- | --- |\n| 1 | 2 |", at: offset) }
             Button("Flowchart") { insert("```mermaid\nflowchart LR\n  A[Start] --> B[End]\n```", at: offset) }
             Button("Pie chart") { insert("```mermaid\npie title Chart\n  \"A\" : 1\n```", at: offset) }
+            Button("Sequence") { insert("```mermaid\nsequenceDiagram\n  participant A\n  participant B\n  A->>B: Hello\n```", at: offset) }
+            Button("Mindmap") { insert("```mermaid\nmindmap\n  root((Topic))\n    Idea\n```", at: offset) }
+            Button("Gantt") { insert("```mermaid\ngantt\n  title Plan\n  section Phase\n  Task : 3d\n```", at: offset) }
             Button("Divider") { insert("---", at: offset) }
         } label: {
             Label(label, systemImage: "plus.circle.fill")

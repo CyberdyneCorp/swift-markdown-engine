@@ -119,6 +119,61 @@ final class PencilNotesUITests: XCTestCase {
                       "flowchart visual builder did not open")
     }
 
+    func testInsertSequenceOpensVisualBuilder() {
+        let app = launch()
+        openInsertBelowMenu(app)
+        app.buttons["Sequence"].tap()
+        XCTAssertTrue(app.buttons["Participant"].waitForExistence(timeout: 5),
+                      "sequence builder did not open")
+    }
+
+    func testInsertMindmapOpensVisualBuilder() {
+        let app = launch()
+        openInsertBelowMenu(app)
+        app.buttons["Mindmap"].tap()
+        XCTAssertTrue(app.buttons["Indent"].firstMatch.waitForExistence(timeout: 5),
+                      "mindmap builder did not open")
+    }
+
+    func testInsertGanttOpensVisualBuilder() {
+        let app = launch()
+        openInsertBelowMenu(app)
+        app.buttons["Gantt"].tap()
+        XCTAssertTrue(app.buttons["Task"].waitForExistence(timeout: 5),
+                      "gantt builder did not open")
+    }
+
+    // MARK: - Deeper coverage: the table editor
+
+    private func openTableEditor(_ app: XCUIApplication) {
+        openInsertBelowMenu(app)
+        app.buttons["Table"].tap()
+        XCTAssertTrue(app.buttons["Column"].waitForExistence(timeout: 5), "table editor did not open")
+    }
+
+    func testTableEditorAddsColumnAndRow() {
+        let app = launch()
+        openTableEditor(app)
+
+        let initial = app.textFields.count
+        app.buttons["Column"].tap()
+        XCTAssertGreaterThan(app.textFields.count, initial, "adding a column did not add cells")
+
+        let afterColumn = app.textFields.count
+        app.buttons["Row"].tap()
+        XCTAssertGreaterThan(app.textFields.count, afterColumn, "adding a row did not add cells")
+    }
+
+    func testTableEditorEditsACell() {
+        let app = launch()
+        openTableEditor(app)
+        let cell = app.textFields.element(boundBy: 0)
+        XCTAssertTrue(cell.waitForExistence(timeout: 5))
+        cell.tap()
+        cell.typeText("Z")
+        XCTAssertTrue((cell.value as? String ?? "").contains("Z"), "cell edit did not register")
+    }
+
     // MARK: - Chrome
 
     func testDarkModeToggle() {

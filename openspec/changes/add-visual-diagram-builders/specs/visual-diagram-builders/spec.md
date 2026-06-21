@@ -23,10 +23,28 @@ numeric value), serialized to a `pie` Mermaid block.
 - **THEN** the block SHALL render the pie chart and serialize to a `pie title …` block with
   `"label" : value` lines
 
-### Requirement: Other diagram types unchanged
-The system SHALL keep the Phase-1 source editor (with live preview) for all Mermaid types that
-do not yet have a visual builder.
+### Requirement: Additional diagram builders (sequence, mindmap, gantt)
+The system SHALL provide form-based visual builders for sequence diagrams (participants +
+messages), mindmaps (indented nodes), and gantt charts (title + sectioned tasks with
+durations), each serialized to the corresponding Mermaid block.
+
+#### Scenario: Build a sequence diagram
+- **WHEN** the user adds participants and a message between two of them
+- **THEN** the block SHALL render the sequence diagram and serialize to a `sequenceDiagram`
+  block with `participant` lines and a `A->>B: text` message
+
+#### Scenario: Build a mindmap
+- **WHEN** the user adds nodes and indents one under another
+- **THEN** the block SHALL serialize to a `mindmap` block whose indentation reflects the hierarchy
+
+#### Scenario: Build a gantt chart
+- **WHEN** the user sets a title and adds tasks with sections and durations
+- **THEN** the block SHALL serialize to a `gantt` block with `title`, `section`, and task lines
+
+### Requirement: Remaining diagram types unchanged
+The system SHALL keep the Phase-1 source editor (with live preview) for Mermaid types without a
+visual builder yet (class, state, ER, gitGraph, journey, timeline).
 
 #### Scenario: Unsupported type uses source editor
-- **WHEN** a `sequenceDiagram` (or other non-flowchart/non-pie) block is selected
+- **WHEN** a `classDiagram` block is selected
 - **THEN** the system SHALL present the source editor, not a visual builder

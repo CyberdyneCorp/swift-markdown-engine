@@ -247,6 +247,225 @@ struct FlowchartBuilder: View {
     private func addButton(_ label: String, _ action: @escaping () -> Void) -> some View { builderAdd(label, theme: theme, action: action) }
 }
 
+// MARK: - Sequence diagram
+
+struct SequenceBuilder: View {
+    @Binding var markdown: String
+    let theme: MarkdownTheme
+
+    struct Participant: Identifiable, Equatable { let id = UUID(); var name: String }
+    struct Message: Identifiable, Equatable { let id = UUID(); var from: String; var to: String; var text: String; var dashed: Bool }
+
+    @State private var participants: [Participant] = []
+    @State private var messages: [Message] = []
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            builderSection("Participants", theme: theme) {
+                ForEach($participants) { $p in
+                    HStack(spacing: 6) {
+                        builderField("Name", text: $p.name, theme: theme)
+                        builderTrash { participants.removeAll { $0.id == p.id } }
+                    }
+                }
+                builderAdd("Participant", theme: theme) { participants.append(Participant(name: nextName())) }
+            }
+            builderSection("Messages", theme: theme) {
+                ForEach($messages) { $m in
+                    HStack(spacing: 6) {
+                        namePicker(selection: $m.from)
+                        Image(systemName: m.dashed ? "arrow.right.to.line" : "arrow.right").foregroundStyle(theme.textSecondary)
+                            .onTapGesture { m.dashed.toggle() }
+                        namePicker(selection: $m.to)
+                        builderField("text", text: $m.text, theme: theme).frame(width: 90)
+                        builderTrash { messages.removeAll { $0.id == m.id } }
+                    }
+                }
+                builderAdd("Message", theme: theme) {
+                    let names = participants.map(\.name)
+                    messages.append(Message(from: names.first ?? "", to: names.dropFirst().first ?? names.first ?? "", text: "msg", dashed: false))
+                }
+                .disabled(participants.isEmpty)
+            }
+        }
+        .onAppear(perform: decompose)
+        .onChange(of: participants) { _ in recompose() }
+        .onChange(of: messages) { _ in recompose() }
+    }
+
+    private func namePicker(selection: Binding<String>) -> some View {
+        Picker("", selection: selection) { ForEach(participants.map(\.name), id: \.self) { Text($0).tag($0) } }
+            .pickerStyle(.menu).tint(theme.accent).labelsHidden()
+    }
+
+    private func nextName() -> String {
+        for c in "ABCDEFGHIJKLMNOPQRSTUVWXYZ" where !participants.contains(where: { $0.name == String(c) }) { return String(c) }
+        return "P\(participants.count + 1)"
+    }
+
+    private func decompose() {
+        let source = mermaidSource(from: markdown)
+        var names: [String] = []
+        var msgs: [Message] = []
+        func ensure(_ n: String) { if !n.isEmpty, !names.contains(n) { names.append(n) } }
+        for line in source.split(separator: "\n").map({ $0.trimmingCharacters(in: .whitespaces) }) {
+            if line.lowercased().hasPrefix("sequencediagram") { continue }
+            if line.hasPrefix("participant ") || line.hasPrefix("actor ") {
+                let n = line.split(separator: " ").dropFirst().first.map(String.init) ?? ""
+                ensure(n); continue
+            }
+            guard let (conn, dashed) = Self.connector(in: line) else { continue }
+            let sides = line.components(separatedBy: conn)
+            guard sides.count == 2 else { continue }
+            let from = sides[0].trimmingCharacters(in: .whitespaces)
+            let rest = sides[1]
+            let to: String, text: String
+            if let colon = rest.firstIndex(of: ":") {
+                to = String(rest[..<colon]).trimmingCharacters(in: .whitespaces)
+                text = String(rest[rest.index(after: colon)...]).trimmingCharacters(in: .whitespaces)
+            } else { to = rest.trimmingCharacters(in: .whitespaces); text = "" }
+            ensure(from); ensure(to)
+            msgs.append(Message(from: from, to: to, text: text, dashed: dashed))
+        }
+        participants = names.map { Participant(name: $0) }
+        messages = msgs
+    }
+
+    private static func connector(in line: String) -> (String, Bool)? {
+        for c in ["-->>", "->>", "-->", "->"] where line.contains(c) { return (c, c.hasPrefix("--")) }
+        return nil
+    }
+
+    private func recompose() {
+        var lines = ["sequenceDiagram"]
+        lines += participants.map { "  participant \($0.name)" }
+        lines += messages.map { "  \($0.from)\($0.dashed ? "-->>" : "->>")\($0.to): \($0.text)" }
+        markdown = mermaidBlock(lines.joined(separator: "\n"))
+    }
+}
+
+// MARK: - Mindmap
+
+struct MindmapBuilder: View {
+    @Binding var markdown: String
+    let theme: MarkdownTheme
+
+    struct Item: Identifiable, Equatable { let id = UUID(); var text: String; var depth: Int }
+    @State private var items: [Item] = []
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            ForEach($items) { $item in
+                HStack(spacing: 6) {
+                    Button { if item.depth > 0 { item.depth -= 1 } } label: { Image(systemName: "arrow.left.to.line") }
+                        .buttonStyle(.plain).foregroundStyle(theme.accent).disabled(item.depth == 0).accessibilityLabel("Outdent")
+                    Button { item.depth += 1 } label: { Image(systemName: "arrow.right.to.line") }
+                        .buttonStyle(.plain).foregroundStyle(theme.accent).accessibilityLabel("Indent")
+                    builderField("Text", text: $item.text, theme: theme)
+                        .padding(.leading, CGFloat(item.depth) * 14)
+                    builderTrash { items.removeAll { $0.id == item.id } }
+                }
+            }
+            builderAdd("Node", theme: theme) {
+                items.append(Item(text: "Node", depth: items.isEmpty ? 0 : 1))
+            }
+        }
+        .onAppear(perform: decompose)
+        .onChange(of: items) { _ in recompose() }
+    }
+
+    private func decompose() {
+        let source = mermaidSource(from: markdown)
+        var found: [Item] = []
+        for raw in source.split(separator: "\n", omittingEmptySubsequences: false) {
+            let trimmed = raw.trimmingCharacters(in: .whitespaces)
+            if trimmed.isEmpty || trimmed.lowercased() == "mindmap" { continue }
+            let indent = raw.prefix { $0 == " " || $0 == "\t" }.reduce(0) { $0 + ($1 == "\t" ? 2 : 1) }
+            found.append(Item(text: Self.cleanLabel(trimmed), depth: indent / 2))
+        }
+        // Normalize so depths form a sensible 0-based hierarchy.
+        items = found
+    }
+
+    private static func cleanLabel(_ text: String) -> String {
+        var t = text
+        for (open, close) in [("((", "))"), ("[", "]"), ("(", ")"), ("{{", "}}")] {
+            if let r = t.range(of: open), t.hasSuffix(close) {
+                t = String(t[r.upperBound..<t.index(t.endIndex, offsetBy: -close.count)]); break
+            }
+        }
+        return t.trimmingCharacters(in: CharacterSet(charactersIn: " \"'"))
+    }
+
+    private func recompose() {
+        var lines = ["mindmap"]
+        for item in items {
+            let indent = String(repeating: "  ", count: max(0, item.depth))
+            lines.append(item.depth == 0 ? "\(indent)root((\(item.text)))" : "\(indent)\(item.text)")
+        }
+        markdown = mermaidBlock(lines.joined(separator: "\n"))
+    }
+}
+
+// MARK: - Gantt
+
+struct GanttBuilder: View {
+    @Binding var markdown: String
+    let theme: MarkdownTheme
+
+    struct Task: Identifiable, Equatable { let id = UUID(); var section: String; var label: String; var duration: String }
+    @State private var title: String = ""
+    @State private var tasks: [Task] = []
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            builderField("Title", text: $title, theme: theme)
+            ForEach($tasks) { $task in
+                HStack(spacing: 6) {
+                    builderField("Section", text: $task.section, theme: theme).frame(width: 90)
+                    builderField("Task", text: $task.label, theme: theme)
+                    builderField("3d", text: $task.duration, theme: theme).frame(width: 56)
+                    builderTrash { tasks.removeAll { $0.id == task.id } }
+                }
+            }
+            builderAdd("Task", theme: theme) {
+                tasks.append(Task(section: tasks.last?.section ?? "Section", label: "Task", duration: "3d"))
+            }
+        }
+        .onAppear(perform: decompose)
+        .onChange(of: title) { _ in recompose() }
+        .onChange(of: tasks) { _ in recompose() }
+    }
+
+    private func decompose() {
+        let source = mermaidSource(from: markdown)
+        var section = ""
+        var found: [Task] = []
+        for line in source.split(separator: "\n").map({ $0.trimmingCharacters(in: .whitespaces) }) {
+            if line.lowercased() == "gantt" { continue }
+            if line.hasPrefix("title ") { title = String(line.dropFirst("title ".count)); continue }
+            if line.hasPrefix("section ") { section = String(line.dropFirst("section ".count)); continue }
+            guard let colon = line.firstIndex(of: ":") else { continue }
+            let label = String(line[..<colon]).trimmingCharacters(in: .whitespaces)
+            let tokens = line[line.index(after: colon)...].split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+            let duration = tokens.last(where: { $0.last.map { "dwh".contains($0) } ?? false }) ?? tokens.last ?? "3d"
+            found.append(Task(section: section, label: label, duration: duration))
+        }
+        tasks = found
+    }
+
+    private func recompose() {
+        var lines = ["gantt"]
+        if !title.isEmpty { lines.append("  title \(title)") }
+        var lastSection: String?
+        for task in tasks {
+            if task.section != lastSection { lines.append("  section \(task.section)"); lastSection = task.section }
+            lines.append("  \(task.label) : \(task.duration)")
+        }
+        markdown = mermaidBlock(lines.joined(separator: "\n"))
+    }
+}
+
 // MARK: - Small shared controls
 
 private func builderField(_ placeholder: String, text: Binding<String>, theme: MarkdownTheme) -> some View {
@@ -265,4 +484,12 @@ private func builderTrash(_ action: @escaping () -> Void) -> some View {
 private func builderAdd(_ label: String, theme: MarkdownTheme, action: @escaping () -> Void) -> some View {
     Button(action: action) { Label(label, systemImage: "plus") }
         .buttonStyle(.plain).foregroundStyle(theme.accent).font(.system(size: 15, weight: .medium))
+}
+
+private func builderSection<Content: View>(_ title: String, theme: MarkdownTheme,
+                                           @ViewBuilder _ content: () -> Content) -> some View {
+    VStack(alignment: .leading, spacing: 6) {
+        Text(title).font(.caption.weight(.semibold)).foregroundStyle(theme.textSecondary)
+        content()
+    }
 }

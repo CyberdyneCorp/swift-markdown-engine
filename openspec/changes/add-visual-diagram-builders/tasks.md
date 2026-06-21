@@ -11,6 +11,14 @@
 - [x] 2.3 Decompose a `flowchart`/`graph` block into the model; serialize back to Mermaid
 - [x] 2.4 Route `flowchart`/`graph` mermaid blocks to the builder in `WysiwygEditorView`
 
+## 2b. More builders (sequence, mindmap, gantt)
+
+- [x] 2b.1 SequenceBuilder: participants + messages (from→to, text, dashed); decompose/serialize `sequenceDiagram`
+- [x] 2b.2 MindmapBuilder: indented nodes (indent/outdent); decompose/serialize `mindmap`
+- [x] 2b.3 GanttBuilder: title + sectioned tasks with durations; decompose/serialize `gantt`
+- [x] 2b.4 Route sequence/mindmap/gantt blocks + add insert-menu items
+- [x] 2b.5 Deeper UI tests for the table editor (add column/row, edit a cell) + smoke tests for the three new builders
+
 ## 3. Verification
 
 - [x] 3.1 Build PencilNotes; engine tests still green
