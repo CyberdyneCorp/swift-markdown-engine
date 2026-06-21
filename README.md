@@ -4,9 +4,12 @@ A complete, **fully native** Markdown renderer and editor for **iOS, macOS, and 
 CommonMark + GFM plus code highlighting, tables, LaTeX math, and Mermaid diagrams. No
 WebView, no JavaScript runtime.
 
-> **Status:** Specified, pre-implementation. The full specification lives in
-> [`openspec/`](openspec/changes/add-markdown-renderer-editor/). This README describes the
-> engine being built.
+[![CI](https://github.com/CyberdyneCorp/swift-markdown-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/CyberdyneCorp/swift-markdown-engine/actions/workflows/ci.yml)
+
+> **Status:** Implemented and released (`v1.0.0`). Builds for iOS / macOS / watchOS, with
+> the engine + bridges covered by unit tests and the editors by on-device XCUITests in CI.
+> The behavior is specified with [OpenSpec](https://openspec.dev) under
+> [`openspec/specs/`](openspec/specs/).
 
 ---
 
@@ -243,20 +246,20 @@ MarkdownDocument  ── immutable, Sendable AST with source ranges
 
 ## Project status & specs
 
-This project is **spec-driven** with [OpenSpec](https://openspec.dev). The complete,
-testable specification — parsing, rendering, code, math, Mermaid, editor, theming,
-services, and platform support — is in:
+This project is **spec-driven** with [OpenSpec](https://openspec.dev). Each capability has a
+living specification (requirements + scenarios) under [`openspec/specs/`](openspec/specs/) —
+parsing, rendering, code, math, Mermaid, the editor and live/WYSIWYG editors, serialization,
+theming, host-customization hooks, services, and platform support. Completed change
+proposals are archived in `openspec/changes/archive/`.
 
 ```
-openspec/changes/add-markdown-renderer-editor/
-├── proposal.md     # why + scope
-├── design.md       # architecture & decisions
-├── tasks.md        # implementation checklist
-└── specs/          # 9 capability specs (requirements + scenarios)
+openspec/
+├── specs/              # living capability specs (current behavior)
+└── changes/archive/    # delivered change proposals (proposal / design / tasks)
 ```
 
-Browse it with `openspec show add-markdown-renderer-editor` or read the spec files
-directly. The phased delivery plan lives in [ROADMAP.md](ROADMAP.md).
+Browse with `openspec list --specs` and `openspec show <spec>`, or read the files directly.
+The phased delivery history lives in [ROADMAP.md](ROADMAP.md).
 
 ## License
 

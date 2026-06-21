@@ -64,11 +64,12 @@ struct MermaidView: View {
     #endif
 }
 
-#if !os(watchOS)
 /// Sizes a fixed-size diagram view. In `.scroll` mode it just applies the natural frame; in
 /// `.fitToWidth` mode it scales the diagram down (never up) to fit the available width, keeping
 /// the whole diagram visible. The natural size is known at the call site, so the fit is computed
 /// synchronously (no preference round-trip) and works inside hosted/measured contexts.
+/// Defined for all platforms because the diagram views call it even where Mermaid degrades to
+/// source (watchOS) — only `MermaidView`'s own diagram rendering is gated off there.
 private struct DiagramFrame: ViewModifier {
     let natural: CGSize
     @Environment(\.markdownConfiguration) private var configuration
@@ -97,4 +98,3 @@ extension View {
         modifier(DiagramFrame(natural: CGSize(width: width, height: height)))
     }
 }
-#endif
