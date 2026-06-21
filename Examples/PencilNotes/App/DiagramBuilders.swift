@@ -7,12 +7,12 @@ import SwiftMarkdownEngine
 
 // MARK: - Shared helpers
 
-private func mermaidSource(from markdown: String) -> String {
+func mermaidSource(from markdown: String) -> String {
     guard case .mermaid(let source)? = MarkdownParser().parse(markdown).blocks.first?.kind else { return "" }
     return source
 }
 
-private func mermaidBlock(_ source: String) -> String { "```mermaid\n\(source)\n```" }
+func mermaidBlock(_ source: String) -> String { "```mermaid\n\(source)\n```" }
 
 // MARK: - Pie chart
 
@@ -468,7 +468,7 @@ struct GanttBuilder: View {
 
 // MARK: - Small shared controls
 
-private func builderField(_ placeholder: String, text: Binding<String>, theme: MarkdownTheme) -> some View {
+func builderField(_ placeholder: String, text: Binding<String>, theme: MarkdownTheme) -> some View {
     TextField(placeholder, text: text)
         .autocorrectionDisabled()
         .textInputAutocapitalization(.never)
@@ -476,17 +476,17 @@ private func builderField(_ placeholder: String, text: Binding<String>, theme: M
         .background(theme.surface, in: RoundedRectangle(cornerRadius: 6))
 }
 
-private func builderTrash(_ action: @escaping () -> Void) -> some View {
+func builderTrash(_ action: @escaping () -> Void) -> some View {
     Button(role: .destructive, action: action) { Image(systemName: "trash") }
         .buttonStyle(.plain).foregroundStyle(.red).accessibilityLabel("Delete")
 }
 
-private func builderAdd(_ label: String, theme: MarkdownTheme, action: @escaping () -> Void) -> some View {
+func builderAdd(_ label: String, theme: MarkdownTheme, action: @escaping () -> Void) -> some View {
     Button(action: action) { Label(label, systemImage: "plus") }
         .buttonStyle(.plain).foregroundStyle(theme.accent).font(.system(size: 15, weight: .medium))
 }
 
-private func builderSection<Content: View>(_ title: String, theme: MarkdownTheme,
+func builderSection<Content: View>(_ title: String, theme: MarkdownTheme,
                                            @ViewBuilder _ content: () -> Content) -> some View {
     VStack(alignment: .leading, spacing: 6) {
         Text(title).font(.caption.weight(.semibold)).foregroundStyle(theme.textSecondary)

@@ -113,6 +113,18 @@ struct WysiwygEditorView: View {
             MindmapBuilder(markdown: boundMarkdown, theme: theme)
         case .gantt:
             GanttBuilder(markdown: boundMarkdown, theme: theme)
+        case .classDiagram:
+            ClassDiagramBuilder(markdown: boundMarkdown, theme: theme)
+        case .stateDiagram:
+            StateDiagramBuilder(markdown: boundMarkdown, theme: theme)
+        case .erDiagram:
+            ERDiagramBuilder(markdown: boundMarkdown, theme: theme)
+        case .gitGraph:
+            GitGraphBuilder(markdown: boundMarkdown, theme: theme)
+        case .journey:
+            JourneyBuilder(markdown: boundMarkdown, theme: theme)
+        case .timeline:
+            TimelineBuilder(markdown: boundMarkdown, theme: theme)
         case .diagram:
             DiagramSourceEditor(markdown: boundMarkdown, theme: theme)
         case .other:
@@ -122,7 +134,8 @@ struct WysiwygEditorView: View {
 
     private enum EditorKind {
         case text, table, list, code, math, media
-        case diagram, flowchart, pie, sequence, mindmap, gantt, other
+        case diagram, flowchart, pie, sequence, mindmap, gantt
+        case classDiagram, stateDiagram, erDiagram, gitGraph, journey, timeline, other
     }
 
     private func blockKind(_ markdown: String) -> EditorKind {
@@ -155,6 +168,12 @@ struct WysiwygEditorView: View {
             if header.hasPrefix("sequencediagram") { return .sequence }
             if header.hasPrefix("mindmap") { return .mindmap }
             if header.hasPrefix("gantt") { return .gantt }
+            if header.hasPrefix("classdiagram") { return .classDiagram }
+            if header.hasPrefix("statediagram") { return .stateDiagram }
+            if header.hasPrefix("erdiagram") { return .erDiagram }
+            if header.hasPrefix("gitgraph") { return .gitGraph }
+            if header.hasPrefix("journey") { return .journey }
+            if header.hasPrefix("timeline") { return .timeline }
             return .diagram
         case .list(let list):
             // Only flat lists (each item a single paragraph) get the visual editor; nested
@@ -204,6 +223,12 @@ struct WysiwygEditorView: View {
             Button("Sequence") { insert("```mermaid\nsequenceDiagram\n  participant A\n  participant B\n  A->>B: Hello\n```", at: offset) }
             Button("Mindmap") { insert("```mermaid\nmindmap\n  root((Topic))\n    Idea\n```", at: offset) }
             Button("Gantt") { insert("```mermaid\ngantt\n  title Plan\n  section Phase\n  Task : 3d\n```", at: offset) }
+            Button("Class diagram") { insert("```mermaid\nclassDiagram\n  class Animal\n  Animal : +int age\n```", at: offset) }
+            Button("State diagram") { insert("```mermaid\nstateDiagram-v2\n  [*] --> Idle\n  Idle --> Active\n```", at: offset) }
+            Button("ER diagram") { insert("```mermaid\nerDiagram\n  CUSTOMER ||--o{ ORDER : places\n```", at: offset) }
+            Button("Git graph") { insert("```mermaid\ngitGraph\n  commit\n  branch dev\n  checkout dev\n  commit\n```", at: offset) }
+            Button("Journey") { insert("```mermaid\njourney\n  title My Day\n  section Work\n  Code: 4: Me\n```", at: offset) }
+            Button("Timeline") { insert("```mermaid\ntimeline\n  title History\n  2020 : Start\n```", at: offset) }
             Button("Divider") { insert("---", at: offset) }
         } label: {
             Label(label, systemImage: "plus.circle.fill")

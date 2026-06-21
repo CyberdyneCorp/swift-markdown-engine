@@ -143,6 +143,23 @@ final class PencilNotesUITests: XCTestCase {
                       "gantt builder did not open")
     }
 
+    private func insertAndExpectBuilder(_ app: XCUIApplication, item: String, addButton: String,
+                                        file: StaticString = #filePath, line: UInt = #line) {
+        openInsertBelowMenu(app)
+        let menuItem = app.buttons[item]
+        XCTAssertTrue(menuItem.waitForExistence(timeout: 5), "insert menu missing \(item)", file: file, line: line)
+        menuItem.tap()
+        XCTAssertTrue(app.buttons[addButton].waitForExistence(timeout: 5),
+                      "\(item) builder did not open", file: file, line: line)
+    }
+
+    func testInsertClassDiagramOpensBuilder() { insertAndExpectBuilder(launch(), item: "Class diagram", addButton: "Class") }
+    func testInsertStateDiagramOpensBuilder() { insertAndExpectBuilder(launch(), item: "State diagram", addButton: "Transition") }
+    func testInsertERDiagramOpensBuilder() { insertAndExpectBuilder(launch(), item: "ER diagram", addButton: "Relationship") }
+    func testInsertGitGraphOpensBuilder() { insertAndExpectBuilder(launch(), item: "Git graph", addButton: "Operation") }
+    func testInsertJourneyOpensBuilder() { insertAndExpectBuilder(launch(), item: "Journey", addButton: "Step") }
+    func testInsertTimelineOpensBuilder() { insertAndExpectBuilder(launch(), item: "Timeline", addButton: "Period") }
+
     // MARK: - Deeper coverage: the table editor
 
     private func openTableEditor(_ app: XCUIApplication) {

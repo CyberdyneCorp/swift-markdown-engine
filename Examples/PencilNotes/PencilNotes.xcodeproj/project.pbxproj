@@ -21,6 +21,7 @@
 		9EDE48ED7E1E4DEA3D50EB96 /* ListBlockEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5D805AD61DAA506BED28569 /* ListBlockEditor.swift */; };
 		B5B3E9F4A7D13B340355894F /* YouTubeEmbedder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AE6AEB5AF09961FE3FE0BA4 /* YouTubeEmbedder.swift */; };
 		F4BA81E742F6F94E21A764E3 /* SwiftMarkdownEngine in Frameworks */ = {isa = PBXBuildFile; productRef = 92B980C54823A0B5ABDA7AF7 /* SwiftMarkdownEngine */; };
+		FF030A6122E90A2B6DBE943D /* DiagramBuildersMore.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBBB16B604E09E702F3C8F3E /* DiagramBuildersMore.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -46,6 +47,7 @@
 		B52F45FD2793FB352F025BBF /* MediaCodeMathEditors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaCodeMathEditors.swift; sourceTree = "<group>"; };
 		DC5D31CD5DC8165469AD7242 /* TableBlockEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableBlockEditor.swift; sourceTree = "<group>"; };
 		E2DAAEE4EFB6E35975216BB0 /* TextBlockEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextBlockEditor.swift; sourceTree = "<group>"; };
+		FBBB16B604E09E702F3C8F3E /* DiagramBuildersMore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagramBuildersMore.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -77,6 +79,7 @@
 			children = (
 				96EA481B4C84DDBFD21B4A97 /* Assets.xcassets */,
 				A915E5D3B76333826E318386 /* DiagramBuilders.swift */,
+				FBBB16B604E09E702F3C8F3E /* DiagramBuildersMore.swift */,
 				A5D805AD61DAA506BED28569 /* ListBlockEditor.swift */,
 				B52F45FD2793FB352F025BBF /* MediaCodeMathEditors.swift */,
 				8546F4E0079D31440D4A03F2 /* PencilNotesApp.swift */,
@@ -206,6 +209,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				51FD7BCEB36FACF7D1FCA746 /* DiagramBuilders.swift in Sources */,
+				FF030A6122E90A2B6DBE943D /* DiagramBuildersMore.swift in Sources */,
 				9EDE48ED7E1E4DEA3D50EB96 /* ListBlockEditor.swift in Sources */,
 				9B0AD514324A9363195BF990 /* MediaCodeMathEditors.swift in Sources */,
 				2BAB6ACA0A5ABAFB7852EBFA /* PencilNotesApp.swift in Sources */,
