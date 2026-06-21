@@ -10,6 +10,11 @@ renderer stays WebView-free. An app can inject a ``VideoEmbedder`` through
 ``MarkdownServices`` to play provider videos inline (the WebView then lives in the app,
 not the engine).
 
+Serialization: the model round-trips back to Markdown — call `markdown()` on a
+``MarkdownDocument``, ``BlockNode``, or ``InlineNode``. This powers editing surfaces (e.g.
+the block-based WYSIWYG editor in the PencilNotes example) where visual edits must persist
+as Markdown.
+
 ## Overview
 
 `SwiftMarkdownEngine` parses Markdown into an immutable, `Sendable` document model and

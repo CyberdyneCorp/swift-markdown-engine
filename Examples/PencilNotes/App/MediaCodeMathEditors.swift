@@ -73,6 +73,37 @@ struct MathBlockEditor: View {
     private func recompose() { markdown = "$$\n\(latex)\n$$" }
 }
 
+/// Interim diagram editor: edit the Mermaid source directly; the rendered diagram shown above
+/// is the live preview. Full visual diagram/chart builders are Phase 2 (a follow-up change).
+struct DiagramSourceEditor: View {
+    @Binding var markdown: String
+    let theme: MarkdownTheme
+
+    @State private var source: String = ""
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text("Diagram source — a visual builder is coming in a later phase")
+                .font(.caption2.weight(.semibold)).foregroundStyle(theme.textSecondary)
+            TextEditor(text: $source)
+                .font(.system(.callout, design: .monospaced))
+                .frame(minHeight: 90)
+                .padding(6)
+                .background(theme.surface, in: RoundedRectangle(cornerRadius: 6))
+                .scrollContentBackground(.hidden)
+        }
+        .onAppear(perform: decompose)
+        .onChange(of: source) { _ in recompose() }
+    }
+
+    private func decompose() {
+        guard case .mermaid(let s)? = MarkdownParser().parse(markdown).blocks.first?.kind else { return }
+        source = s
+    }
+
+    private func recompose() { markdown = "```mermaid\n\(source)\n```" }
+}
+
 /// Image/video editor: a plain image (`![alt](url)`) or a linked video thumbnail
 /// (`[![alt](thumb)](videoURL)`), toggled by "Linked video".
 struct ImageVideoEditor: View {

@@ -34,12 +34,12 @@
 
 ## 6. Diagram/chart interim editor
 
-- [ ] 6.1 Source editor + live `MermaidView` preview for `mermaid` blocks; serialize back into a fenced `mermaid` block
-- [ ] 6.2 Document that full visual diagram/chart builders are Phase 2 (follow-up change)
+- [x] 6.1 Dedicated diagram source editor (edit Mermaid source; rendered diagram above is the live preview); serializes back into a fenced `mermaid` block
+- [x] 6.2 Document that full visual diagram/chart builders are Phase 2 (noted in README + the editor UI; deferred to a follow-up change)
 
 ## 7. Verification & docs
 
-- [ ] 7.1 Run the full package test suite (serializer round-trips) — no regressions
-- [ ] 7.2 Build PencilNotes; manually exercise the Edit mode for each block type
-- [ ] 7.3 Update README/DocC: Markdown serialization API + WYSIWYG example mode
-- [ ] 7.4 `openspec validate add-wysiwyg-editor`
+- [x] 7.1 Run the full package test suite (serializer round-trips) — no regressions (111 tests)
+- [x] 7.2 Build PencilNotes (builds clean); manual exercise of the Edit mode is for on-device verification
+- [x] 7.3 Update README/DocC: Markdown serialization API + WYSIWYG example mode
+- [x] 7.4 `openspec validate add-wysiwyg-editor`

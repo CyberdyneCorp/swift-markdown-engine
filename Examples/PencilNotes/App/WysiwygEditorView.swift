@@ -102,12 +102,14 @@ struct WysiwygEditorView: View {
             MathBlockEditor(markdown: boundMarkdown, theme: theme)
         case .media:
             ImageVideoEditor(markdown: boundMarkdown, theme: theme)
+        case .diagram:
+            DiagramSourceEditor(markdown: boundMarkdown, theme: theme)
         case .other:
             sourceEditor(for: block)
         }
     }
 
-    private enum EditorKind { case text, table, list, code, math, media, other }
+    private enum EditorKind { case text, table, list, code, math, media, diagram, other }
 
     private func blockKind(_ markdown: String) -> EditorKind {
         guard let kind = MarkdownParser().parse(markdown).blocks.first?.kind else { return .other }
@@ -131,6 +133,8 @@ struct WysiwygEditorView: View {
             return .code
         case .mathBlock:
             return .math
+        case .mermaid:
+            return .diagram
         case .list(let list):
             // Only flat lists (each item a single paragraph) get the visual editor; nested
             // lists keep the source editor.
