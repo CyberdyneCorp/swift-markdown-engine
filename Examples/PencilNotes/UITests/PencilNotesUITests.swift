@@ -140,6 +140,26 @@ final class PencilNotesUITests: XCTestCase {
                       "text typed in Live did not reach the source")
     }
 
+    /// Regression: flat lists render as inline-editable text in Live mode, so they must survive
+    /// source reconstruction. Typing (which reconstructs the whole document) must not corrupt or
+    /// drop the checklist items.
+    func testLiveListRoundTripPreservesChecklist() {
+        let app = launch()
+        select(mode: "Live", in: app)
+        let editor = app.textViews.firstMatch
+        XCTAssertTrue(editor.waitForExistence(timeout: 12))
+        editor.coordinate(withNormalizedOffset: CGVector(dx: 0.15, dy: 0.03)).tap()
+        editor.typeText("Z")   // forces a full Markdown reconstruction
+        select(mode: "Raw", in: app)
+        let raw = app.textViews.firstMatch
+        XCTAssertTrue(raw.waitForExistence(timeout: 6))
+        let src = raw.value as? String ?? ""
+        XCTAssertTrue(src.contains("- [x] Set up the easel"),
+                      "checklist item lost through Live list reconstruction")
+        XCTAssertTrue(src.contains("- [ ] Add color"),
+                      "checklist item lost through Live list reconstruction")
+    }
+
     func testLiveInsertBlockUpdatesSource() {
         let app = launch()
         select(mode: "Live", in: app)

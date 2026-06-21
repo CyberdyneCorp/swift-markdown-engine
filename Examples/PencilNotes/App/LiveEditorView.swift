@@ -147,6 +147,40 @@ private let liveBlockIndexKey = NSAttributedString.Key("liveBlockIndex")
 private let liveMarkerKey = NSAttributedString.Key("liveMarker")
 private let liveMarkerFontKey = NSAttributedString.Key("liveMarkerFont")
 
+/// A parsed list-item line: its marker, indentation, optional checkbox, and where the body starts.
+/// Powers Enter-continuation, Tab indentation, and checkbox toggling in the Live editor.
+private struct ListLine {
+    let indent: String
+    let bullet: String?          // "-", "*", "+" for unordered
+    let number: Int?             // value for ordered markers
+    let prefixLength: Int        // chars from line start through the marker (and checkbox) + spaces
+    let checkMarkOffset: Int?    // offset within the line of the char between [ ]
+    let bodyEmpty: Bool
+
+    private static let regex = try? NSRegularExpression(
+        pattern: "^([ \\t]*)([-*+]|(\\d+)[.)])([ \\t]+)(?:\\[([ xX])\\]([ \\t]+))?")
+
+    static func parse(_ line: String) -> ListLine? {
+        let ns = line as NSString
+        guard let m = regex?.firstMatch(in: line, range: NSRange(location: 0, length: ns.length)) else { return nil }
+        func sub(_ i: Int) -> String? { let r = m.range(at: i); return r.location == NSNotFound ? nil : ns.substring(with: r) }
+        let number = sub(3).flatMap { Int($0) }
+        let hasCheckbox = m.range(at: 5).location != NSNotFound
+        var body = ns.substring(from: m.range.length)
+        if body.hasSuffix("\n") { body.removeLast() }
+        return ListLine(indent: sub(1) ?? "", bullet: number == nil ? sub(2) : nil, number: number,
+                        prefixLength: m.range.length,
+                        checkMarkOffset: hasCheckbox ? m.range(at: 5).location : nil,
+                        bodyEmpty: body.trimmingCharacters(in: .whitespaces).isEmpty)
+    }
+
+    /// The marker text to begin the next item (ordered markers increment).
+    var nextMarker: String {
+        let body = number.map { "\($0 + 1). " } ?? "\(bullet ?? "-") "
+        return indent + body + (checkMarkOffset != nil ? "[ ] " : "")
+    }
+}
+
 struct LiveTextView: UIViewRepresentable {
     @Binding var text: String
     let theme: MarkdownTheme
@@ -235,6 +269,59 @@ struct LiveTextView: UIViewRepresentable {
         // MARK: Editing & selection
 
         func textViewDidChange(_ tv: UITextView) {
+            parent.text = reconstructMarkdown(tv)
+            lastRenderedSource = parent.text
+            restyleActiveParagraph()
+        }
+
+        // MARK: List keyboard behaviors
+
+        /// Intercepts Enter (continue/end a list) and Tab (indent) inside flat list items.
+        func textView(_ tv: UITextView, shouldChangeTextIn range: NSRange, replacementText text: String) -> Bool {
+            guard range.length == 0 else { return true }   // only the simple caret cases
+            switch text {
+            case "\n": return handleListNewline(tv, at: range)
+            case "\t": return handleListTab(tv, at: range)
+            default: return true
+            }
+        }
+
+        private func handleListNewline(_ tv: UITextView, at range: NSRange) -> Bool {
+            let storage = tv.textStorage
+            let ns = storage.string as NSString
+            let lineRange = ns.paragraphRange(for: range)
+            guard let info = ListLine.parse(ns.substring(with: lineRange)) else { return true }
+            if info.bodyEmpty {
+                // Empty item: remove the marker, ending the list.
+                storage.replaceCharacters(in: NSRange(location: lineRange.location, length: info.prefixLength), with: "")
+                tv.selectedRange = NSRange(location: lineRange.location, length: 0)
+            } else {
+                let insert = "\n" + info.nextMarker
+                storage.replaceCharacters(in: range, with: bodyText(insert))
+                tv.selectedRange = NSRange(location: range.location + (insert as NSString).length, length: 0)
+            }
+            afterProgrammaticEdit()
+            return false
+        }
+
+        private func handleListTab(_ tv: UITextView, at range: NSRange) -> Bool {
+            let storage = tv.textStorage
+            let ns = storage.string as NSString
+            let lineRange = ns.paragraphRange(for: range)
+            guard ListLine.parse(ns.substring(with: lineRange)) != nil else { return true }
+            storage.replaceCharacters(in: NSRange(location: lineRange.location, length: 0), with: bodyText("  "))
+            tv.selectedRange = NSRange(location: range.location + 2, length: 0)
+            afterProgrammaticEdit()
+            return false
+        }
+
+        private func bodyText(_ s: String) -> NSAttributedString {
+            NSAttributedString(string: s, attributes: [.font: LiveStyler.bodyFont,
+                                                       .foregroundColor: UIColor(parent.theme.textPrimary)])
+        }
+
+        private func afterProgrammaticEdit() {
+            guard let tv = textView else { return }
             parent.text = reconstructMarkdown(tv)
             lastRenderedSource = parent.text
             restyleActiveParagraph()
@@ -362,6 +449,7 @@ struct LiveTextView: UIViewRepresentable {
             guard let position = tv.closestPosition(to: point) else { return }
             let index = tv.offset(from: tv.beginningOfDocument, to: position)
             let storage = tv.textStorage
+            if toggleCheckboxIfTapped(tv, at: index) { return }
             for probe in [index, max(0, index - 1)] where probe < storage.length {
                 // Scrollable blocks have an interactive hosted view that handles its own tap.
                 if let att = storage.attribute(.attachment, at: probe, effectiveRange: nil) as? BlockAttachment,
@@ -372,6 +460,24 @@ struct LiveTextView: UIViewRepresentable {
                     return
                 }
             }
+        }
+
+        /// Toggles a task-list checkbox if the tap landed on its `[ ]`/`[x]` token. Returns whether
+        /// it handled the tap.
+        @MainActor private func toggleCheckboxIfTapped(_ tv: UITextView, at index: Int) -> Bool {
+            let storage = tv.textStorage
+            let ns = storage.string as NSString
+            guard index <= ns.length else { return false }
+            let lineRange = ns.paragraphRange(for: NSRange(location: min(index, max(0, ns.length - 1)), length: 0))
+            guard let info = ListLine.parse(ns.substring(with: lineRange)), let offset = info.checkMarkOffset else { return false }
+            let markLocation = lineRange.location + offset           // the char between the brackets
+            guard (markLocation - 1)...(markLocation + 1) ~= index, markLocation < storage.length else { return false }
+            let current = ns.substring(with: NSRange(location: markLocation, length: 1))
+            storage.replaceCharacters(in: NSRange(location: markLocation, length: 1),
+                                      with: bodyText(current.lowercased() == "x" ? " " : "x"))
+            tv.selectedRange = NSRange(location: lineRange.location + info.prefixLength, length: 0)
+            afterProgrammaticEdit()
+            return true
         }
     }
 }
@@ -504,7 +610,17 @@ private struct LiveStyler {
             return !isMedia(block)   // an image-only / video paragraph renders as a media block
         case .blockQuote(let blocks):
             return blocks.count == 1 && { if case .paragraph = blocks[0].kind { return true } else { return false } }()
-        default: return false   // lists, tables, code, math, diagrams render as live blocks
+        case .list(let list):
+            return isFlatList(list)  // flat lists are inline-editable text; nested ones stay blocks
+        default: return false   // tables, code, math, diagrams render as live blocks
+        }
+    }
+
+    /// A list whose every item is a single paragraph (the item may carry a checkbox). Such lists
+    /// render as inline-editable text; nested or multi-block lists keep the block rendering.
+    static func isFlatList(_ list: MarkdownList) -> Bool {
+        list.items.allSatisfy { item in
+            item.blocks.count == 1 && { if case .paragraph = item.blocks[0].kind { return true } else { return false } }()
         }
     }
 
@@ -553,6 +669,7 @@ private struct LiveStyler {
         stylePaired(result, "(==)(.+?)(==)") { s, inner in
             s.addAttribute(.backgroundColor, value: UIColor.systemYellow.withAlphaComponent(0.35), range: inner)
         }
+        styleListMarkers(result)
         styleLinks(result)
         // Hint that `$…$` is editable math source (shown only on the active line; elsewhere the
         // span is replaced by a rendered image — see Coordinator.syncInlineMath).
@@ -561,6 +678,25 @@ private struct LiveStyler {
             result.addAttribute(.foregroundColor, value: accent, range: m.range)
         }
         return result
+    }
+
+    /// Styles list markers: the leading bullet/number gets the accent color and semibold weight,
+    /// and a `[ ]`/`[x]` checkbox token is colored by state (green when checked).
+    private func styleListMarkers(_ s: NSMutableAttributedString) {
+        let length = (s.string as NSString).length
+        regex("(?m)^([ \\t]*)([-*+]|\\d+[.)])([ \\t]+)(\\[[ xX]\\])?").enumerateMatches(
+            in: s.string, range: NSRange(location: 0, length: length)) { m, _, _ in
+            guard let m else { return }
+            if let marker = range(m, 2) {
+                s.addAttribute(.foregroundColor, value: accent, range: marker)
+                s.addAttribute(.font, value: UIFont.systemFont(ofSize: Self.bodyFont.pointSize, weight: .semibold), range: marker)
+            }
+            if let checkbox = range(m, 4) {
+                let checked = (s.string as NSString).substring(with: checkbox).lowercased().contains("x")
+                s.addAttribute(.foregroundColor, value: checked ? UIColor.systemGreen : UIColor(theme.textSecondary), range: checkbox)
+                s.addAttribute(.font, value: UIFont.monospacedSystemFont(ofSize: Self.bodyFont.pointSize, weight: .semibold), range: checkbox)
+            }
+        }
     }
 
     /// Renders `[text](url)` as styled, underlined link text; the `[`, `](url)` syntax is tagged
