@@ -269,6 +269,14 @@ final class PencilNotesUITests: XCTestCase {
                       "table inserted near the top should appear before the Checklist section, not appended at the end")
     }
 
+    /// The host-customized Raw editor toolbar shows its custom item.
+    func testCustomToolbarItemAppears() {
+        let app = launch()
+        select(mode: "Raw", in: app)
+        XCTAssertTrue(app.buttons["Bold + italic"].waitForExistence(timeout: 8),
+                      "custom toolbar item from the host-provided toolbar did not appear")
+    }
+
     func testLiveToolbarActionsDoNotCrash() {
         let app = launch()
         select(mode: "Live", in: app)

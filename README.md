@@ -31,6 +31,7 @@ all of it natively in one package, so it works offline, runs fast, and reaches t
 | **Serialization** | Round-trips the model back to Markdown — `MarkdownDocument.markdown()`, `BlockNode.markdown()`, `InlineNode.markdown()` |
 | **WYSIWYG** | A block-based "what you see is what you get" editor (in the PencilNotes example) with visual editors for text, tables, lists, code, image/video, and math |
 | **Theming** | Semantic light/dark tokens, full per-element customization |
+| **Extensible host hooks** | Override the SwiftUI view for any block kind (`.markdownBlockRenderer`); define the editor toolbar's items (`MarkdownToolbarItem`); inject content services |
 
 **Mermaid diagram types:** flowchart · state · sequence · class · ER · pie · gantt ·
 git graph · journey · mindmap · timeline. Unsupported syntax falls back to a highlighted
@@ -180,6 +181,40 @@ MarkdownView(source)
 | `LatexRenderer` | Render math | Raw source |
 | `WikiLinkResolver` | Resolve `[[…]]` targets | Plain text |
 | `EmbeddedImageProvider` | Load images | Built-in loader |
+
+### Overriding block rendering
+
+Replace the SwiftUI view used for a specific block kind. The builder receives the
+`BlockNode` and the resolved `MarkdownTheme`, and fully replaces the built-in view for that
+kind; unregistered kinds render as usual. Apply it more than once to override several kinds.
+
+```swift
+MarkdownView(source)
+    .markdownBlockRenderer(.thematicBreak) { _, theme in
+        AnyView(DotRule(color: theme.accent))
+    }
+    .markdownBlockRenderer(.codeBlock) { node, theme in
+        guard case let .codeBlock(language, content) = node.kind else { return AnyView(EmptyView()) }
+        return AnyView(MyCodeCard(language: language, code: content).tint(theme.accent))
+    }
+```
+
+### Customizing the editor toolbar
+
+`MarkdownEditor` takes a `toolbar:` of `MarkdownToolbarItem`s — mix built-ins, dividers,
+submenus, and `.custom` actions that act on the editor's `MarkdownEditorController`. Omit it
+for the default set, or pass `showsToolbar: false` to hide it.
+
+```swift
+MarkdownEditor(text: $text, toolbar: [
+    .bold, .italic, .inlineCode, .divider,
+    .heading(level: 2), .bulletList, .link, .divider,
+    .custom(id: "emphasize", systemImage: "sparkles", label: "Bold + italic") { c in
+        c.toggleBold(); c.toggleItalic()
+    },
+    .menu([.taskList, .quote, .indent, .outdent]),
+])
+```
 
 ---
 

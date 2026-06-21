@@ -11,24 +11,31 @@ public struct MarkdownEditor: View {
     @Binding private var text: String
     private let explicitTheme: MarkdownTheme?
     private let showsToolbar: Bool
+    private let toolbarItems: [MarkdownToolbarItem]
     private let wikiResolver: (any WikiLinkResolver)?
     private let pencilDoubleTap: ((MarkdownEditorController) -> Void)?
 
     @Environment(\.colorScheme) private var colorScheme
     @StateObject private var controller = MarkdownEditorController()
 
-    /// - Parameter onPencilDoubleTap: Action invoked on an Apple Pencil double-tap
-    ///   (iPad). Receives the editor's command surface; defaults to toggling bold.
+    /// - Parameters:
+    ///   - toolbar: The toolbar items to show. Defaults to `MarkdownToolbarItem.default`.
+    ///     Combine built-in items (`.bold`, `.italic`, …) with `.custom(...)` actions, or
+    ///     pass `showsToolbar: false` to hide the toolbar entirely.
+    ///   - onPencilDoubleTap: Action invoked on an Apple Pencil double-tap (iPad). Receives
+    ///     the editor's command surface; defaults to toggling bold.
     public init(
         text: Binding<String>,
         theme: MarkdownTheme? = nil,
         showsToolbar: Bool = true,
+        toolbar: [MarkdownToolbarItem]? = nil,
         wikiLinkResolver: (any WikiLinkResolver)? = nil,
         onPencilDoubleTap: ((MarkdownEditorController) -> Void)? = nil
     ) {
         self._text = text
         self.explicitTheme = theme
         self.showsToolbar = showsToolbar
+        self.toolbarItems = toolbar ?? MarkdownToolbarItem.default
         self.wikiResolver = wikiLinkResolver
         self.pencilDoubleTap = onPencilDoubleTap
     }
@@ -40,7 +47,7 @@ public struct MarkdownEditor: View {
     public var body: some View {
         VStack(spacing: 0) {
             if showsToolbar {
-                MarkdownEditorToolbar(controller: controller, theme: theme)
+                MarkdownEditorToolbar(items: toolbarItems, controller: controller, theme: theme)
                 Divider()
             }
             MarkdownTextViewRepresentable(text: $text, theme: theme, controller: controller,
@@ -82,6 +89,7 @@ public struct MarkdownEditor: View {
 /// The formatting toolbar. Buttons drive the shared controller; common commands
 /// also bind to keyboard shortcuts.
 struct MarkdownEditorToolbar: View {
+    let items: [MarkdownToolbarItem]
     @ObservedObject var controller: MarkdownEditorController
     let theme: MarkdownTheme
 
@@ -99,38 +107,41 @@ struct MarkdownEditorToolbar: View {
 
     private var buttonRow: some View {
         HStack(spacing: 14) {
-            button("bold", "Bold", "b") { controller.toggleBold() }
-            button("italic", "Italic", "i") { controller.toggleItalic() }
-            button("strikethrough", "Strikethrough", nil) { controller.toggleStrikethrough() }
-            button("chevron.left.forwardslash.chevron.right", "Inline code", nil) { controller.toggleInlineCode() }
-            Divider().frame(height: 18)
-            button("number", "Heading", nil) { controller.setHeading(2) }
-            button("list.bullet", "Bullet list", nil) { controller.toggleBulletList() }
-            button("link", "Link", "k") { controller.insertLink() }
-            Divider().frame(height: 18)
-            overflowMenu
+            ForEach(items) { item in view(for: item) }
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 6)
     }
 
-    /// Less-common commands live in an overflow menu so the toolbar fits inline
-    /// (and every command stays reliably reachable).
-    private var overflowMenu: some View {
-        Menu {
-            Button("Task list", systemImage: "checklist") { controller.toggleTaskList() }
-            Button("Toggle checkbox", systemImage: "checkmark.square") { controller.toggleCheckbox() }
-            Button("Quote", systemImage: "text.quote") { controller.toggleQuote() }
-            Button("Outdent", systemImage: "decrease.indent") { controller.outdent() }
-            Button("Indent", systemImage: "increase.indent") { controller.indent() }
-        } label: {
-            Image(systemName: "ellipsis.circle").foregroundStyle(theme.textPrimary)
+    @ViewBuilder
+    private func view(for item: MarkdownToolbarItem) -> some View {
+        switch item.kind {
+        case let .command(systemImage, label, shortcut, action):
+            commandButton(systemImage, label, shortcut) { action(controller) }
+        case let .menu(systemImage, label, items):
+            Menu {
+                ForEach(items) { sub in
+                    if case let .command(_, label, _, action) = sub.kind {
+                        Button(label, systemImage: menuSystemImage(sub)) { action(controller) }
+                    }
+                }
+            } label: {
+                Image(systemName: systemImage).foregroundStyle(theme.textPrimary)
+            }
+            .accessibilityLabel(label)
+        case .divider:
+            Divider().frame(height: 18)
         }
-        .accessibilityLabel("More")
+    }
+
+    private func menuSystemImage(_ item: MarkdownToolbarItem) -> String {
+        if case let .command(systemImage, _, _, _) = item.kind { return systemImage }
+        return ""
     }
 
     @ViewBuilder
-    private func button(_ systemName: String, _ label: String, _ shortcut: Character?, action: @escaping () -> Void) -> some View {
+    private func commandButton(_ systemName: String, _ label: String, _ shortcut: Character?,
+                               action: @escaping () -> Void) -> some View {
         let view = Button(action: action) {
             Image(systemName: systemName).foregroundStyle(theme.textPrimary)
         }

@@ -10,6 +10,20 @@ final class RenderingTests: XCTestCase {
         return nodes
     }
 
+    func testBlockKindRendererSelector() {
+        // Each block kind maps to its renderer-override selector (used by .markdownBlockRenderer).
+        XCTAssertEqual(BlockKind.heading(level: 1, inlines: []).rendererKind, .heading)
+        XCTAssertEqual(BlockKind.paragraph([]).rendererKind, .paragraph)
+        XCTAssertEqual(BlockKind.blockQuote([]).rendererKind, .blockQuote)
+        XCTAssertEqual(BlockKind.thematicBreak.rendererKind, .thematicBreak)
+        XCTAssertEqual(BlockKind.codeBlock(language: "swift", content: "x").rendererKind, .codeBlock)
+        XCTAssertEqual(BlockKind.mermaid(source: "flowchart LR\nA-->B").rendererKind, .mermaid)
+        XCTAssertEqual(BlockKind.mathBlock(body: "x^2").rendererKind, .mathBlock)
+        XCTAssertEqual(BlockKind.list(MarkdownList(marker: .bullet, isTight: true, items: [])).rendererKind, .list)
+        XCTAssertEqual(BlockKind.htmlBlock("<p>").rendererKind, .htmlBlock)
+        XCTAssertEqual(BlockKind.callout(kind: .note, title: nil, blocks: []).rendererKind, .callout)
+    }
+
     func testStrongProducesStrongIntent() {
         let a = renderer.attributedString(for: inlines("**bold**"))
         let hasStrong = a.runs.contains { ($0.inlinePresentationIntent ?? []).contains(.stronglyEmphasized) }

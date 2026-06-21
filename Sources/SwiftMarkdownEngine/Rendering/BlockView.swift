@@ -7,8 +7,17 @@ struct BlockView: View {
     @Environment(\.resolvedMarkdownTheme) private var theme
     @Environment(\.markdownServices) private var services
     @Environment(\.displayScale) private var displayScale
+    @Environment(\.markdownBlockRenderers) private var blockRenderers
 
     var body: some View {
+        if let custom = blockRenderers.byKind[block.kind.rendererKind] {
+            custom(block, theme)   // host-provided view fully replaces the built-in one
+        } else {
+            defaultBody
+        }
+    }
+
+    @ViewBuilder private var defaultBody: some View {
         switch block.kind {
         case .heading(let level, let inlines):
             headingView(level: level, inlines: inlines)

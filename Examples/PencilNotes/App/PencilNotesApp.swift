@@ -100,13 +100,26 @@ struct RootView: View {
         panel(title: "Editor", systemImage: "square.and.pencil") {
             VStack(spacing: 0) {
                 if showHint { pencilHint }
-                MarkdownEditor(text: $text, theme: theme) { controller in
+                MarkdownEditor(text: $text, theme: theme, toolbar: Self.customToolbar) { controller in
                     controller.toggleBold()
                     flashPencil("Bold ✦ — Pencil double-tap")
                 }
             }
         }
     }
+
+    /// A host-customized toolbar: the built-in items plus an app-specific "Emphasize" command
+    /// (bold + italic in one tap) — shows that consuming apps choose and extend the buttons.
+    private static let customToolbar: [MarkdownToolbarItem] = [
+        .bold, .italic, .strikethrough, .inlineCode,
+        .divider,
+        .heading(level: 1), .heading(level: 2), .bulletList, .link,
+        .divider,
+        .custom(id: "emphasize", systemImage: "sparkles", label: "Bold + italic") { c in
+            c.toggleBold(); c.toggleItalic()
+        },
+        .menu([.taskList, .toggleCheckbox, .quote, .outdent, .indent]),
+    ]
 
     /// Optional bridges: highlighted code (Highlightr), rendered LaTeX (SwiftMath), and an
     /// inline YouTube/Vimeo player (WKWebView, injected here so the engine stays WebView-free).
@@ -124,6 +137,18 @@ struct RootView: View {
                 .markdownTheme(theme)
                 .markdownServices(services)
                 .markdownConfiguration(MarkdownConfiguration(interactiveCheckboxes: true))
+                // Host-overridden rendering: thematic breaks (`---`) render as a custom dot rule.
+                .markdownBlockRenderer(.thematicBreak) { _, theme in
+                    AnyView(
+                        HStack(spacing: 8) {
+                            ForEach(0..<3, id: \.self) { _ in
+                                Circle().fill(theme.accent.opacity(0.6)).frame(width: 5, height: 5)
+                            }
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                    )
+                }
         }
     }
 
@@ -205,6 +230,8 @@ struct RootView: View {
     Format text as **bold**, *italic*, ~~strikethrough~~, ==highlight==, `code`,
     or a [link](https://example.com). Inline math like $e^{i\\pi} + 1 = 0$ renders
     right in the sentence.
+
+    ---
 
     ## Checklist
     - [x] Set up the easel
