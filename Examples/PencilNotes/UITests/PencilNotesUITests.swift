@@ -167,6 +167,28 @@ final class PencilNotesUITests: XCTestCase {
         XCTAssertTrue(editor.exists, "Live editor disappeared after toolbar actions (possible crash)")
     }
 
+    /// Diagnostic: navigate to Live mode and capture screenshots down the document so the
+    /// rendering (e.g. cropped blocks) can be inspected. Run explicitly with -only-testing.
+    func testCaptureLiveScreenshots() {
+        let app = launch()
+        select(mode: "Live", in: app)
+        XCTAssertTrue(app.textViews.firstMatch.waitForExistence(timeout: 15))
+        Thread.sleep(forTimeInterval: 4)   // let async block views (images/video/diagrams) render
+        capture(app, "live-00-top")
+        for i in 1...6 {
+            app.swipeUp()
+            Thread.sleep(forTimeInterval: 1.2)
+            capture(app, String(format: "live-%02d", i))
+        }
+    }
+
+    private func capture(_ app: XCUIApplication, _ name: String) {
+        let shot = XCTAttachment(screenshot: app.screenshot())
+        shot.name = name
+        shot.lifetime = .keepAlways
+        add(shot)
+    }
+
     // MARK: - Diagram builders (Phase 2)
 
     func testInsertPieChartOpensVisualBuilder() {

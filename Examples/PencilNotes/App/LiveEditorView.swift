@@ -206,7 +206,9 @@ struct LiveTextView: UIViewRepresentable {
                     // async content (images/video), Canvas (Mermaid) and LaTeX render for real.
                     let source = block.markdown()
                     let attachment = BlockAttachment(source: source, theme: parent.theme,
-                                                     services: parent.services, width: width)
+                                                     services: parent.services, width: width,
+                                                     isMedia: LiveStyler.isMedia(block))
+                    attachment.measureHeight()
                     let attr = NSMutableAttributedString(attachment: attachment)
                     let r = NSRange(location: 0, length: attr.length)
                     attr.addAttribute(liveBlockSourceKey, value: source, range: r)
@@ -307,18 +309,49 @@ final class BlockAttachment: NSTextAttachment {
     let theme: MarkdownTheme
     let services: MarkdownServices
     let width: CGFloat
+    let isMedia: Bool
+    /// Block height, measured eagerly during rebuild (see `measuredHeight(...)`). The view
+    /// provider returns this from `attachmentBounds`, so layout never depends on the
+    /// provider's view lifecycle (which can query bounds before `loadView` runs).
+    var height: CGFloat
 
-    init(source: String, theme: MarkdownTheme, services: MarkdownServices, width: CGFloat) {
-        self.source = source; self.theme = theme; self.services = services; self.width = width
+    init(source: String, theme: MarkdownTheme, services: MarkdownServices, width: CGFloat, isMedia: Bool) {
+        self.source = source; self.theme = theme; self.services = services
+        self.width = width; self.isMedia = isMedia
+        self.height = isMedia ? BlockAttachment.mediaHeight(width: width) : 24
         super.init(data: nil, ofType: nil)
     }
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    /// Media height floor: images/video are sized asynchronously, so reserve a 16:9-ish box up
+    /// front (capped) instead of letting them collapse to one line before the asset loads.
+    static func mediaHeight(width: CGFloat) -> CGFloat { min(280, width * 9.0 / 16.0) }
+
+    /// The SwiftUI content for this block, shared by measurement and the hosted view.
+    @MainActor func content() -> AnyView {
+        let view = MarkdownView(source)
+            .markdownTheme(theme)
+            .markdownServices(services)
+            .padding(.vertical, 4)
+        return isMedia
+            ? AnyView(view.frame(width: width, height: BlockAttachment.mediaHeight(width: width), alignment: .leading))
+            : AnyView(view.frame(width: width, alignment: .leading))
+    }
+
+    /// Measures the block's intrinsic height with a throwaway hosting controller. Reliable for
+    /// synchronous content (text, code, math, Mermaid Canvas); async media uses the floor above.
+    @MainActor func measureHeight() {
+        let measured = UIHostingController(rootView: content())
+            .sizeThatFits(in: CGSize(width: width, height: .greatestFiniteMagnitude)).height
+        let floor = isMedia ? BlockAttachment.mediaHeight(width: width) : 24
+        height = max(floor, measured.isFinite ? measured : 0)
+    }
 
     override func viewProvider(for parentView: UIView?, location: any NSTextLocation,
                                textContainer: NSTextContainer?) -> NSTextAttachmentViewProvider? {
         let provider = BlockViewProvider(textAttachment: self, parentView: parentView,
                                          textLayoutManager: textContainer?.textLayoutManager, location: location)
-        provider.tracksTextAttachmentViewBounds = true
+        provider.tracksTextAttachmentViewBounds = true   // honor the explicit frame we set in loadView
         return provider
     }
 }
@@ -326,30 +359,24 @@ final class BlockAttachment: NSTextAttachment {
 /// Hosts the SwiftUI `MarkdownView` for a block attachment. Read-only (user interaction off) so a
 /// tap falls through to the text view's block-tap handler, which opens the per-type editor sheet.
 final class BlockViewProvider: NSTextAttachmentViewProvider {
-    private var host: UIHostingController<AnyView>?
-
     override func loadView() {
         guard let att = textAttachment as? BlockAttachment else { return }
-        let controller = UIHostingController(rootView: AnyView(
-            MarkdownView(att.source)
-                .markdownTheme(att.theme)
-                .markdownServices(att.services)
-                .frame(width: att.width, alignment: .leading)
-                .padding(.vertical, 4)))
-        controller.view.backgroundColor = .clear
-        controller.view.isUserInteractionEnabled = false
-        host = controller
-        view = controller.view
+        MainActor.assumeIsolated {
+            let controller = UIHostingController(rootView: att.content())
+            controller.view.backgroundColor = .clear
+            controller.view.isUserInteractionEnabled = false
+            // Pin to an explicit frame anchored at the line-fragment origin so the block's
+            // leading edge isn't shifted off-screen (TextKit tracks this frame).
+            controller.view.frame = CGRect(x: 0, y: 0, width: att.width, height: att.height)
+            view = controller.view
+        }
     }
 
     override func attachmentBounds(for attributes: [NSAttributedString.Key: Any],
                                    location: any NSTextLocation, textContainer: NSTextContainer?,
                                    proposedLineFragment: CGRect, position: CGPoint) -> CGRect {
-        guard let v = view, let att = textAttachment as? BlockAttachment else { return .zero }
-        let fitting = v.systemLayoutSizeFitting(
-            CGSize(width: att.width, height: UIView.layoutFittingCompressedSize.height),
-            withHorizontalFittingPriority: .required, verticalFittingPriority: .fittingSizeLevel)
-        return CGRect(x: 0, y: 0, width: att.width, height: max(24, fitting.height))
+        guard let att = textAttachment as? BlockAttachment else { return .zero }
+        return CGRect(x: 0, y: 0, width: att.width, height: att.height)
     }
 }
 
@@ -361,11 +388,22 @@ private struct LiveStyler {
 
     static func isTextBlock(_ block: BlockNode) -> Bool {
         switch block.kind {
-        case .heading, .paragraph: return true
+        case .heading: return true
+        case .paragraph:
+            return !isMedia(block)   // an image-only / video paragraph renders as a media block
         case .blockQuote(let blocks):
             return blocks.count == 1 && { if case .paragraph = blocks[0].kind { return true } else { return false } }()
-        default: return false   // lists, tables, code, math, diagrams, images render as live blocks
+        default: return false   // lists, tables, code, math, diagrams render as live blocks
         }
+    }
+
+    /// A paragraph whose sole content is an image or a linked image (e.g. a video thumbnail).
+    static func isMedia(_ block: BlockNode) -> Bool {
+        guard case .paragraph(let inlines) = block.kind, inlines.count == 1 else { return false }
+        if case .image = inlines[0].kind { return true }
+        if case .link(_, _, let children) = inlines[0].kind,
+           children.count == 1, case .image = children[0].kind { return true }
+        return false
     }
 
     private var primary: UIColor { UIColor(theme.textPrimary) }
