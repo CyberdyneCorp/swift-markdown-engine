@@ -181,6 +181,21 @@ private struct ListLine {
     }
 }
 
+/// A UITextView that reports width changes so inline block attachments can be re-laid-out at the
+/// correct width (they would otherwise stay at the stale width captured during `makeUIView`).
+final class WidthTrackingTextView: UITextView {
+    var onWidthChange: (() -> Void)?
+    private var lastWidth: CGFloat = -1
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        if abs(bounds.width - lastWidth) > 0.5 {
+            lastWidth = bounds.width
+            onWidthChange?()
+        }
+    }
+}
+
 struct LiveTextView: UIViewRepresentable {
     @Binding var text: String
     let theme: MarkdownTheme
@@ -189,7 +204,10 @@ struct LiveTextView: UIViewRepresentable {
     let onBlockTap: (Int, String) -> Void
 
     func makeUIView(context: Context) -> UITextView {
-        let tv = UITextView(usingTextLayoutManager: true)
+        let tv = WidthTrackingTextView(usingTextLayoutManager: true)
+        tv.onWidthChange = { [weak coord = context.coordinator] in
+            DispatchQueue.main.async { coord?.widthDidChange() }   // defer out of the layout pass
+        }
         tv.delegate = context.coordinator
         tv.backgroundColor = UIColor(theme.background)
         tv.textContainerInset = UIEdgeInsets(top: 16, left: 12, bottom: 24, right: 12)
@@ -228,11 +246,26 @@ struct LiveTextView: UIViewRepresentable {
 
         // MARK: Build
 
+        /// The text content width a block should fill — the line-fragment width, so inline blocks
+        /// match where prose wraps (not the raw bounds, which ignores insets and padding).
+        private func availableWidth(_ tv: UITextView) -> CGFloat {
+            tv.bounds.width - tv.textContainerInset.left - tv.textContainerInset.right
+                - 2 * tv.textContainer.lineFragmentPadding
+        }
+
+        /// Re-render at the new width when the text view resizes (rotation, split view, or the
+        /// first real layout after `makeUIView`), so inline block attachments aren't stuck at a
+        /// stale narrow width and cropped. No-op while the width is unchanged.
+        @MainActor func widthDidChange() {
+            guard let tv = textView, tv.textStorage.length > 0 else { return }
+            rebuild(reconstructMarkdown(tv))
+        }
+
         @MainActor func rebuild(_ markdown: String) {
             guard let tv = textView else { return }
             let styler = LiveStyler(theme: parent.theme)
             let result = NSMutableAttributedString()
-            let width = max(240, tv.bounds.width - 24)
+            let width = max(240, availableWidth(tv))
             for (i, block) in MarkdownParser().parse(markdown).blocks.enumerated() {
                 if LiveStyler.isTextBlock(block) {
                     result.append(styler.styled(block.markdown()))
