@@ -15,6 +15,8 @@ the current paragraph immediately.
 - **WHEN** the user types `## ` at the start of a line
 - **THEN** the line SHALL immediately render as a heading
 
+## ADDED Requirements
+
 ### Requirement: Live editor toolbar
 The system SHALL provide a toolbar in the Live editor with a heading menu, inline formatting
 (bold, italic, strikethrough, inline code, link) applied to the selection, and an Insert menu

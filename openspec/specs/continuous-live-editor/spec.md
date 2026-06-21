@@ -18,12 +18,18 @@ inline. Markdown remains the source of truth.
 
 ### Requirement: Live inline text styling with reveal-on-active-line
 The system SHALL render inline formatting (headings, bold, italic, strikethrough, inline code)
-live, dim the Markdown markers off the active line, and reveal the full source on the line the
-cursor occupies.
+live and HIDE the Markdown markers, collapsing them to zero width off the active line and
+revealing the full source only on the line the cursor occupies. Typing Markdown SHALL restyle
+the current paragraph immediately.
 
-#### Scenario: Markers reveal on the active line
-- **WHEN** the cursor is on a line containing `**bold**`
-- **THEN** that line SHALL show the `**` markers; lines without the cursor SHALL dim them
+#### Scenario: Markers are hidden, revealed on the active line
+- **WHEN** a line contains `**bold**` and the cursor is elsewhere
+- **THEN** the line SHALL show "bold" rendered bold with the `**` markers hidden; placing the
+  cursor on that line SHALL reveal the `**` markers for editing
+
+#### Scenario: Typing renders live
+- **WHEN** the user types `## ` at the start of a line
+- **THEN** the line SHALL immediately render as a heading
 
 ### Requirement: Inline-rendered block elements
 The system SHALL render block elements (fenced code, math, Mermaid, tables, images) inline
@@ -39,4 +45,17 @@ responsive, and SHALL let the user edit a block via its per-type visual editor.
 - **WHEN** the user taps an inline block element
 - **THEN** the system SHALL open that block's per-type visual editor (e.g. a table grid or a
   diagram builder) with a live preview, and apply changes back to the Markdown
+
+### Requirement: Live editor toolbar
+The system SHALL provide a toolbar in the Live editor with a heading menu, inline formatting
+(bold, italic, strikethrough, inline code, link) applied to the selection, and an Insert menu
+for blocks (list, quote, table, code, diagrams, math, image).
+
+#### Scenario: Apply formatting from the toolbar
+- **WHEN** the user selects text and taps Bold
+- **THEN** the selection SHALL be wrapped and rendered bold
+
+#### Scenario: Insert a block from the toolbar
+- **WHEN** the user picks a block from the Insert menu
+- **THEN** that block SHALL be added to the document and rendered inline
 
